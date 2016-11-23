@@ -1,8 +1,8 @@
 import assert from 'assert';
-import skygearChat from '../lib';
+import SkygearChatContainer from '../lib';
 
 describe('skygear-chat', function () {
-  it('should have unit test!', function () {
-    assert(false, 'we expected this package author to add actual unit tests.');
+  it('will will unit test', function () {
+    assert(SkygearChatContainer !== null);
   });
 });

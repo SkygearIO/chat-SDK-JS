@@ -15,6 +15,7 @@
   ],
   "scripts": {
     "test": "gulp",
+    "babel": "gulp babel",
     "prepublish": "gulp prepublish"
   },
   "repository": {
@@ -50,5 +51,8 @@
     "env": {
       "mocha": true
     }
+  },
+  "dependencies": {
+    "skygear": "^0.19.2"
   }
 }
