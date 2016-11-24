@@ -51,6 +51,7 @@ gulp.task('test', ['pre-test'], function (cb) {
     }))
     .on('end', function () {
       cb(mochaErr);
+      process.exit();
     });
 });
 
