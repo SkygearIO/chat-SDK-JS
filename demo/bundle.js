@@ -27,20 +27,31 @@ var SkygearChatContainer = function () {
 
   _createClass(SkygearChatContainer, [{
     key: 'createConversation',
-    value: function createConversation(participant_ids, admin_ids, title) {
+    value: function createConversation(participants, title) {
+      var meta = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+      var options = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
+
       var conversation = new Conversation();
       conversation.title = title;
-      conversation.participant_ids = _.unique(participant_ids);
-      if (_.isEmpty(admin_ids)) {
+      conversation.meta = meta;
+      conversation.participant_ids = _.map(participants, function (user) {
+        console.log(user);
+        return user._id;
+      });
+      conversation.participant_ids.push(skygear.currentUser.id);
+      if (_.isEmpty(options.admins)) {
         conversation.admin_ids = conversation.participant_ids;
       } else {
+        var admin_ids = _.map(options.admins, function (user) {
+          return user._id;
+        });
         conversation.admin_ids = _.unique(admin_ids);
       }
       return skygear.publicDB.save(conversation);
     }
   }, {
-    key: 'getOrCreateDirectConversation',
-    value: function getOrCreateDirectConversation(user_id) {
+    key: 'createDirectConversation',
+    value: function createDirectConversation(user_id) {
       var query = new skygear.Query(Conversation);
       query.containsValue('participant_ids', skygear.currentUser.id);
       query.containsValue('participant_ids', user_id);

@@ -123,13 +123,14 @@ class Demo {
         users.push(u);
       }
     });
-    return this.plugin.createConversation(
-        users,
-        null,
-        'From Demo'
-      ).then(function (result) {
-      console.log(result);
-      this.groupConversationEl.textContent = result._id;
+    return this.container.discoverUserByUsernames(users).then(function (users) {
+      return this.plugin.createConversation(
+          users,
+          'From Demo'
+        ).then(function (result) {
+        console.log(result);
+        this.groupConversationEl.textContent = result._id;
+      }.bind(this));
     }.bind(this));
   }
 
