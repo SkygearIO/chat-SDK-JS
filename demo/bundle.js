@@ -34,11 +34,16 @@ var SkygearChatContainer = function () {
       var conversation = new Conversation();
       conversation.title = title;
       conversation.meta = meta;
-      conversation.participant_ids = _.map(participants, function (user) {
-        console.log(user);
+      if (options.distinctByParticipants === true) {
+        conversation.distinct_by_participants = true;
+      } else {
+        conversation.distinct_by_participants = false;
+      }
+      var participant_ids = _.map(participants, function (user) {
         return user._id;
       });
-      conversation.participant_ids.push(skygear.currentUser.id);
+      participant_ids.push(skygear.currentUser.id);
+      conversation.participant_ids = _.unique(participant_ids);
       if (_.isEmpty(options.admins)) {
         conversation.admin_ids = conversation.participant_ids;
       } else {
@@ -51,22 +56,12 @@ var SkygearChatContainer = function () {
     }
   }, {
     key: 'createDirectConversation',
-    value: function createDirectConversation(user_id) {
-      var query = new skygear.Query(Conversation);
-      query.containsValue('participant_ids', skygear.currentUser.id);
-      query.containsValue('participant_ids', user_id);
-      query.equalTo('is_direct_message', true);
-      query.limit = 1;
-      return skygear.publicDB.query(query).then(function (records) {
-        if (records.length > 0) {
-          return records[0];
-        }
-        var conversation = new Conversation();
-        conversation.participant_ids = [skygear.currentUser.id, user_id];
-        conversation.admin_ids = conversation.participant_ids;
-        conversation.is_direct_message = true;
-        return skygear.publicDB.save(conversation);
-      });
+    value: function createDirectConversation(user, title) {
+      var meta = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+      var options = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
+
+      options.distinctByParticipants = true;
+      return this.createConversation([user], title, meta, options);
     }
   }, {
     key: 'getConversation',

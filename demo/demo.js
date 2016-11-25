@@ -105,14 +105,16 @@ class Demo {
     });
   }
 
-  createDirectConversation(userID) {
-    // FIXME: the SDK should strip the prefix for me.
-    if (userID.startsWith("user/")) {
-      userID = userID.substr(5);
-    }
-    return this.plugin.getOrCreateDirectConversation(userID).then(function (result) {
-      console.log(result);
-      this.directConversationEl.textContent = result._id;
+  createDirectConversation(username) {
+    return this.container.discoverUserByUsernames([username]).then(function (users) {
+      var user = users[0]
+      return this.plugin.createDirectConversation(user, username).then(function (result) {
+        console.log(result);
+        this.directConversationEl.textContent = result._id;
+      }.bind(this), function (err) {
+        console.log(err);
+        this.directConversationEl.textContent = err.message;
+      }.bind(this));
     }.bind(this));
   }
 
