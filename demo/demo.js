@@ -103,6 +103,10 @@ class Demo {
     });
   }
 
+  leaveConversation() {
+    return this.plugin.leaveConversation(this.conversation);
+  }
+
   fetchConversationsTo(el) {
     return this.plugin.getConversations().then(function (result) {
       var ul = $(el);

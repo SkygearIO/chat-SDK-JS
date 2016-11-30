@@ -125,6 +125,11 @@ var SkygearChatContainer = function () {
       return skygear.publicDB.save(conversation);
     }
   }, {
+    key: 'leaveConversation',
+    value: function leaveConversation(conversation) {
+      return skygear.lambda('chat:leave_conversation', [conversation._id]);
+    }
+  }, {
     key: 'addParticipants',
     value: function addParticipants(conversation, participants) {
       var participant_ids = _.map(participants, function (user) {
