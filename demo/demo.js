@@ -30,11 +30,11 @@ class Demo {
     if (apiKey === null) {
       apiKey = 'apikey';
     }
-    this.configSkygear(endPoint, apiKey);
+    return this.configSkygear(endPoint, apiKey);
   }
 
   configSkygear(endPoint, apiKey) {
-    this.container.config({
+    return this.container.config({
       endPoint: endPoint,
       apiKey: apiKey
     }).then(function () {
@@ -44,6 +44,13 @@ class Demo {
       this.apiKeyEl.value = skygear.apiKey;
       this.displayCurrentUser();
       this.plugin.subscribe(this._handler.bind(this));
+    }.bind(this));
+  }
+
+  cacheConversation(conversationID) {
+    return this.plugin.getConversation(conversationID).then(function (result) {
+      console.log(result);
+      this.conversation = result;
     }.bind(this));
   }
 
@@ -136,16 +143,24 @@ class Demo {
     }.bind(this));
   }
 
-  addParticipant(conversationID, userID) {
-    return this.plugin.addParticipants(conversationID, [userID]).then(function (result) {
-      console.log(result);
-    });
+  addParticipant(conversationID, username, resultTo) {
+    const resultEl = $(resultTo);
+    return this.container.discoverUserByUsernames([username]).then(function (users) {
+      return this.plugin.addParticipants(this.conversation, users).then(function (result) {
+        console.log(result);
+        resultEl.textContent = JSON.stringify(result);
+      });
+    }.bind(this));
   }
 
-  removeParticipant(conversationID, userID) {
-    return this.plugin.removeParticipants(conversationID, [userID]).then(function (result) {
-      console.log(result);
-    });
+  removeParticipant(conversationID, username, resultTo) {
+    const resultEl = $(resultTo);
+    return this.container.discoverUserByUsernames([username]).then(function (users) {
+      return this.plugin.removeParticipants(this.conversation, users).then(function (result) {
+        console.log(result);
+        resultEl.textContent = JSON.stringify(result);
+      });
+    }.bind(this));
   }
 
   markAsLastRead(conversationID, messageID, el) {

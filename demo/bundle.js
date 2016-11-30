@@ -65,12 +65,9 @@ var SkygearChatContainer = function () {
     }
   }, {
     key: 'getConversation',
-    value: function getConversation(conversation_id) {
-      var query = new skygear.Query(UserConversation);
-      query.equalTo('user', skygear.currentUser.id);
-      query.equalTo('conversation', conversation_id);
-      query.transientInclude('user');
-      query.transientInclude('conversation');
+    value: function getConversation(conversationID) {
+      var query = new skygear.Query(Conversation);
+      query.equalTo('_id', conversationID);
       return skygear.publicDB.query(query).then(function (records) {
         if (records.length > 0) {
           return records[0];
@@ -81,6 +78,27 @@ var SkygearChatContainer = function () {
   }, {
     key: 'getConversations',
     value: function getConversations() {
+      var query = new skygear.Query(Conversation);
+      return skygear.publicDB.query(query);
+    }
+  }, {
+    key: 'getUserConversation',
+    value: function getUserConversation(conversation) {
+      var query = new skygear.Query(UserConversation);
+      query.equalTo('user', skygear.currentUser.id);
+      query.equalTo('conversation', conversation.id);
+      query.transientInclude('user');
+      query.transientInclude('conversation');
+      return skygear.publicDB.query(query).then(function (records) {
+        if (records.length > 0) {
+          return records[0];
+        }
+        throw new Error('no conversation found');
+      });
+    }
+  }, {
+    key: 'getUserConversations',
+    value: function getUserConversations() {
       var query = new skygear.Query(UserConversation);
       query.equalTo('user', skygear.currentUser.id);
       query.transientInclude('user');
@@ -97,56 +115,55 @@ var SkygearChatContainer = function () {
     }
   }, {
     key: 'updateConversation',
-    value: function updateConversation(conversation_id, changes) {
-      return this.getConversation(conversation_id).then(function (userConversation) {
-        var conversation = userConversation.$transient.conversation;
-        if (changes.title !== undefined) {
-          conversation.title = changes.title;
-        }
+    value: function updateConversation(conversation, title) {
+      var meta = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
 
-        return skygear.publicDB.save(conversation);
-      });
+      if (title) {
+        conversation.title = title;
+      }
+      conversation.meta = meta;
+      return skygear.publicDB.save(conversation);
     }
   }, {
     key: 'addParticipants',
-    value: function addParticipants(conversation_id, participant_ids) {
-      return this.getConversation(conversation_id).then(function (userConversation) {
-        var conversation = userConversation.$transient.conversation;
-        conversation.participant_ids = _.union(conversation.participant_ids, participant_ids);
-
-        return skygear.publicDB.save(conversation);
+    value: function addParticipants(conversation, participants) {
+      var participant_ids = _.map(participants, function (user) {
+        return user._id;
       });
+      conversation.participant_ids = _.union(conversation.participant_ids, participant_ids);
+
+      return skygear.publicDB.save(conversation);
     }
   }, {
     key: 'removeParticipants',
-    value: function removeParticipants(conversation_id, participant_ids) {
-      return this.getConversation(conversation_id).then(function (userConversation) {
-        var conversation = userConversation.$transient.conversation;
-        conversation.participant_ids = _.difference(_.unique(conversation.participant_ids), participant_ids);
-        conversation.admin_ids = _.difference(_.unique(conversation.admin_ids), participant_ids);
-
-        return skygear.publicDB.save(conversation);
+    value: function removeParticipants(conversation, participants) {
+      var participant_ids = _.map(participants, function (user) {
+        return user._id;
       });
+      conversation.participant_ids = _.difference(conversation.participant_ids, participant_ids);
+      conversation.admin_ids = _.difference(conversation.admin_ids, participant_ids);
+
+      return skygear.publicDB.save(conversation);
     }
   }, {
     key: 'addAdmins',
-    value: function addAdmins(conversation_id, admin_ids) {
-      return this.getConversation(conversation_id).then(function (userConversation) {
-        var conversation = userConversation.$transient.conversation;
-        conversation.admin_ids = _.union(conversation.admin_ids, admin_ids);
-
-        return skygear.publicDB.save(conversation);
+    value: function addAdmins(conversation, admins) {
+      var admin_ids = _.map(admins, function (user) {
+        return user._id;
       });
+      conversation.admin_ids = _.union(conversation.admin_ids, admin_ids);
+
+      return skygear.publicDB.save(conversation);
     }
   }, {
     key: 'removeAdmins',
-    value: function removeAdmins(conversation_id, admin_ids) {
-      return this.getConversation(conversation_id).then(function (userConversation) {
-        var conversation = userConversation.$transient.conversation;
-        conversation.admin_ids = _.difference(_.unique(conversation.admin_ids), admin_ids);
-
-        return skygear.publicDB.save(conversation);
+    value: function removeAdmins(conversation, admins) {
+      var admin_ids = _.map(admins, function (user) {
+        return user._id;
       });
+      conversation.admin_ids = _.difference(conversation.admin_ids, admin_ids);
+
+      return skygear.publicDB.save(conversation);
     }
   }, {
     key: 'createMessage',

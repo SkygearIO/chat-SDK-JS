@@ -47,21 +47,22 @@
 
     <h3>Participant</h3>
     <p>
-      <label>User ID</label>
+      <label>Username</label>
       <input id="participant-id" type="text" />
     </p>
     <p><button
       onclick="demo.addParticipant(inputVal('conversation-id'),
       inputVal('participant-id'),
-      'messages');"
+      'participant-result');"
     >Add
     </button></p>
     <p><button
       onclick="demo.removeParticipant(inputVal('conversation-id'),
       inputVal('participant-id'),
-      'messages');"
+      'participant-result');"
     >Remove
     </button></p>
+    <p id="participant-result"></p>
     <hr/>
     <h3>Messages</h3>
     <ul id="messages">
@@ -108,13 +109,15 @@
       </button>
     </p>
     <script>
-      var demo = new Demo(skygear, skygear_chat);
-      demo.restore();
       var u = new URL(window.location);
       var cid = u.searchParams.get("conversation");
       if (cid) {
         $("conversation-id").value = cid;
       }
+      var demo = new Demo(skygear, skygear_chat);
+      demo.restore().then(function () {
+        demo.cacheConversation(cid);
+      });
     </script>
   </body>
 </html>
