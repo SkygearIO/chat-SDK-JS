@@ -86,7 +86,7 @@ var SkygearChatContainer = function () {
     value: function getUserConversation(conversation) {
       var query = new skygear.Query(UserConversation);
       query.equalTo('user', skygear.currentUser.id);
-      query.equalTo('conversation', conversation.id);
+      query.equalTo('conversation', new skygear.Reference(conversation.id));
       query.transientInclude('user');
       query.transientInclude('conversation');
       return skygear.publicDB.query(query).then(function (records) {
@@ -204,21 +204,38 @@ var SkygearChatContainer = function () {
         data.results = data.results.map(function (message_data) {
           return new Message(message_data);
         });
+        this.markAsDelivered(data.results);
         return data;
+      }.bind(this));
+    }
+  }, {
+    key: 'markAsDelivered',
+    value: function markAsDelivered(messages) {
+      var message_ids = _.map(messages, function (m) {
+        return m._id;
       });
+      return skygear.lambda('chat:mark_as_delivered', [message_ids]);
+    }
+  }, {
+    key: 'markAsRead',
+    value: function markAsRead(messages) {
+      var message_ids = _.map(messages, function (m) {
+        return m._id;
+      });
+      return skygear.lambda('chat:mark_as_read', [message_ids]);
     }
   }, {
     key: 'markAsLastMessageRead',
-    value: function markAsLastMessageRead(conversation_id, message_id) {
-      return _getUserConversation(conversation_id).then(function (uc) {
-        uc.last_read_message = new skygear.Reference('message/' + message_id);
+    value: function markAsLastMessageRead(conversation, message) {
+      return this.getUserConversation(conversation).then(function (uc) {
+        uc.last_read_message = new skygear.Reference(message);
         return skygear.publicDB.save(uc);
       });
     }
   }, {
     key: 'getUnreadMessageCount',
-    value: function getUnreadMessageCount(conversation_id) {
-      return _getUserConversation(conversation_id).then(function (uc) {
+    value: function getUnreadMessageCount(conversation) {
+      return this.getUserConversation(conversation).then(function (uc) {
         return uc.unread_count;
       });
     }
@@ -256,19 +273,6 @@ function _getOrCreateUserChannel() {
       return skygear.privateDB.save(channel);
     }
     return record;
-  });
-}
-
-function _getUserConversation(conversation_id) {
-  var ucQuery = new skygear.Query(UserConversation);
-  ucQuery.equalTo('user', skygear.currentUser.id);
-  ucQuery.equalTo('conversation', conversation_id);
-  ucQuery.limit = 1;
-  return skygear.publicDB.query(ucQuery).then(function (records) {
-    if (records.length > 0) {
-      return records[0];
-    }
-    throw new Error('No UserConversation found');
   });
 }
 

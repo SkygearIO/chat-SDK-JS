@@ -43,8 +43,13 @@
     >Fetch Conversation Details
     </button></p>
     <p><button
+      onclick="demo.fetchUserConversationTo(
+      'conversation-detail');"
+    >Fetch UserConversation
+    </button></p>
+    <p><button
       onclick="demo.leaveConversation();"
-    >Leave Conversation Details
+    >Leave Conversation
     </button></p>
     <p id="conversation-detail"><p>
     <hr/>
@@ -80,10 +85,11 @@
     <h3>Mark as last read</h3>
     <p>
       <label>Last Read Message ID</label>
-      <input id="last-read" type="text" />
+      <br />
+      <em>message/</em><input id="last-read" type="text" />
     </p>
     <p><button
-      onclick="demo.markAsLastRead(inputVal('conversation-id'),
+      onclick="demo.markAsLastRead(
       inputVal('last-read'),
       'last-read-result');"
     >Mark this as last read message

@@ -103,6 +103,14 @@ class Demo {
     });
   }
 
+  fetchUserConversationTo(el) {
+    return this.plugin.getUserConversation(this.conversation).then(function (result) {
+      var ul = $(el);
+      console.log(result);
+      ul.textContent = JSON.stringify(result);
+    });
+  }
+
   leaveConversation() {
     return this.plugin.leaveConversation(this.conversation);
   }
@@ -167,8 +175,13 @@ class Demo {
     }.bind(this));
   }
 
-  markAsLastRead(conversationID, messageID, el) {
-    return this.plugin.markAsLastMessageRead(conversationID, messageID).then(function (result) {
+  markAsLastRead(messageID, el) {
+    // This is a hack and for normal use-case, we should use the message
+    // object queried from getMessages
+    const message = new skygear.Record('message', {
+      _id: 'message/' + messageID
+    });
+    return this.plugin.markAsLastMessageRead(this.conversation, message).then(function (result) {
       var rEl = $(el);
       rEl.textContent = JSON.stringify(result);
     });
