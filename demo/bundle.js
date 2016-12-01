@@ -199,8 +199,9 @@ var SkygearChatContainer = function () {
     }
   }, {
     key: 'getMessages',
-    value: function getMessages(conversation_id, limit, before_time) {
-      return skygear.lambda('chat:get_messages', [conversation_id, limit, before_time]).then(function (data) {
+    value: function getMessages(conversation, limit, before_time) {
+      var conversationID = conversation._id;
+      return skygear.lambda('chat:get_messages', [conversationID, limit, before_time]).then(function (data) {
         data.results = data.results.map(function (message_data) {
           return new Message(message_data);
         });

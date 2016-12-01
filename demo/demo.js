@@ -187,8 +187,8 @@ class Demo {
     });
   }
 
-  getMessagesTo(conversationID, limit, beforeTime, el) {
-    return this.plugin.getMessages(conversationID, limit, beforeTime).then(function (result) {
+  getMessagesTo(limit, beforeTime, el) {
+    return this.plugin.getMessages(this.conversation, limit, beforeTime).then(function (result) {
       var ul = $(el);
       ul.innerHTML = "";
       console.log(result);
