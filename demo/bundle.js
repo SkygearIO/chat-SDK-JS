@@ -4,21 +4,35 @@ global.skygear = require('skygear');
 global.skygear_chat = require('../dist');
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../dist":2,"skygear":39}],2:[function(require,module,exports){
+},{"../dist":2,"skygear":40}],2:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+var _skygear = require('skygear');
+
+var _skygear2 = _interopRequireDefault(_skygear);
+
+var _uuid = require('uuid');
+
+var _uuid2 = _interopRequireDefault(_uuid);
+
+var _underscore = require('underscore');
+
+var _underscore2 = _interopRequireDefault(_underscore);
+
+var _pubsub = require('./pubsub');
+
+var _pubsub2 = _interopRequireDefault(_pubsub);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var skygear = require('skygear');
-var uuid = require('uuid');
-var _ = require('underscore');
-
-var Conversation = skygear.Record.extend('conversation');
-var UserConversation = skygear.Record.extend('user_conversation');
-var Message = skygear.Record.extend('message');
-var UserChannel = skygear.Record.extend('user_channel');
+var Conversation = _skygear2.default.Record.extend('conversation');
+var UserConversation = _skygear2.default.Record.extend('user_conversation');
+var Message = _skygear2.default.Record.extend('message');
+var UserChannel = _skygear2.default.Record.extend('user_channel');
 
 var SkygearChatContainer = function () {
   function SkygearChatContainer() {
@@ -39,20 +53,20 @@ var SkygearChatContainer = function () {
       } else {
         conversation.distinct_by_participants = false;
       }
-      var participant_ids = _.map(participants, function (user) {
+      var participant_ids = _underscore2.default.map(participants, function (user) {
         return user._id;
       });
-      participant_ids.push(skygear.currentUser.id);
-      conversation.participant_ids = _.unique(participant_ids);
-      if (_.isEmpty(options.admins)) {
+      participant_ids.push(_skygear2.default.currentUser.id);
+      conversation.participant_ids = _underscore2.default.unique(participant_ids);
+      if (_underscore2.default.isEmpty(options.admins)) {
         conversation.admin_ids = conversation.participant_ids;
       } else {
-        var admin_ids = _.map(options.admins, function (user) {
+        var admin_ids = _underscore2.default.map(options.admins, function (user) {
           return user._id;
         });
-        conversation.admin_ids = _.unique(admin_ids);
+        conversation.admin_ids = _underscore2.default.unique(admin_ids);
       }
-      return skygear.publicDB.save(conversation);
+      return _skygear2.default.publicDB.save(conversation);
     }
   }, {
     key: 'createDirectConversation',
@@ -66,9 +80,9 @@ var SkygearChatContainer = function () {
   }, {
     key: 'getConversation',
     value: function getConversation(conversationID) {
-      var query = new skygear.Query(Conversation);
+      var query = new _skygear2.default.Query(Conversation);
       query.equalTo('_id', conversationID);
-      return skygear.publicDB.query(query).then(function (records) {
+      return _skygear2.default.publicDB.query(query).then(function (records) {
         if (records.length > 0) {
           return records[0];
         }
@@ -78,18 +92,18 @@ var SkygearChatContainer = function () {
   }, {
     key: 'getConversations',
     value: function getConversations() {
-      var query = new skygear.Query(Conversation);
-      return skygear.publicDB.query(query);
+      var query = new _skygear2.default.Query(Conversation);
+      return _skygear2.default.publicDB.query(query);
     }
   }, {
     key: 'getUserConversation',
     value: function getUserConversation(conversation) {
-      var query = new skygear.Query(UserConversation);
-      query.equalTo('user', skygear.currentUser.id);
-      query.equalTo('conversation', new skygear.Reference(conversation.id));
+      var query = new _skygear2.default.Query(UserConversation);
+      query.equalTo('user', _skygear2.default.currentUser.id);
+      query.equalTo('conversation', new _skygear2.default.Reference(conversation.id));
       query.transientInclude('user');
       query.transientInclude('conversation');
-      return skygear.publicDB.query(query).then(function (records) {
+      return _skygear2.default.publicDB.query(query).then(function (records) {
         if (records.length > 0) {
           return records[0];
         }
@@ -99,18 +113,18 @@ var SkygearChatContainer = function () {
   }, {
     key: 'getUserConversations',
     value: function getUserConversations() {
-      var query = new skygear.Query(UserConversation);
-      query.equalTo('user', skygear.currentUser.id);
+      var query = new _skygear2.default.Query(UserConversation);
+      query.equalTo('user', _skygear2.default.currentUser.id);
       query.transientInclude('user');
       query.transientInclude('conversation');
-      return skygear.publicDB.query(query);
+      return _skygear2.default.publicDB.query(query);
     }
   }, {
     key: 'deleteConversation',
     value: function deleteConversation(conversation_id) {
       return this.getConversation(conversation_id).then(function (userConversation) {
         var conversation = userConversation.$transient.conversation;
-        return skygear.publicDB.del(conversation);
+        return _skygear2.default.publicDB.del(conversation);
       });
     }
   }, {
@@ -122,59 +136,59 @@ var SkygearChatContainer = function () {
         conversation.title = title;
       }
       conversation.meta = meta;
-      return skygear.publicDB.save(conversation);
+      return _skygear2.default.publicDB.save(conversation);
     }
   }, {
     key: 'leaveConversation',
     value: function leaveConversation(conversation) {
-      return skygear.lambda('chat:leave_conversation', [conversation._id]);
+      return _skygear2.default.lambda('chat:leave_conversation', [conversation._id]);
     }
   }, {
     key: 'addParticipants',
     value: function addParticipants(conversation, participants) {
-      var participant_ids = _.map(participants, function (user) {
+      var participant_ids = _underscore2.default.map(participants, function (user) {
         return user._id;
       });
-      conversation.participant_ids = _.union(conversation.participant_ids, participant_ids);
+      conversation.participant_ids = _underscore2.default.union(conversation.participant_ids, participant_ids);
 
-      return skygear.publicDB.save(conversation);
+      return _skygear2.default.publicDB.save(conversation);
     }
   }, {
     key: 'removeParticipants',
     value: function removeParticipants(conversation, participants) {
-      var participant_ids = _.map(participants, function (user) {
+      var participant_ids = _underscore2.default.map(participants, function (user) {
         return user._id;
       });
-      conversation.participant_ids = _.difference(conversation.participant_ids, participant_ids);
-      conversation.admin_ids = _.difference(conversation.admin_ids, participant_ids);
+      conversation.participant_ids = _underscore2.default.difference(conversation.participant_ids, participant_ids);
+      conversation.admin_ids = _underscore2.default.difference(conversation.admin_ids, participant_ids);
 
-      return skygear.publicDB.save(conversation);
+      return _skygear2.default.publicDB.save(conversation);
     }
   }, {
     key: 'addAdmins',
     value: function addAdmins(conversation, admins) {
-      var admin_ids = _.map(admins, function (user) {
+      var admin_ids = _underscore2.default.map(admins, function (user) {
         return user._id;
       });
-      conversation.admin_ids = _.union(conversation.admin_ids, admin_ids);
+      conversation.admin_ids = _underscore2.default.union(conversation.admin_ids, admin_ids);
 
-      return skygear.publicDB.save(conversation);
+      return _skygear2.default.publicDB.save(conversation);
     }
   }, {
     key: 'removeAdmins',
     value: function removeAdmins(conversation, admins) {
-      var admin_ids = _.map(admins, function (user) {
+      var admin_ids = _underscore2.default.map(admins, function (user) {
         return user._id;
       });
-      conversation.admin_ids = _.difference(conversation.admin_ids, admin_ids);
+      conversation.admin_ids = _underscore2.default.difference(conversation.admin_ids, admin_ids);
 
-      return skygear.publicDB.save(conversation);
+      return _skygear2.default.publicDB.save(conversation);
     }
   }, {
     key: 'createMessage',
     value: function createMessage(conversation_id, body, metadata, asset) {
       var message = new Message();
-      message.conversation_id = new skygear.Reference('conversation/' + conversation_id);
+      message.conversation_id = new _skygear2.default.Reference('conversation/' + conversation_id);
       message.body = body;
 
       if (metadata === undefined || metadata === null) {
@@ -183,25 +197,25 @@ var SkygearChatContainer = function () {
         message.metadata = metadata;
       }
       if (asset) {
-        var skyAsset = new skygear.Asset({
+        var skyAsset = new _skygear2.default.Asset({
           file: asset,
           name: asset.name
         });
         message.attachment = skyAsset;
       }
 
-      return skygear.privateDB.save(message);
+      return _skygear2.default.privateDB.save(message);
     }
   }, {
     key: 'getUnreadCount',
     value: function getUnreadCount() {
-      return skygear.lambda('chat:total_unread');
+      return _skygear2.default.lambda('chat:total_unread');
     }
   }, {
     key: 'getMessages',
     value: function getMessages(conversation, limit, before_time) {
       var conversationID = conversation._id;
-      return skygear.lambda('chat:get_messages', [conversationID, limit, before_time]).then(function (data) {
+      return _skygear2.default.lambda('chat:get_messages', [conversationID, limit, before_time]).then(function (data) {
         data.results = data.results.map(function (message_data) {
           return new Message(message_data);
         });
@@ -212,25 +226,25 @@ var SkygearChatContainer = function () {
   }, {
     key: 'markAsDelivered',
     value: function markAsDelivered(messages) {
-      var message_ids = _.map(messages, function (m) {
+      var message_ids = _underscore2.default.map(messages, function (m) {
         return m._id;
       });
-      return skygear.lambda('chat:mark_as_delivered', [message_ids]);
+      return _skygear2.default.lambda('chat:mark_as_delivered', [message_ids]);
     }
   }, {
     key: 'markAsRead',
     value: function markAsRead(messages) {
-      var message_ids = _.map(messages, function (m) {
+      var message_ids = _underscore2.default.map(messages, function (m) {
         return m._id;
       });
-      return skygear.lambda('chat:mark_as_read', [message_ids]);
+      return _skygear2.default.lambda('chat:mark_as_read', [message_ids]);
     }
   }, {
     key: 'markAsLastMessageRead',
     value: function markAsLastMessageRead(conversation, message) {
       return this.getUserConversation(conversation).then(function (uc) {
-        uc.last_read_message = new skygear.Reference(message);
-        return skygear.publicDB.save(uc);
+        uc.last_read_message = new _skygear2.default.Reference(message);
+        return _skygear2.default.publicDB.save(uc);
       });
     }
   }, {
@@ -241,44 +255,178 @@ var SkygearChatContainer = function () {
       });
     }
   }, {
+    key: 'sendTypingIndicator',
+    value: function sendTypingIndicator(conversation, state) {
+      this.pubsub.sendTyping(conversation, state);
+    }
+  }, {
+    key: 'subscribeTypingIndicator',
+    value: function subscribeTypingIndicator(conversation, callback) {
+      this.pubsub.subscribeTyping(conversation, callback);
+    }
+  }, {
+    key: 'unsubscribeTypingIndicator',
+    value: function unsubscribeTypingIndicator(conversation) {
+      this.pubsub.unsubscribeTyping(conversation);
+    }
+  }, {
     key: 'subscribe',
     value: function subscribe(handler) {
-      _getOrCreateUserChannel().then(function (channel) {
-        skygear.pubsub.connect();
-        skygear.off(channel.name);
-        skygear.on(channel.name, function (data) {
-          data.record = new skygear.Record(data.record_type, data.record);
-          if (data.original_record) {
-            data.original_record = new skygear.Record(data.record_type, data.original_record);
-          }
-          handler(data);
-        });
-      });
+      this.pubsub.subscribeMessage(handler);
+    }
+  }, {
+    key: 'pubsub',
+    get: function get() {
+      if (!this._pubsub) {
+        this._pubsub = new _pubsub2.default(_skygear2.default);
+      }
+      return this._pubsub;
     }
   }]);
 
   return SkygearChatContainer;
 }();
 
-function _getOrCreateUserChannel() {
-  var query = new skygear.Query(UserChannel);
-  return skygear.privateDB.query(query).then(function (records) {
-    if (records.length > 0) {
-      return records[0];
-    }
-    return null;
-  }).then(function (record) {
-    if (record === null) {
-      var channel = new UserChannel();
-      channel.name = uuid.v4();
-      return skygear.privateDB.save(channel);
-    }
-    return record;
-  });
-}
-
 module.exports = new SkygearChatContainer();
-},{"skygear":39,"underscore":56,"uuid":60}],3:[function(require,module,exports){
+},{"./pubsub":3,"skygear":40,"underscore":57,"uuid":61}],3:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _skygear = require('skygear');
+
+var _skygear2 = _interopRequireDefault(_skygear);
+
+var _uuid = require('uuid');
+
+var _uuid2 = _interopRequireDefault(_uuid);
+
+var _underscore = require('underscore');
+
+var _underscore2 = _interopRequireDefault(_underscore);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Message = _skygear2.default.Record.extend('message');
+var UserChannel = _skygear2.default.Record.extend('user_channel');
+
+var SkygearChatPubsub = function () {
+  function SkygearChatPubsub(container) {
+    _classCallCheck(this, SkygearChatPubsub);
+
+    this.pubsub = container.pubsub;
+    this.userChannel = null;
+    this.dispatch = this.dispatch.bind(this);
+    this.getUserChannel().then(this.subscribeDispatch.bind(this));;
+    this.typingHandler = {};
+    this.messageHandler = [];
+  }
+
+  _createClass(SkygearChatPubsub, [{
+    key: 'subscribeDispatch',
+    value: function subscribeDispatch(channel) {
+      this.pubsub.on(channel.name, this.dispatch);
+    }
+  }, {
+    key: 'dispatch',
+    value: function dispatch(payload) {
+      console.log(payload);
+      if (payload['event'] === 'typing') {
+        this.dispatchTyping(payload['data']);
+      } else {
+        this.dispatchUpdate(payload['data']);
+      }
+    }
+  }, {
+    key: 'dispatchUpdate',
+    value: function dispatchUpdate(data) {
+      var obj = {
+        record_type: data.record_type,
+        event_type: data.event_type
+      };
+      obj.record = new _skygear2.default.Record(data.record_type, data.record);
+      if (data.original_record) {
+        obj.original_record = new _skygear2.default.Record(data.record_type, data.original_record);
+      }
+      _underscore2.default.forEach(this.messageHandler, function (handler) {
+        handler(obj);
+      });
+    }
+  }, {
+    key: 'dispatchTyping',
+    value: function dispatchTyping(data) {
+      console.log('dispatchTyping', data);
+      _underscore2.default.forEach(data, function (t, conversationID) {
+        console.log(conversationID);
+        var handlers = this.typingHandler[conversationID];
+        _underscore2.default.forEach(handlers, function (h) {
+          console.log('handlers', t);
+          h(t);
+        });
+      }.bind(this));
+    }
+  }, {
+    key: 'sendTyping',
+    value: function sendTyping(conversation, state) {
+      _skygear2.default.lambda('chat:typing', [conversation._id, state, new Date()]);
+    }
+  }, {
+    key: 'subscribeTyping',
+    value: function subscribeTyping(conversation, handler) {
+      if (!this.typingHandler[conversation.id]) {
+        this.typingHandler[conversation.id] = [];
+      }
+      this.typingHandler[conversation.id].push(handler);
+    }
+  }, {
+    key: 'unsubscribeTyping',
+    value: function unsubscribeTyping(conversation) {
+      this.typingHandler[conversation.id] = [];
+    }
+  }, {
+    key: 'subscribeMessage',
+    value: function subscribeMessage(handler) {
+      this.messageHandler.push(handler);
+      this.getUserChannel().then(function (channel) {
+        _skygear2.default.on(channel.name, function (data) {});
+      });
+    }
+  }, {
+    key: 'getUserChannel',
+    value: function getUserChannel() {
+      if (this.userChannel) {
+        return Promise.resolve(this.userChannel);
+      }
+      var query = new _skygear2.default.Query(UserChannel);
+      return _skygear2.default.privateDB.query(query).then(function (records) {
+        if (records.length > 0) {
+          this.userChannel = records[0];
+          return this.userChannel;
+        }
+        return null;
+      }.bind(this)).then(function (record) {
+        if (record === null) {
+          var channel = new UserChannel();
+          channel.name = _uuid2.default.v4();
+          return _skygear2.default.privateDB.save(channel);
+        }
+        this.userChannel = record;
+        return this.userChannel;
+      }.bind(this));
+    }
+  }]);
+
+  return SkygearChatPubsub;
+}();
+
+exports.default = SkygearChatPubsub;
+},{"skygear":40,"underscore":57,"uuid":61}],4:[function(require,module,exports){
 ;(function () {
 
   var object = typeof exports != 'undefined' ? exports : this; // #8: web workers
@@ -341,9 +489,9 @@ module.exports = new SkygearChatContainer();
 
 }());
 
-},{}],4:[function(require,module,exports){
-
 },{}],5:[function(require,module,exports){
+
+},{}],6:[function(require,module,exports){
 var charenc = {
   // UTF-8 encoding
   utf8: {
@@ -378,7 +526,7 @@ var charenc = {
 
 module.exports = charenc;
 
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 
 /**
  * Expose `Emitter`.
@@ -543,7 +691,7 @@ Emitter.prototype.hasListeners = function(event){
   return !! this.listeners(event).length;
 };
 
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 (function (factory) {
   if (typeof define === "function" && define.amd) {
     define(["exports"], factory);
@@ -685,7 +833,7 @@ Emitter.prototype.hasListeners = function(event){
 
   exports.CookieStorage = CookieStorage;
 });
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 (function() {
   var base64map
       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/',
@@ -783,7 +931,7 @@ Emitter.prototype.hasListeners = function(event){
   module.exports = crypt;
 })();
 
-},{}],9:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 'use strict';
 
 var assign        = require('es5-ext/object/assign')
@@ -848,14 +996,14 @@ d.gs = function (dscr, get, set/*, options*/) {
 	return !options ? desc : assign(normalizeOpts(options), desc);
 };
 
-},{"es5-ext/object/assign":10,"es5-ext/object/is-callable":13,"es5-ext/object/normalize-options":17,"es5-ext/string/#/contains":20}],10:[function(require,module,exports){
+},{"es5-ext/object/assign":11,"es5-ext/object/is-callable":14,"es5-ext/object/normalize-options":18,"es5-ext/string/#/contains":21}],11:[function(require,module,exports){
 'use strict';
 
 module.exports = require('./is-implemented')()
 	? Object.assign
 	: require('./shim');
 
-},{"./is-implemented":11,"./shim":12}],11:[function(require,module,exports){
+},{"./is-implemented":12,"./shim":13}],12:[function(require,module,exports){
 'use strict';
 
 module.exports = function () {
@@ -866,7 +1014,7 @@ module.exports = function () {
 	return (obj.foo + obj.bar + obj.trzy) === 'razdwatrzy';
 };
 
-},{}],12:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 'use strict';
 
 var keys  = require('../keys')
@@ -890,21 +1038,21 @@ module.exports = function (dest, src/*, …srcn*/) {
 	return dest;
 };
 
-},{"../keys":14,"../valid-value":19}],13:[function(require,module,exports){
+},{"../keys":15,"../valid-value":20}],14:[function(require,module,exports){
 // Deprecated
 
 'use strict';
 
 module.exports = function (obj) { return typeof obj === 'function'; };
 
-},{}],14:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 'use strict';
 
 module.exports = require('./is-implemented')()
 	? Object.keys
 	: require('./shim');
 
-},{"./is-implemented":15,"./shim":16}],15:[function(require,module,exports){
+},{"./is-implemented":16,"./shim":17}],16:[function(require,module,exports){
 'use strict';
 
 module.exports = function () {
@@ -914,7 +1062,7 @@ module.exports = function () {
 	} catch (e) { return false; }
 };
 
-},{}],16:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 'use strict';
 
 var keys = Object.keys;
@@ -923,7 +1071,7 @@ module.exports = function (object) {
 	return keys(object == null ? object : Object(object));
 };
 
-},{}],17:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 'use strict';
 
 var forEach = Array.prototype.forEach, create = Object.create;
@@ -942,7 +1090,7 @@ module.exports = function (options/*, …options*/) {
 	return result;
 };
 
-},{}],18:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 'use strict';
 
 module.exports = function (fn) {
@@ -950,7 +1098,7 @@ module.exports = function (fn) {
 	return fn;
 };
 
-},{}],19:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 'use strict';
 
 module.exports = function (value) {
@@ -958,14 +1106,14 @@ module.exports = function (value) {
 	return value;
 };
 
-},{}],20:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 'use strict';
 
 module.exports = require('./is-implemented')()
 	? String.prototype.contains
 	: require('./shim');
 
-},{"./is-implemented":21,"./shim":22}],21:[function(require,module,exports){
+},{"./is-implemented":22,"./shim":23}],22:[function(require,module,exports){
 'use strict';
 
 var str = 'razdwatrzy';
@@ -975,7 +1123,7 @@ module.exports = function () {
 	return ((str.contains('dwa') === true) && (str.contains('foo') === false));
 };
 
-},{}],22:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 'use strict';
 
 var indexOf = String.prototype.indexOf;
@@ -984,7 +1132,7 @@ module.exports = function (searchString/*, position*/) {
 	return indexOf.call(this, searchString, arguments[1]) > -1;
 };
 
-},{}],23:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 'use strict';
 
 var d        = require('d')
@@ -1118,7 +1266,7 @@ module.exports = exports = function (o) {
 };
 exports.methods = methods;
 
-},{"d":9,"es5-ext/object/valid-callable":18}],24:[function(require,module,exports){
+},{"d":10,"es5-ext/object/valid-callable":19}],25:[function(require,module,exports){
 /*!
  * Determine if an object is a Buffer
  *
@@ -1141,7 +1289,7 @@ function isSlowBuffer (obj) {
   return typeof obj.readFloatLE === 'function' && typeof obj.slice === 'function' && isBuffer(obj.slice(0, 0))
 }
 
-},{}],25:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 (function(root) {
   var localStorageMemory = {};
   var cache = {};
@@ -1225,7 +1373,7 @@ function isSlowBuffer (obj) {
   }
 })(this);
 
-},{}],26:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 (function(){
   var crypt = require('crypt'),
       utf8 = require('charenc').utf8,
@@ -1387,7 +1535,7 @@ function isSlowBuffer (obj) {
 
 })();
 
-},{"charenc":5,"crypt":8,"is-buffer":24}],27:[function(require,module,exports){
+},{"charenc":6,"crypt":9,"is-buffer":25}],28:[function(require,module,exports){
 (function (global){
 /*! https://mths.be/punycode v1.3.2 by @mathias */
 ;(function(root) {
@@ -1921,7 +2069,7 @@ function isSlowBuffer (obj) {
 }(this));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],28:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -2007,7 +2155,7 @@ var isArray = Array.isArray || function (xs) {
   return Object.prototype.toString.call(xs) === '[object Array]';
 };
 
-},{}],29:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -2094,13 +2242,13 @@ var objectKeys = Object.keys || function (obj) {
   return res;
 };
 
-},{}],30:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 'use strict';
 
 exports.decode = exports.parse = require('./decode');
 exports.encode = exports.stringify = require('./encode');
 
-},{"./decode":28,"./encode":29}],31:[function(require,module,exports){
+},{"./decode":29,"./encode":30}],32:[function(require,module,exports){
 
 /**
  * Reduce `arr` with `fn`.
@@ -2125,7 +2273,7 @@ module.exports = function(arr, fn, initial){
   
   return curr;
 };
-},{}],32:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2457,7 +2605,7 @@ var ACL = function () {
 }();
 
 exports.default = ACL;
-},{"./role":46,"./user":49,"lodash":51}],33:[function(require,module,exports){
+},{"./role":47,"./user":50,"lodash":52}],34:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2566,7 +2714,7 @@ function base64StringtoBlob(base64) {
   return bb;
 }
 module.exports = exports['default'];
-},{"Base64":3,"w3c-blob":61}],34:[function(require,module,exports){
+},{"Base64":4,"w3c-blob":62}],35:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2676,7 +2824,7 @@ var Cache = function () {
 
 exports.default = Cache;
 module.exports = exports['default'];
-},{"./store":47,"lodash":51}],35:[function(require,module,exports){
+},{"./store":48,"lodash":52}],36:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -3516,7 +3664,7 @@ function getRespJSON(res) {
   return {};
 }
 module.exports = exports['default'];
-},{"./acl":32,"./asset":33,"./database":36,"./error":37,"./geolocation":38,"./pubsub":40,"./query":41,"./record":43,"./reference":44,"./relation":45,"./role":46,"./store":47,"./type":48,"./user":49,"./util":50,"event-emitter":23,"lodash":51,"react-native":4,"superagent":52}],36:[function(require,module,exports){
+},{"./acl":33,"./asset":34,"./database":37,"./error":38,"./geolocation":39,"./pubsub":41,"./query":42,"./record":44,"./reference":45,"./relation":46,"./role":47,"./store":48,"./type":49,"./user":50,"./util":51,"event-emitter":24,"lodash":52,"react-native":5,"superagent":53}],37:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -3839,7 +3987,7 @@ var Database = function () {
 
 exports.default = Database;
 module.exports = exports['default'];
-},{"./asset":33,"./cache":34,"./query":41,"./query_result":42,"./record":43,"lodash":51}],37:[function(require,module,exports){
+},{"./asset":34,"./cache":35,"./query":42,"./query_result":43,"./record":44,"lodash":52}],38:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -3989,7 +4137,7 @@ var SkygearError = exports.SkygearError = function (_extendableBuiltin2) {
 
   return SkygearError;
 }(_extendableBuiltin(Error));
-},{"lodash":51}],38:[function(require,module,exports){
+},{"lodash":52}],39:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -4062,7 +4210,7 @@ var Geolocation = function () {
 
 exports.default = Geolocation;
 module.exports = exports['default'];
-},{"lodash":51}],39:[function(require,module,exports){
+},{"lodash":52}],40:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -4092,7 +4240,7 @@ var defaultContainer = new _container2.default(); /**
                                                    */
 exports.default = defaultContainer;
 module.exports = exports['default'];
-},{"./container":35}],40:[function(require,module,exports){
+},{"./container":36}],41:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -4422,7 +4570,7 @@ var Pubsub = function () {
 
 exports.default = Pubsub;
 module.exports = exports['default'];
-},{"./util":50,"event-emitter":23,"lodash":51,"url":57,"websocket":62}],41:[function(require,module,exports){
+},{"./util":51,"event-emitter":24,"lodash":52,"url":58,"websocket":63}],42:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -4869,7 +5017,7 @@ var Query = function () {
 
 exports.default = Query;
 module.exports = exports['default'];
-},{"./record":43,"./util":50,"lodash":51,"md5":26}],42:[function(require,module,exports){
+},{"./record":44,"./util":51,"lodash":52,"md5":27}],43:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -4953,7 +5101,7 @@ var QueryResult = function (_extendableBuiltin2) {
 
 exports.default = QueryResult;
 module.exports = exports["default"];
-},{}],43:[function(require,module,exports){
+},{}],44:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -5309,7 +5457,7 @@ function recordDictToObj(dict) {
   return new Cls(dict);
 }
 module.exports = exports['default'];
-},{"./acl":32,"./util":50,"lodash":51,"uuid":60}],44:[function(require,module,exports){
+},{"./acl":33,"./util":51,"lodash":52,"uuid":61}],45:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -5385,7 +5533,7 @@ var Reference = function () {
 
 exports.default = Reference;
 module.exports = exports['default'];
-},{"./record":43}],45:[function(require,module,exports){
+},{"./record":44}],46:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -5711,7 +5859,7 @@ var RelationAction = exports.RelationAction = function () {
 
   return RelationAction;
 }();
-},{"./user":49,"lodash":51}],46:[function(require,module,exports){
+},{"./user":50,"lodash":52}],47:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -5816,7 +5964,7 @@ var Role = function () {
 
 exports.default = Role;
 module.exports = exports['default'];
-},{"lodash":51}],47:[function(require,module,exports){
+},{"lodash":52}],48:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -6086,7 +6234,7 @@ if (typeof window !== 'undefined') {
 
 exports.default = store;
 module.exports = exports['default'];
-},{"./util":50,"cookie-storage":7,"localstorage-memory":25,"react-native":4}],48:[function(require,module,exports){
+},{"./util":51,"cookie-storage":8,"localstorage-memory":26,"react-native":5}],49:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -6128,7 +6276,7 @@ var Sequence = exports.Sequence = function () {
 
   return Sequence;
 }();
-},{}],49:[function(require,module,exports){
+},{}],50:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -6234,7 +6382,7 @@ var User = function () {
 
 exports.default = User;
 module.exports = exports['default'];
-},{"./role":46,"lodash":51}],50:[function(require,module,exports){
+},{"./role":47,"lodash":52}],51:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -6353,7 +6501,7 @@ var EventHandle = exports.EventHandle = function () {
 
   return EventHandle;
 }();
-},{"./asset":33,"./geolocation":38,"./reference":44,"lodash":51}],51:[function(require,module,exports){
+},{"./asset":34,"./geolocation":39,"./reference":45,"lodash":52}],52:[function(require,module,exports){
 (function (global){
 /**
  * @license
@@ -18708,7 +18856,7 @@ var EventHandle = exports.EventHandle = function () {
 }.call(this));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],52:[function(require,module,exports){
+},{}],53:[function(require,module,exports){
 /**
  * Module dependencies.
  */
@@ -19787,7 +19935,7 @@ request.put = function(url, data, fn){
   return req;
 };
 
-},{"./is-object":53,"./request":55,"./request-base":54,"emitter":6,"reduce":31}],53:[function(require,module,exports){
+},{"./is-object":54,"./request":56,"./request-base":55,"emitter":7,"reduce":32}],54:[function(require,module,exports){
 /**
  * Check if `obj` is an object.
  *
@@ -19802,7 +19950,7 @@ function isObject(obj) {
 
 module.exports = isObject;
 
-},{}],54:[function(require,module,exports){
+},{}],55:[function(require,module,exports){
 /**
  * Module of mixed-in functions shared between node and client code
  */
@@ -19970,7 +20118,7 @@ exports.field = function(name, val) {
   return this;
 };
 
-},{"./is-object":53}],55:[function(require,module,exports){
+},{"./is-object":54}],56:[function(require,module,exports){
 // The node and browser modules expose versions of this with the
 // appropriate constructor function bound as first argument
 /**
@@ -20004,7 +20152,7 @@ function request(RequestConstructor, method, url) {
 
 module.exports = request;
 
-},{}],56:[function(require,module,exports){
+},{}],57:[function(require,module,exports){
 //     Underscore.js 1.6.0
 //     http://underscorejs.org
 //     (c) 2009-2014 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
@@ -21349,7 +21497,7 @@ module.exports = request;
   }
 }).call(this);
 
-},{}],57:[function(require,module,exports){
+},{}],58:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -22083,7 +22231,7 @@ Url.prototype.parseHost = function() {
   if (host) this.hostname = host;
 };
 
-},{"./util":58,"punycode":27,"querystring":30}],58:[function(require,module,exports){
+},{"./util":59,"punycode":28,"querystring":31}],59:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -22101,7 +22249,7 @@ module.exports = {
   }
 };
 
-},{}],59:[function(require,module,exports){
+},{}],60:[function(require,module,exports){
 (function (global){
 
 var rng;
@@ -22137,7 +22285,7 @@ module.exports = rng;
 
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],60:[function(require,module,exports){
+},{}],61:[function(require,module,exports){
 //     uuid.js
 //
 //     Copyright (c) 2010-2012 Robert Kieffer
@@ -22322,7 +22470,7 @@ uuid.unparse = unparse;
 
 module.exports = uuid;
 
-},{"./rng":59}],61:[function(require,module,exports){
+},{"./rng":60}],62:[function(require,module,exports){
 (function (global){
 module.exports = get_blob()
 
@@ -22354,7 +22502,7 @@ function get_blob() {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],62:[function(require,module,exports){
+},{}],63:[function(require,module,exports){
 var _global = (function() { return this; })();
 var nativeWebSocket = _global.WebSocket || _global.MozWebSocket;
 var websocket_version = require('./version');
@@ -22392,10 +22540,10 @@ module.exports = {
     'version'      : websocket_version
 };
 
-},{"./version":63}],63:[function(require,module,exports){
+},{"./version":64}],64:[function(require,module,exports){
 module.exports = require('../package.json').version;
 
-},{"../package.json":64}],64:[function(require,module,exports){
+},{"../package.json":65}],65:[function(require,module,exports){
 module.exports={
   "_args": [
     [

@@ -96,9 +96,25 @@
     </button></p>
     <p id="last-read-result"></p>
     <hr/>
+    <h3>Typing and send message</h3>
+    <p>
+      <button
+        onclick="demo.subscribeTypingTo(
+        'typing-indicator');"
+      >Subscribe Typing indicator
+      </button>
+      <button
+        onclick="demo.unsubscribeTyping();"
+      >Unsubscribe
+      </button>
+      <em id="typing-indicator"></em>
+    </p>
     <p>
       <label>Body</label><br />
-      <textarea id="message-content"></textarea>
+      <textarea id="message-content"
+        onfocus="demo.startTyping();"
+        onblur="demo.stopTyping();"
+      ></textarea>
     </p>
     <p>
       <label>metadata</label><br />

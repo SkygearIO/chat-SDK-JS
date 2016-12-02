@@ -209,6 +209,26 @@ class Demo {
     }.bind(this));
   }
 
+  startTyping() {
+    return this.plugin.sendTypingIndicator(this.conversation, 'begin');
+  }
+
+  stopTyping() {
+    return this.plugin.sendTypingIndicator(this.conversation, 'finished');
+  }
+
+  subscribeTypingTo(el) {
+    const indicateEl = $(el);
+    return this.plugin.subscribeTypingIndicator(this.conversation, function (payload) {
+      console.log(payload);
+      indicateEl.textContent = JSON.stringify(payload);
+    });
+  }
+
+  unsubscribeTyping() {
+    return this.plugin.unsubscribeTypingIndicator(this.conversation);
+  }
+
   _handler(data) {
     if (this.handler) {
       this.handler(data);
