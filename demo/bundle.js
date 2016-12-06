@@ -234,14 +234,6 @@ var SkygearChatContainer = exports.SkygearChatContainer = function () {
         throw new Error('no conversation found');
       });
     }
-  }, {
-    key: 'deleteConversation',
-    value: function deleteConversation(conversation_id) {
-      return this.getConversation(conversation_id).then(function (userConversation) {
-        var conversation = userConversation.$transient.conversation;
-        return _skygear2.default.publicDB.del(conversation);
-      });
-    }
 
     /**
      * updateConversation is a helper method for updating a conversation with
