@@ -140,7 +140,7 @@
       if (cid) {
         $("conversation-id").value = cid;
       }
-      var demo = new Demo(skygear, skygear_chat);
+      var demo = new Demo(skygear, skygear_chat.default);
       demo.restore().then(function () {
         demo.cacheConversation(cid);
       });

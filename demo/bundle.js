@@ -7,15 +7,16 @@ global.skygear_chat = require('../dist');
 },{"../dist":2,"skygear":40}],2:[function(require,module,exports){
 'use strict';
 
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.SkygearChatContainer = undefined;
+
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _skygear = require('skygear');
 
 var _skygear2 = _interopRequireDefault(_skygear);
-
-var _uuid = require('uuid');
-
-var _uuid2 = _interopRequireDefault(_uuid);
 
 var _underscore = require('underscore');
 
@@ -32,15 +33,50 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 var Conversation = _skygear2.default.Record.extend('conversation');
 var UserConversation = _skygear2.default.Record.extend('user_conversation');
 var Message = _skygear2.default.Record.extend('message');
-var UserChannel = _skygear2.default.Record.extend('user_channel');
 
-var SkygearChatContainer = function () {
+/**
+ * SkygearChatContainer provide API access to the chat plugin.
+ */
+
+var SkygearChatContainer = exports.SkygearChatContainer = function () {
   function SkygearChatContainer() {
     _classCallCheck(this, SkygearChatContainer);
   }
 
   _createClass(SkygearChatContainer, [{
     key: 'createConversation',
+
+    /**
+     * createConversation create an conversation with provided participants and
+     * title.
+     *
+     * Duplicate call of createConversation with same list of participants will
+     * return the different conversation, unless `distinctByParticipants` in
+     * options is set to true.
+     *
+     * Adding or removing participants from a distinct conversation (see below)
+     * makes it non-distinct.
+     *
+     * For application specific attributes, you are suggested to put them as
+     * meta.
+     *
+     * All participant will be admin unless specific in options.admins
+     *
+     * @example
+     * const skygearChat = require('skygear-chat');¬
+     *
+     * skygearChat.createConversation([userBen], 'Greeting')
+     *   .then(function (conversation) {
+     *     console.log('Conversation created!', conversation);
+     *   }, function (err) {
+     *     console.log('Conversation created fails');
+     *   });
+     *
+     * @param {[]User} participants - array of Skygear Users
+     * @param {string} title - string for describing the conversation topic
+     * @param {object} meta - attributes for application specific purpose
+     * @param {object} [options] - options for the conversation, avaliable options `distinctByParticipants` and `admins`
+     */
     value: function createConversation(participants, title) {
       var meta = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
       var options = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
@@ -68,6 +104,27 @@ var SkygearChatContainer = function () {
       }
       return _skygear2.default.publicDB.save(conversation);
     }
+
+    /**
+     * createDirectConversation is a helper function will create conversation
+     * with distinctByParticipants set to true
+     *
+     * @example
+     * const skygearChat = require('skygear-chat');¬
+     *
+     * skygearChat.createDirectConversation(userBen, 'Greeting')
+     *   .then(function (conversation) {
+     *     console.log('Conversation created!', conversation);
+     *   }, function (err) {
+     *     console.log('Conversation created fails');
+     *   });
+     *
+     * @param {User} user - Skygear Users
+     * @param {string} title - string for describing the conversation topic
+     * @param {object} meta - attributes for application specific purpose
+     * @param {object} [options] - options for the conversation, avaliable options `admins`
+     */
+
   }, {
     key: 'createDirectConversation',
     value: function createDirectConversation(user, title) {
@@ -77,6 +134,14 @@ var SkygearChatContainer = function () {
       options.distinctByParticipants = true;
       return this.createConversation([user], title, meta, options);
     }
+
+    /**
+     * getConversation query a Conversation Record from Skygear
+     *
+     * @param {string} conversationID - ConversationID
+     * @return {Promise<Conversation>}  A promise to array of Conversation Recrods
+     */
+
   }, {
     key: 'getConversation',
     value: function getConversation(conversationID) {
@@ -89,12 +154,71 @@ var SkygearChatContainer = function () {
         throw new Error('no conversation found');
       });
     }
+
+    /**
+     * getConversation query a list of Conversation Records from Skygear which
+     * are readable to the current user
+     *
+     * @return {Promise<[]Conversation>} A promise to array of Conversation Recrods
+     */
+
   }, {
     key: 'getConversations',
     value: function getConversations() {
       var query = new _skygear2.default.Query(Conversation);
       return _skygear2.default.publicDB.query(query);
     }
+
+    /**
+     * getUserConversations query all UserConversation record of current logged
+     * in user.
+     *
+     * UserConversation is a Skygear Record contain user specific data to a
+     * conversation, like `unread` count, `last_read_message`. This method will
+     * return all UserConversation records assoicated to the current user. The
+     * UserConversation will transientInclude Conversion and User object for
+     * ease of use.
+     *
+     * @example
+     * const skygearChat = require('skygear-chat');¬
+     *
+     * const ulNode = document.createElement('UL');
+     * skygearChat.getUserConversation()
+     *   .then(function (userConversations) {
+     *     userConversations.forEach(function (uc) {
+     *       const liNode = document.createElement('LI');
+     *       liNode.appendChild(document.createTextNode(uc.conversation.title));
+     *       liNode.appendChild(document.createTextNode(uc.unread));
+     *       ulNode.appendChild(liNode);
+     *     });
+     *   }, function (err) {
+     *     console.log('Cannot load conversation list');
+     *   });
+     *
+     * @return {Promise<[]UserConversation>} - A promise to UserConversation Recrods
+     */
+
+  }, {
+    key: 'getUserConversations',
+    value: function getUserConversations() {
+      var query = new _skygear2.default.Query(UserConversation);
+      query.equalTo('user', _skygear2.default.currentUser.id);
+      query.transientInclude('user');
+      query.transientInclude('conversation');
+      return _skygear2.default.publicDB.query(query);
+    }
+
+    /**
+     * getUserConversation query a UserConversation record of current logged
+     * in user and the pass in Conversation.
+     *
+     * The UserConversation will transientInclude Conversion and User object
+     * for ease of use.
+     *
+     * @param {string} conversation - Conversation
+     * @return {Promise<UserConversation>} - A promise to UserConversation Recrod
+     */
+
   }, {
     key: 'getUserConversation',
     value: function getUserConversation(conversation) {
@@ -111,15 +235,6 @@ var SkygearChatContainer = function () {
       });
     }
   }, {
-    key: 'getUserConversations',
-    value: function getUserConversations() {
-      var query = new _skygear2.default.Query(UserConversation);
-      query.equalTo('user', _skygear2.default.currentUser.id);
-      query.transientInclude('user');
-      query.transientInclude('conversation');
-      return _skygear2.default.publicDB.query(query);
-    }
-  }, {
     key: 'deleteConversation',
     value: function deleteConversation(conversation_id) {
       return this.getConversation(conversation_id).then(function (userConversation) {
@@ -127,6 +242,17 @@ var SkygearChatContainer = function () {
         return _skygear2.default.publicDB.del(conversation);
       });
     }
+
+    /**
+     * updateConversation is a helper method for updating a conversation with
+     * the provied title and meta.
+     *
+     * @param {string} conversation - Conversation to update
+     * @param {string} title - new title for describing the conversation topic
+     * @param {object} meta - new attributes for application specific purpose
+     * @return {Promise<UserConversation>} - A promise to save result
+     */
+
   }, {
     key: 'updateConversation',
     value: function updateConversation(conversation, title) {
@@ -138,11 +264,29 @@ var SkygearChatContainer = function () {
       conversation.meta = meta;
       return _skygear2.default.publicDB.save(conversation);
     }
+
+    /**
+     * updateConversation is a helper method for updating a conversation with
+     * the provied title and meta.
+     *
+     * @param {string} conversation - Conversation to update
+     * @return {Promise<boolean>} - A promise to save result
+     */
+
   }, {
     key: 'leaveConversation',
     value: function leaveConversation(conversation) {
       return _skygear2.default.lambda('chat:leave_conversation', [conversation._id]);
     }
+
+    /**
+     * addParticipants allow adding participants to a conversation.
+     *
+     * @param {string} conversation - Conversation to update
+     * @param {[]User} participants - array of Skygear User
+     * @return {Promise<Conversation>} - A promise to save result
+     */
+
   }, {
     key: 'addParticipants',
     value: function addParticipants(conversation, participants) {
@@ -153,6 +297,15 @@ var SkygearChatContainer = function () {
 
       return _skygear2.default.publicDB.save(conversation);
     }
+
+    /**
+     * removeParticipants allow removal of  participants from a conversation.
+     *
+     * @param {string} conversation - Conversation to update
+     * @param {[]User} participants - array of Skygear User
+     * @return {Promise<COnversation>} - A promise to save result
+     */
+
   }, {
     key: 'removeParticipants',
     value: function removeParticipants(conversation, participants) {
@@ -164,6 +317,15 @@ var SkygearChatContainer = function () {
 
       return _skygear2.default.publicDB.save(conversation);
     }
+
+    /**
+     * addAdmins allow adding admins to a conversation.
+     *
+     * @param {string} conversation - Conversation to update
+     * @param {[]User} admins - array of Skygear User
+     * @return {Promise<Conversation>} - A promise to save result
+     */
+
   }, {
     key: 'addAdmins',
     value: function addAdmins(conversation, admins) {
@@ -174,6 +336,15 @@ var SkygearChatContainer = function () {
 
       return _skygear2.default.publicDB.save(conversation);
     }
+
+    /**
+     * removeParticipants allow removal of  participants from a conversation.
+     *
+     * @param {string} conversation - Conversation to update
+     * @param {[]User} admins - array of Skygear User
+     * @return {Promise<Conversation>} - A promise to save result
+     */
+
   }, {
     key: 'removeAdmins',
     value: function removeAdmins(conversation, admins) {
@@ -206,16 +377,72 @@ var SkygearChatContainer = function () {
 
       return _skygear2.default.privateDB.save(message);
     }
+
+    /**
+     * getUnreadCount return the total unread message count of current user
+     *
+     * @example
+     * const skygearChat = require('skygear-chat');¬
+     *
+     * skygearChat.getUnreadCount().then(function (count) {
+     *   console.log('Total unread count: ', count);
+     * }, function (err) {
+     *   console.log('Error: ', err);
+     * });
+     *
+     * @return {Promise<number>} - A promise to total count
+     */
+
   }, {
     key: 'getUnreadCount',
     value: function getUnreadCount() {
       return _skygear2.default.lambda('chat:total_unread');
     }
+
+    /**
+     * getMessages return an array of message in a conversation. The way of
+     * query is to provide `limit` and `beforeTime`. The expected way is to
+     * query from the latest message first. And use the message `createdAt` to
+     * query the next pages via setting `beforeTime` when user scroll.
+     *
+     * Once you query specific messages, the SDK will automatically mark the
+     * message as delivery on the server.
+     *
+     * @example
+     * const skygearChat = require('skygear-chat');¬
+     *
+     * const ulNode = document.createElement('UL');
+     * const currentTime = new Date();
+     * skygearChat.getMessages(conversation, 10, currentTime)
+     *   .then(function (messages) {
+     *     let lastMsgTime;
+     *     message.forEach(function (m) {
+     *       const liNode = document.createElement('LI');
+     *       liNode.appendChild(document.createTextNode(m.content));
+     *       ulNode.appendChild(liNode);
+     *       lastMsgTime = m.createAt;
+     *     });
+     *     // Querying next page
+     *     skygearChat.getMessages(conversation, 10, lastMsgTime).then(...);
+     *   }, function (err) {
+     *     console.log('Error: ', err);
+     *   });
+     *
+     * @param {Conversation} conversation - conversation to query
+     * @param {number} [limit=50] - limit the result set, if it is set to too large, may
+     * result in timeout.
+     * @param {Date} beforeTime - specific from which time
+     * @return {Promise<int>} - A promise to total count
+     */
+
   }, {
     key: 'getMessages',
-    value: function getMessages(conversation, limit, before_time) {
+    value: function getMessages(conversation) {
+      var limit = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 50;
+      var beforeTime = arguments[2];
+
       var conversationID = conversation._id;
-      return _skygear2.default.lambda('chat:get_messages', [conversationID, limit, before_time]).then(function (data) {
+      return _skygear2.default.lambda('chat:get_messages', [conversationID, limit, beforeTime]).then(function (data) {
         data.results = data.results.map(function (message_data) {
           return new Message(message_data);
         });
@@ -223,6 +450,14 @@ var SkygearChatContainer = function () {
         return data;
       }.bind(this));
     }
+
+    /**
+     * markAsDelivered mark all messages as delivered
+     *
+     * @param {[]Message} messages - an array of message to mark as delivery
+     * @return {Promise<boolean>}  A promise to result
+     */
+
   }, {
     key: 'markAsDelivered',
     value: function markAsDelivered(messages) {
@@ -231,6 +466,14 @@ var SkygearChatContainer = function () {
       });
       return _skygear2.default.lambda('chat:mark_as_delivered', [message_ids]);
     }
+
+    /**
+     * markAsRead mark all messages as read
+     *
+     * @param {[]Message} messages - an array of message to mark as read
+     * @return {Promise<boolean>} - A promise to result
+     */
+
   }, {
     key: 'markAsRead',
     value: function markAsRead(messages) {
@@ -239,6 +482,17 @@ var SkygearChatContainer = function () {
       });
       return _skygear2.default.lambda('chat:mark_as_read', [message_ids]);
     }
+
+    /**
+     * markAsLastMessageRead mark the message as last read message.
+     * Once you mark a message as last read, the system will update the unread
+     * count at UserConversation.
+     *
+     * @param {Conversation} conversation - conversation the message belong to
+     * @param {Message} message - message to be mark as last read
+     * @return {Promise<number>} - A promise to result
+     */
+
   }, {
     key: 'markAsLastMessageRead',
     value: function markAsLastMessageRead(conversation, message) {
@@ -247,6 +501,14 @@ var SkygearChatContainer = function () {
         return _skygear2.default.publicDB.save(uc);
       });
     }
+
+    /**
+     * getUnreadMessageCount query a unread count of a conversation
+     *
+     * @param {Conversation} conversation - conversation to be query
+     * @return {Promise<number>} - A promise to result
+     */
+
   }, {
     key: 'getUnreadMessageCount',
     value: function getUnreadMessageCount(conversation) {
@@ -256,19 +518,76 @@ var SkygearChatContainer = function () {
     }
   }, {
     key: 'sendTypingIndicator',
+
+
+    /**
+     * sendTypingIndicaton send typing indicator to the specified conversation.
+     *
+     * @param {Conversation} conversation - conversation to be query
+     * @param {string} state - the state to send
+     * @return {Promise<number>} - A promise to result
+     */
     value: function sendTypingIndicator(conversation, state) {
       this.pubsub.sendTyping(conversation, state);
     }
+
+    /**
+     * Subscribe to typing indicator events in a conversation.
+     *
+     * You are required to specify a conversation where typing indicator
+     * events apply. You may subscribe to multiple conversation at the same time.
+     * To get typing indicator event, call this method with a handler that
+     * accepts following parameters.
+     *
+     * ```
+     * {
+     *   "user/id": {
+     *     "event": "begin",
+     *     "at": "20161116T78:44:00Z"
+     *   },
+     *   "user/id2": {
+     *     "event": "begin",
+     *     "at": "20161116T78:44:00Z"
+     *   }
+     * }
+     * ```
+     *
+     * @param {Conversation} conversation - conversation to be query
+     * @param {function} callback - function be be invoke when there is someone
+     * typing in the specificed conversation
+     * @return {Promise<number>} - A promise to result
+     */
+
   }, {
     key: 'subscribeTypingIndicator',
     value: function subscribeTypingIndicator(conversation, callback) {
       this.pubsub.subscribeTyping(conversation, callback);
     }
+
+    /**
+     * unsubscribe all handler from a conversation.
+     *
+     * @param {Conversation} conversation - conversation to be unsubscribe
+     * @return {Promise<number>} - A promise to result
+     */
+
   }, {
     key: 'unsubscribeTypingIndicator',
     value: function unsubscribeTypingIndicator(conversation) {
       this.pubsub.unsubscribeTyping(conversation);
     }
+
+    /**
+     * subscribe all message changes event from the system.
+     *
+     * The server will push all messsage change events via UserChannel that
+     * concerning the current user. i.e. all message belongs to a conversation
+     * that the current user have access to.
+     *
+     * @param {funct} handler - function to be invoke when a notification arrive
+     * @return {Promise<number>} - A promise to result
+     */
+
   }, {
     key: 'subscribe',
     value: function subscribe(handler) {
@@ -287,8 +606,9 @@ var SkygearChatContainer = function () {
   return SkygearChatContainer;
 }();
 
-module.exports = new SkygearChatContainer();
-},{"./pubsub":3,"skygear":40,"underscore":57,"uuid":61}],3:[function(require,module,exports){
+var chatContainer = new SkygearChatContainer();
+exports.default = chatContainer;
+},{"./pubsub":3,"skygear":40,"underscore":57}],3:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -313,8 +633,12 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var Message = _skygear2.default.Record.extend('message');
 var UserChannel = _skygear2.default.Record.extend('user_channel');
+
+/**
+ * SkygearChatPubsub is a class for dsipatching the message from user_channel
+ * to the coorrect handler according to the event type and registeration
+ */
 
 var SkygearChatPubsub = function () {
   function SkygearChatPubsub(container) {
@@ -323,7 +647,7 @@ var SkygearChatPubsub = function () {
     this.pubsub = container.pubsub;
     this.userChannel = null;
     this.dispatch = this.dispatch.bind(this);
-    this.getUserChannel().then(this.subscribeDispatch.bind(this));;
+    this.getUserChannel().then(this.subscribeDispatch.bind(this));
     this.typingHandler = {};
     this.messageHandler = [];
   }
@@ -336,11 +660,10 @@ var SkygearChatPubsub = function () {
   }, {
     key: 'dispatch',
     value: function dispatch(payload) {
-      console.log(payload);
-      if (payload['event'] === 'typing') {
-        this.dispatchTyping(payload['data']);
+      if (payload.event === 'typing') {
+        this.dispatchTyping(payload.data);
       } else {
-        this.dispatchUpdate(payload['data']);
+        this.dispatchUpdate(payload.data);
       }
     }
   }, {
@@ -361,12 +684,9 @@ var SkygearChatPubsub = function () {
   }, {
     key: 'dispatchTyping',
     value: function dispatchTyping(data) {
-      console.log('dispatchTyping', data);
       _underscore2.default.forEach(data, function (t, conversationID) {
-        console.log(conversationID);
         var handlers = this.typingHandler[conversationID];
         _underscore2.default.forEach(handlers, function (h) {
-          console.log('handlers', t);
           h(t);
         });
       }.bind(this));
@@ -393,9 +713,6 @@ var SkygearChatPubsub = function () {
     key: 'subscribeMessage',
     value: function subscribeMessage(handler) {
       this.messageHandler.push(handler);
-      this.getUserChannel().then(function (channel) {
-        _skygear2.default.on(channel.name, function (data) {});
-      });
     }
   }, {
     key: 'getUserChannel',
