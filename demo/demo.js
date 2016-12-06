@@ -196,9 +196,9 @@ class Demo {
     }.bind(this));
   }
 
-  createMessage(conversationID, content, metadata, asset, el) {
+  createMessage(content, metadata, asset, el) {
     return this.plugin.createMessage(
-      conversationID,
+      this.conversation,
       content,
       metadata,
       asset

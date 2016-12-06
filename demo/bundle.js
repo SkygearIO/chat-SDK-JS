@@ -347,11 +347,42 @@ var SkygearChatContainer = exports.SkygearChatContainer = function () {
 
       return _skygear2.default.publicDB.save(conversation);
     }
+
+    /**
+     * createMessage create a message in a conversation.
+     *
+     * A message can be just a text message, or a message with image, audio or
+     * video attachment. Application developer can also save metadata to a
+     * message, so the message can be display as important notice. The metadata
+     * provide flexibility to application to control how to display the message,
+     * like font and color.
+     *
+     * @example
+     * const skygearChat = require('skygear-chat');¬
+     *
+     * skygearChat.createMessage(
+     *   'Red in color, with attachment',
+     *   {'color': 'red', },
+     *   $('message-asset').files[0],
+     * ).then(function (result) {
+     *   console.log('Save success', result);
+     * });
+     *
+     * @param {string} conversation - create the message in this conversation
+     * @param {string} body - body text of the message
+     * @param {object} metadata - application specific meta data for display
+     * purpose
+     * @param {File} asset - File object to be saves as attachment of this
+     * message
+     * @return {Promise<Conversation>} - A promise to save result
+     */
+
   }, {
     key: 'createMessage',
-    value: function createMessage(conversation_id, body, metadata, asset) {
+    value: function createMessage(conversation, body, metadata, asset) {
       var message = new Message();
-      message.conversation_id = new _skygear2.default.Reference('conversation/' + conversation_id);
+
+      message.conversation_id = new _skygear2.default.Reference(conversation.id);
       message.body = body;
 
       if (metadata === undefined || metadata === null) {
