@@ -52,7 +52,7 @@ var SkygearChatContainer = exports.SkygearChatContainer = function () {
      *
      * Duplicate call of createConversation with same list of participants will
      * return the different conversation, unless `distinctByParticipants` in
-     * options is set to true.
+     * options is set to true. By default `distinctByParticipants` is false.
      *
      * Adding or removing participants from a distinct conversation (see below)
      * makes it non-distinct.
@@ -545,6 +545,7 @@ var SkygearChatContainer = exports.SkygearChatContainer = function () {
 
     /**
      * sendTypingIndicaton send typing indicator to the specified conversation.
+     * The state can be `begin`, `pause` and `finished`.
      *
      * @param {Conversation} conversation - conversation to be query
      * @param {string} state - the state to send
@@ -585,6 +586,44 @@ var SkygearChatContainer = exports.SkygearChatContainer = function () {
     key: 'subscribeTypingIndicator',
     value: function subscribeTypingIndicator(conversation, callback) {
       this.pubsub.subscribeTyping(conversation, callback);
+    }
+
+    /**
+     * Subscribe to typing indicator events in all conversation.
+     *
+     * If you application want to dispatch the typing other than
+     * per-conversation manner. You can use this method in stead of
+     * `subscribeTypingIndicator`.
+     *
+     * The format of payload is similiar with conversation id as key to separate
+     * users' typing event.
+     * To get typing indicator event, call this method with a handler that
+     * accepts following parameters.
+     *
+     * ```
+     * {
+     *   "conversation/id1": {
+     *     "user/id": {
+     *       "event": "begin",
+     *       "at": "20161116T78:44:00Z"
+     *     },
+     *     "user/id2": {
+     *       "event": "begin",
+     *       "at": "20161116T78:44:00Z"
+     *     }
+     *   }
+     * }
+     * ```
+     *
+     * @param {function} callback - function be be invoke when there is someone
+     * typing in conversation you have access to.
+     * @return {Promise<number>} - A promise to result
+     */
+
+  }, {
+    key: 'subscribeAllTypingIndicator',
+    value: function subscribeAllTypingIndicator(callback) {
+      this.pubsub.subscribeAllTyping(callback);
     }
 
     /**
@@ -672,6 +711,7 @@ var SkygearChatPubsub = function () {
     this.dispatch = this.dispatch.bind(this);
     this.getUserChannel().then(this.subscribeDispatch.bind(this));
     this.typingHandler = {};
+    this.allTypingHandler = [];
     this.messageHandler = [];
   }
 
@@ -707,6 +747,9 @@ var SkygearChatPubsub = function () {
   }, {
     key: 'dispatchTyping',
     value: function dispatchTyping(data) {
+      _underscore2.default.forEach(this.allTypingHandler, function (ah) {
+        ah(data);
+      });
       _underscore2.default.forEach(data, function (t, conversationID) {
         var handlers = this.typingHandler[conversationID];
         _underscore2.default.forEach(handlers, function (h) {
@@ -718,6 +761,11 @@ var SkygearChatPubsub = function () {
     key: 'sendTyping',
     value: function sendTyping(conversation, state) {
       _skygear2.default.lambda('chat:typing', [conversation._id, state, new Date()]);
+    }
+  }, {
+    key: 'subscribeAllTyping',
+    value: function subscribeAllTyping(handler) {
+      this.allTypingHandler.push(handler);
     }
   }, {
     key: 'subscribeTyping',
