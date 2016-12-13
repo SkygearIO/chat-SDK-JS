@@ -361,6 +361,7 @@ var SkygearChatContainer = exports.SkygearChatContainer = function () {
      * const skygearChat = require('skygear-chat');¬
      *
      * skygearChat.createMessage(
+     *   conversation,
      *   'Red in color, with attachment',
      *   {'color': 'red', },
      *   $('message-asset').files[0],
