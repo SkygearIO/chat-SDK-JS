@@ -179,6 +179,10 @@ var SkygearChatContainer = exports.SkygearChatContainer = function () {
      * UserConversation will transientInclude Conversion and User object for
      * ease of use.
      *
+     * For transientInclude of `last_read_message`, we provided an boolean flag
+     * to include or not. This function will transientInclude the it unless
+     * specified otherwise.
+     *
      * @example
      * const skygearChat = require('skygear-chat');¬
      *
@@ -195,17 +199,53 @@ var SkygearChatContainer = exports.SkygearChatContainer = function () {
      *     console.log('Cannot load conversation list');
      *   });
      *
+     * @param {boolean} includeLastMessage - Transient include the
+     * `last_read_message`, default is true.
      * @return {Promise<[]UserConversation>} - A promise to UserConversation Recrods
      */
 
   }, {
     key: 'getUserConversations',
     value: function getUserConversations() {
+      var includeLastMessage = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
+
       var query = new _skygear2.default.Query(UserConversation);
       query.equalTo('user', _skygear2.default.currentUser.id);
       query.transientInclude('user');
       query.transientInclude('conversation');
-      return _skygear2.default.publicDB.query(query);
+      return _skygear2.default.publicDB.query(query).then(function (result) {
+        if (!includeLastMessage) {
+          return result;
+        }
+        return this._getMessageOfUserConversation(result);
+      }.bind(this));
+    }
+  }, {
+    key: '_getMessageOfUserConversation',
+    value: function _getMessageOfUserConversation(userConversation) {
+      var messageIDs = _underscore2.default.reduce(userConversation, function (mids, uc) {
+        if (uc.last_read_message) {
+          var mid = _skygear2.default.Record.parseID(uc.last_read_message.id)[1];
+          mids.push(mid);
+        }
+        return mids;
+      }, []);
+      return _skygear2.default.lambda('chat:get_messages_by_ids', [messageIDs]).then(function (data) {
+        var messagesByID = _underscore2.default.reduce(data.results, function (byID, m) {
+          byID[m._id] = m;
+          return byID;
+        }, {});
+        var ucWithMessage = _underscore2.default.reduce(userConversation, function (withMessage, uc) {
+          if (uc.last_read_message) {
+            uc.updateTransient({
+              last_read_message: messagesByID[uc.last_read_message.id]
+            }, true);
+          }
+          withMessage.push(uc);
+          return withMessage;
+        }, []);
+        return ucWithMessage;
+      });
     }
 
     /**
@@ -215,13 +255,21 @@ var SkygearChatContainer = exports.SkygearChatContainer = function () {
      * The UserConversation will transientInclude Conversion and User object
      * for ease of use.
      *
+     * For transientInclude of `last_read_message`, we provided an boolean flag
+     * to include or not. This function will transientInclude the it unless
+     * specified otherwise.
+     *
      * @param {string} conversation - Conversation
+     * @param {boolean} includeLastMessage - Transient include the
+     * `last_read_message`, default is true.
      * @return {Promise<UserConversation>} - A promise to UserConversation Recrod
      */
 
   }, {
     key: 'getUserConversation',
     value: function getUserConversation(conversation) {
+      var includeLastMessage = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
+
       var query = new _skygear2.default.Query(UserConversation);
       query.equalTo('user', _skygear2.default.currentUser.id);
       query.equalTo('conversation', new _skygear2.default.Reference(conversation.id));
@@ -229,10 +277,15 @@ var SkygearChatContainer = exports.SkygearChatContainer = function () {
       query.transientInclude('conversation');
       return _skygear2.default.publicDB.query(query).then(function (records) {
         if (records.length > 0) {
-          return records[0];
+          if (!includeLastMessage) {
+            return records[0];
+          }
+          return this._getMessageOfUserConversation(records).then(function (ucs) {
+            return ucs[0];
+          });
         }
         throw new Error('no conversation found');
-      });
+      }.bind(this));
     }
 
     /**
@@ -358,7 +411,7 @@ var SkygearChatContainer = exports.SkygearChatContainer = function () {
      * like font and color.
      *
      * @example
-     * const skygearChat = require('skygear-chat');¬
+     * const skygearChat = require('skygear-chat');
      *
      * skygearChat.createMessage(
      *   conversation,
@@ -369,7 +422,7 @@ var SkygearChatContainer = exports.SkygearChatContainer = function () {
      *   console.log('Save success', result);
      * });
      *
-     * @param {string} conversation - create the message in this conversation
+     * @param {Conversation} conversation - create the message in this conversation
      * @param {string} body - body text of the message
      * @param {object} metadata - application specific meta data for display
      * purpose
@@ -580,7 +633,6 @@ var SkygearChatContainer = exports.SkygearChatContainer = function () {
      * @param {Conversation} conversation - conversation to be query
      * @param {function} callback - function be be invoke when there is someone
      * typing in the specificed conversation
-     * @return {Promise<number>} - A promise to result
      */
 
   }, {
@@ -618,7 +670,6 @@ var SkygearChatContainer = exports.SkygearChatContainer = function () {
      *
      * @param {function} callback - function be be invoke when there is someone
      * typing in conversation you have access to.
-     * @return {Promise<number>} - A promise to result
      */
 
   }, {
@@ -628,10 +679,9 @@ var SkygearChatContainer = exports.SkygearChatContainer = function () {
     }
 
     /**
-     * unsubscribe all handler from a conversation.
+     * unsubscribe all typing indicator handler from a conversation.
      *
      * @param {Conversation} conversation - conversation to be unsubscribe
-     * @return {Promise<number>} - A promise to result
      */
 
   }, {
@@ -647,8 +697,28 @@ var SkygearChatContainer = exports.SkygearChatContainer = function () {
      * concerning the current user. i.e. all message belongs to a conversation
      * that the current user have access to.
      *
-     * @param {funct} handler - function to be invoke when a notification arrive
-     * @return {Promise<number>} - A promise to result
+     * The handler will receive following object as parameters
+     *
+     * ```
+     * {
+     *   "record_type": "message",
+     *   "event_type": "create",
+     *   "record": recordObj,
+     *   "original_record": nulll
+     * }
+     * ```
+     *
+     * - `event_type` can be `update`, `create` and `delete`.
+     * - `recordObj` is `skygear.Record` instance.
+     *
+     * Common use-case on the event_type:
+     * `create` - other user send a message to the conversation and insert it in
+     * the conversation view.
+     * `updated` - when a message is received by other, the message delivery
+     * status is changed. For example, from `delivered` to `some_read`. You can
+     * check the `conversation_status` fields to see the new delivery status.
+     *
+     * @param {function} handler - function to be invoke when a notification arrive
      */
 
   }, {
