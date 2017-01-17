@@ -111,6 +111,23 @@ class Demo {
     });
   }
 
+  fetchUserConversationsTo(el) {
+    return this.plugin.getUserConversations().then(function (result) {
+      var ul = $(el);
+      ul.textContent = '';
+      console.log(result);
+      result.forEach(function (uc) {
+        var liEl = document.createElement('div');
+        var text = uc.$transient.conversation.title + ': ';
+        if (uc.last_read_message) {
+          text = text + uc.$transient.last_read_message.body;
+        }
+        liEl.textContent = text;
+        ul.appendChild(liEl);
+      });
+    });
+  }
+
   leaveConversation() {
     return this.plugin.leaveConversation(this.conversation);
   }
