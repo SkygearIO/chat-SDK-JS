@@ -58,7 +58,10 @@
       "mocha": true
     }
   },
-  "dependencies": {
+  "peerDependencies": {
     "skygear": "^0.19.2"
+  },
+  "dependencies": {
+    "underscore": "^1.8.3"
   }
 }
