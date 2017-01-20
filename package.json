@@ -7,7 +7,7 @@
   "files": [
     "dist"
   ],
-  "main": "index.js",
+  "main": "dist/index.js",
   "keywords": [
     "skygear",
     "chat",
@@ -58,7 +58,10 @@
       "mocha": true
     }
   },
-  "dependencies": {
+  "peerDependencies": {
     "skygear": "^0.19.2"
+  },
+  "dependencies": {
+    "underscore": "^1.8.3"
   }
 }
