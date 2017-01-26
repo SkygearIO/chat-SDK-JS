@@ -59,7 +59,7 @@
     }
   },
   "peerDependencies": {
-    "skygear": "^0.19.2"
+    "skygear": "^0.21.0"
   },
   "dependencies": {
     "underscore": "^1.8.3"

@@ -12,7 +12,7 @@ And the Chat Plugin make Skygear group conversation possible.
 
 This SDK helps you work with Skygear Chat Plugin in JS environment..
 
-# Document
+# Reference
 
 [API doc](https://doc.esdoc.org/github.com/skygeario/chat-SDK-JS/)
 
@@ -21,6 +21,12 @@ This SDK helps you work with Skygear Chat Plugin in JS environment..
 
 Setup Skygear with chat plugin. You may follow the instruction at chat
 plugin: https://github.com/skygeario/chat
+
+Install the skygear and other dependencies
+```
+npm install skygear
+npm install
+```
 
 Codes are located at `lib/` folder, to transcript it to be babel
 ```
