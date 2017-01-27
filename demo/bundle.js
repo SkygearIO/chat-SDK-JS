@@ -178,12 +178,12 @@ var SkygearChatContainer = exports.SkygearChatContainer = function () {
      * in user.
      *
      * UserConversation is a Skygear Record contain user specific data to a
-     * conversation, like `unread` count, `last_read_message`. This method will
+     * conversation, like `unread` count, `last_message`. This method will
      * return all UserConversation records assoicated to the current user. The
      * UserConversation will transientInclude Conversion and User object for
      * ease of use.
      *
-     * For transientInclude of `last_read_message`, we provided an boolean flag
+     * For transientInclude of `last_message`, we provided an boolean flag
      * to include or not. This function will transientInclude the it unless
      * specified otherwise.
      *
@@ -204,7 +204,7 @@ var SkygearChatContainer = exports.SkygearChatContainer = function () {
      *   });
      *
      * @param {boolean} includeLastMessage - Transient include the
-     * `last_read_message`, default is true.
+     * `last_message`, default is true.
      * @return {Promise<[]UserConversation>} - A promise to UserConversation Recrods
      */
 
@@ -228,8 +228,9 @@ var SkygearChatContainer = exports.SkygearChatContainer = function () {
     key: '_getMessageOfUserConversation',
     value: function _getMessageOfUserConversation(userConversation) {
       var messageIDs = _underscore2.default.reduce(userConversation, function (mids, uc) {
-        if (uc.last_read_message) {
-          var mid = _skygear2.default.Record.parseID(uc.last_read_message.id)[1];
+        var conversation = uc.$transient.conversation;
+        if (conversation.last_message) {
+          var mid = _skygear2.default.Record.parseID(conversation.last_message.id)[1];
           mids.push(mid);
         }
         return mids;
@@ -240,9 +241,10 @@ var SkygearChatContainer = exports.SkygearChatContainer = function () {
           return byID;
         }, {});
         var ucWithMessage = _underscore2.default.reduce(userConversation, function (withMessage, uc) {
-          if (uc.last_read_message) {
-            uc.updateTransient({
-              last_read_message: messagesByID[uc.last_read_message.id]
+          var conversation = uc.$transient.conversation;
+          if (conversation.last_message) {
+            conversation.updateTransient({
+              last_message: messagesByID[conversation.last_message.id]
             }, true);
           }
           withMessage.push(uc);
@@ -263,7 +265,7 @@ var SkygearChatContainer = exports.SkygearChatContainer = function () {
      * to include or not. This function will transientInclude the it unless
      * specified otherwise.
      *
-     * @param {string} conversation - Conversation
+     * @param {Conversation} conversation - Conversation
      * @param {boolean} includeLastMessage - Transient include the
      * `last_read_message`, default is true.
      * @return {Promise<UserConversation>} - A promise to UserConversation Recrod
@@ -296,21 +298,21 @@ var SkygearChatContainer = exports.SkygearChatContainer = function () {
      * updateConversation is a helper method for updating a conversation with
      * the provied title and meta.
      *
-     * @param {string} conversation - Conversation to update
+     * @param {Conversation} conversation - Conversation to update
      * @param {string} title - new title for describing the conversation topic
      * @param {object} meta - new attributes for application specific purpose
-     * @return {Promise<UserConversation>} - A promise to save result
+     * @return {Promise<Conversation>} - A promise to save result
      */
 
   }, {
     key: 'updateConversation',
-    value: function updateConversation(conversation, title) {
-      var meta = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
-
+    value: function updateConversation(conversation, title, meta) {
       if (title) {
         conversation.title = title;
       }
-      conversation.meta = meta;
+      if (meta) {
+        conversation.meta = meta;
+      }
       return _skygear2.default.publicDB.save(conversation);
     }
 
@@ -330,7 +332,7 @@ var SkygearChatContainer = exports.SkygearChatContainer = function () {
     /**
      * addParticipants allow adding participants to a conversation.
      *
-     * @param {string} conversation - Conversation to update
+     * @param {Conversation} conversation - Conversation to update
      * @param {[]User} participants - array of Skygear User
      * @return {Promise<Conversation>} - A promise to save result
      */
@@ -349,7 +351,7 @@ var SkygearChatContainer = exports.SkygearChatContainer = function () {
     /**
      * removeParticipants allow removal of  participants from a conversation.
      *
-     * @param {string} conversation - Conversation to update
+     * @param {Conversation} conversation - Conversation to update
      * @param {[]User} participants - array of Skygear User
      * @return {Promise<COnversation>} - A promise to save result
      */
@@ -369,7 +371,7 @@ var SkygearChatContainer = exports.SkygearChatContainer = function () {
     /**
      * addAdmins allow adding admins to a conversation.
      *
-     * @param {string} conversation - Conversation to update
+     * @param {Conversation} conversation - Conversation to update
      * @param {[]User} admins - array of Skygear User
      * @return {Promise<Conversation>} - A promise to save result
      */
@@ -388,7 +390,7 @@ var SkygearChatContainer = exports.SkygearChatContainer = function () {
     /**
      * removeParticipants allow removal of  participants from a conversation.
      *
-     * @param {string} conversation - Conversation to update
+     * @param {Conversation} conversation - Conversation to update
      * @param {[]User} admins - array of Skygear User
      * @return {Promise<Conversation>} - A promise to save result
      */
@@ -431,7 +433,7 @@ var SkygearChatContainer = exports.SkygearChatContainer = function () {
      * purpose
      * @param {File} asset - File object to be saves as attachment of this
      * message
-     * @return {Promise<Conversation>} - A promise to save result
+     * @return {Promise<Message>} - A promise to save result
      */
 
   }, {
@@ -459,18 +461,32 @@ var SkygearChatContainer = exports.SkygearChatContainer = function () {
     }
 
     /**
-     * getUnreadCount return the total unread message count of current user
+     * getUnreadCount return following unread count;
+     *
+     * 1. The total unread message count of current user.
+     * 2. The total number of conversation have one or more unread message.
+     *
+     * Format is as follow:
+     * ```
+     * {
+     *   'conversation': 3,
+     *   'message': 23
+     * }
+     * ```
      *
      * @example
      * const skygearChat = require('skygear-chat');¬
      *
      * skygearChat.getUnreadCount().then(function (count) {
-     *   console.log('Total unread count: ', count);
+     *   console.log('Total message unread count: ', count.message);
+     *   console.log(
+     *     'Total converation have unread message: ',
+     *     count.conversation);
      * }, function (err) {
      *   console.log('Error: ', err);
      * });
      *
-     * @return {Promise<number>} - A promise to total count
+     * @return {Promise<object>} - A promise to total count object
      */
 
   }, {
@@ -512,7 +528,7 @@ var SkygearChatContainer = exports.SkygearChatContainer = function () {
      * @param {number} [limit=50] - limit the result set, if it is set to too large, may
      * result in timeout.
      * @param {Date} beforeTime - specific from which time
-     * @return {Promise<int>} - A promise to total count
+     * @return {Promise<[]Message>} - array of Message records
      */
 
   }, {
@@ -527,7 +543,7 @@ var SkygearChatContainer = exports.SkygearChatContainer = function () {
           return new Message(message_data);
         });
         this.markAsDelivered(data.results);
-        return data;
+        return data.results;
       }.bind(this));
     }
 
@@ -734,7 +750,6 @@ var SkygearChatContainer = exports.SkygearChatContainer = function () {
     /**
      * Unsubscribe one or all typing message handler(s)
      *
-     * @param {Conversation} conversation - conversation to be unsubscribe
      * @param {function?} handler - Which handler to remove,
      * if absent, all handlers are removed.
      */

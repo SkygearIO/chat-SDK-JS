@@ -119,8 +119,9 @@ class Demo {
       result.forEach(function (uc) {
         var liEl = document.createElement('div');
         var text = uc.$transient.conversation.title + ': ';
-        if (uc.last_read_message) {
-          text = text + uc.$transient.last_read_message.body;
+        var conversation = uc.$transient.conversation;
+        if (conversation.$transient.last_message) {
+          text = text + uc.$transient.conversation.$transient.last_message.body;
         }
         liEl.textContent = text;
         ul.appendChild(liEl);
