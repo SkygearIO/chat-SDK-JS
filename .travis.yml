@@ -4,6 +4,15 @@ node_js:
 - v6
 - v5
 - v4
+
+deploy:
+  - provider: script
+    script: ./script/deploy.sh
+    skip_cleanup: true
+    on:
+      repo: SkygearIO/chat-SDK-JS
+      branch: master
+      node_js: 7
 notifications:
   slack:
     secure: azc17DKycygtIAr7dK74YyuApedqQHPFfGx+nhDmLTTZRJyhRbrfTtxhEX6SD63K+0a/BQhCZgkKmTahmfOqmlnrp5KWeSfrzSfmtsZyrLfEAtCqAUiSAkmKnsl/2iIuvtLXeO5mXGZTpqz4Z/ane+lGijY4rSiMS6/DvBKeLsbw5pQDShy6GnOTJ0dZGd24YjJ6OLYYwRSK//bTak96VtmSU1RHeoDMTq576z53b5VIFIEtKJ4vAtJO1RyBVz3X1Oa6WzcwUG/JBL48nVywtkBcoRr45qvhjQz3lGy2FVKDqVBco5UkdsgFeMO1Kofvb/N/VpvdwfXg60fVo+CEyicr6+RfRewZsp/0RTYLiLCnEP4SLVhKHUiHJpV66OPvjL255mYaiTkeNZgGU1O8dWv9cq13ivuGTGqxKggeizYFVJ5bnEerEz5auwTvYWnAY7QHJoeIAghCGBv3lPAAkXMjxQEBtFuNetoC19Ve/+2yjBtpPwPQV2/YYC/PsdRmpwzerY7WRTT6tSBunEPZzBqPVVxN7LVKj2scwNimotgfQzM3s8IAuD9ErzAHtZBYPy3tmZ9w0es1GjfG0UVHF4M3vM2cA7sHkLjy2XRNCGJ+sjUfY6e+T3ksV+U/eZ5P0FBoTx9JzQg8hkQKkacFklw5rKyjgJnWG64GCeILttU=
