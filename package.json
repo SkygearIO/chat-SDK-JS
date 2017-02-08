@@ -19,7 +19,9 @@
     "dev": "gulp --type dev dev",
     "babel": "gulp babel",
     "demo": "browserify demo/main.js -o demo/bundle.js -i react-native",
-    "prepublish": "gulp prepublish"
+    "prepublish": "gulp prepublish",
+    "deploy": "gulp deploy",
+    "deploy-latest": "gulp deploy --latest"
   },
   "repository": {
     "type": "git",
@@ -43,7 +45,9 @@
     "eslint-config-xo-space": "^0.15.0",
     "eslint-plugin-babel": "^3.3.0",
     "gulp": "^3.9.0",
+    "gulp-awspublish": "^3.3.0",
     "gulp-babel": "^6.1.2",
+    "gulp-cloudfront-invalidate-aws-publish": "^0.2.1",
     "gulp-concat": "^2.6.1",
     "gulp-connect": "^5.0.0",
     "gulp-eslint": "^3.0.1",
@@ -53,6 +57,7 @@
     "gulp-mocha": "^3.0.1",
     "gulp-nsp": "^2.1.0",
     "gulp-plumber": "^1.0.0",
+    "gulp-rename": "^1.2.2",
     "gulp-sourcemaps": "^2.4.1",
     "gulp-uglify": "^2.0.1",
     "isparta": "^4.0.0",
