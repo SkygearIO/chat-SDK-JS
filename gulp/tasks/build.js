@@ -75,5 +75,5 @@ gulp.task('dev', [], function() {
   gulp.watch(config.src, ['browserify', 'babel']);
 });
 
-gulp.task('prepublish', ['nsp', 'babel', 'browserify']);
+gulp.task('prepublish', ['nsp', 'babel', 'browserify', 'minify']);
 gulp.task('default', ['static', 'test']);
