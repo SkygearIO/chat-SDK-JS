@@ -10,12 +10,14 @@ var babel = require('gulp-babel');
 var del = require('del');
 var isparta = require('isparta');
 
+var config = require('../config');
+
 // Initialize the babel transpiler so ES2015 files gets compiled
 // when they're loaded
 require('babel-register');
 
 gulp.task('static', function () {
-  return gulp.src('lib/**/*.js')
+  return gulp.src(config.src)
     .pipe(excludeGitignore())
     .pipe(eslint())
     .pipe(eslint.format())
@@ -27,7 +29,7 @@ gulp.task('nsp', function (cb) {
 });
 
 gulp.task('pre-test', function () {
-  return gulp.src('lib/**/*.js')
+  return gulp.src(config.src)
     .pipe(excludeGitignore())
     .pipe(istanbul({
       includeUntested: true,
@@ -39,7 +41,7 @@ gulp.task('pre-test', function () {
 gulp.task('test', ['pre-test'], function (cb) {
   var mochaErr;
 
-  gulp.src('test/**/*.js')
+  gulp.src(config.testSrc)
     .pipe(plumber())
     .pipe(mocha({reporter: 'spec'}))
     .on('error', function (err) {
@@ -56,11 +58,11 @@ gulp.task('test', ['pre-test'], function (cb) {
 });
 
 gulp.task('watch', function () {
-  gulp.watch(['lib/**/*.js', 'test/**'], ['test']);
+  gulp.watch([config.src, 'test/**'], ['test']);
 });
 
 gulp.task('babel', ['clean'], function () {
-  return gulp.src('lib/**/*.js')
+  return gulp.src(config.src)
     .pipe(babel())
     .pipe(gulp.dest('dist'));
 });
@@ -69,5 +71,9 @@ gulp.task('clean', function () {
   return del('dist');
 });
 
-gulp.task('prepublish', ['nsp', 'babel']);
+gulp.task('dev', [], function() {
+  gulp.watch(config.src, ['browserify', 'babel']);
+});
+
+gulp.task('prepublish', ['nsp', 'babel', 'browserify']);
 gulp.task('default', ['static', 'test']);
