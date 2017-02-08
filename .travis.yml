@@ -5,6 +5,10 @@ node_js:
 - v5
 - v4
 
+install:
+  - npm install
+  - npm install skygear
+
 deploy:
   - provider: script
     script: ./script/deploy.sh
