@@ -50,7 +50,8 @@
     "gulp-nsp": "^2.1.0",
     "gulp-plumber": "^1.0.0",
     "isparta": "^4.0.0",
-    "nock": "^9.0.2"
+    "nock": "^9.0.2",
+    "require-dir": "^0.3.1"
   },
   "eslintConfig": {
     "extends": "xo-space",
