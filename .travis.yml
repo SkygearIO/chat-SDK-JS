@@ -6,8 +6,8 @@ node_js:
 - v4
 
 install:
-  - npm install
   - npm install skygear
+  - npm install
 
 deploy:
   - provider: script

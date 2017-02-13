@@ -13,6 +13,9 @@ function cleanNock() {
 }
 
 describe('skygear-chat', function() {
+  // Skip test case until supgeragent is upgrade at skygear
+  // https://github.com/SkygearIO/skygear-SDK-JS/issues/166
+  return
   before(function() {
     nock(skygear.endPoint).post('/auth/login').reply(200, {
       result: {
