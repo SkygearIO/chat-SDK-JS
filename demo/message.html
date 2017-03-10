@@ -73,6 +73,27 @@
     </button></p>
     <p id="participant-result"></p>
     <hr/>
+
+    <h3>Admin</h3>
+    <p>
+      <label>Username</label>
+      <input id="admin-id" type="text" />
+    </p>
+    <p><button
+      onclick="demo.addAdmin(inputVal('conversation-id'),
+      inputVal('admin-id'),
+      'admin-result');"
+    >Add
+    </button></p>
+    <p><button
+      onclick="demo.removeAdmin(inputVal('conversation-id'),
+      inputVal('admin-id'),
+      'admin-result');"
+    >Remove
+    </button></p>
+    <p id="admin-result"></p>
+    <hr/>
+
     <h3>Messages</h3>
     <ul id="messages">
     </ul>

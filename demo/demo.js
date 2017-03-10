@@ -193,6 +193,26 @@ class Demo {
     }.bind(this));
   }
 
+  addAdmin(conversationID, username, resultTo) {
+    const resultEl = $(resultTo);
+    return this.container.discoverUserByUsernames([username]).then(function (users) {
+      return this.plugin.addAdmins(this.conversation, users).then(function (result) {
+        console.log(result);
+        resultEl.textContent = JSON.stringify(result);
+      });
+    }.bind(this));
+  }
+
+  removeAdmin(conversationID, username, resultTo) {
+    const resultEl = $(resultTo);
+    return this.container.discoverUserByUsernames([username]).then(function (users) {
+      return this.plugin.removeAdmins(this.conversation, users).then(function (result) {
+        console.log(result);
+        resultEl.textContent = JSON.stringify(result);
+      });
+    }.bind(this));
+  }
+
   markAsLastRead(messageID, el) {
     // This is a hack and for normal use-case, we should use the message
     // object queried from getMessages
