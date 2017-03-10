@@ -165,13 +165,21 @@ var SkygearChatContainer = exports.SkygearChatContainer = function () {
      * getConversation query a list of Conversation Records from Skygear which
      * are readable to the current user
      *
+     * @param {number} [page=1] - Which page to display, default to the 1. The
+     * first page
+     * @param {number} [pageSize=50] - How many item pre page, default to 50.
      * @return {Promise<[]Conversation>} A promise to array of Conversation Recrods
      */
 
   }, {
     key: 'getConversations',
     value: function getConversations() {
+      var page = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
+      var pageSize = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 50;
+
       var query = new _skygear2.default.Query(Conversation);
+      query.limit = pageSize;
+      query.offset = (page - 1) * pageSize;
       return _skygear2.default.publicDB.query(query);
     }
 
@@ -207,6 +215,9 @@ var SkygearChatContainer = exports.SkygearChatContainer = function () {
      *
      * @param {boolean} includeLastMessage - Transient include the
      * `last_message`, default is true.
+     * @param {number} [page=1] - Which page to display, default to the 1. The
+     * first page
+     * @param {number} [pageSize=50] - How many item pre page, default to 50.
      * @return {Promise<[]UserConversation>} - A promise to UserConversation Recrods
      */
 
@@ -214,8 +225,12 @@ var SkygearChatContainer = exports.SkygearChatContainer = function () {
     key: 'getUserConversations',
     value: function getUserConversations() {
       var includeLastMessage = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
+      var page = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1;
+      var pageSize = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 50;
 
       var query = new _skygear2.default.Query(UserConversation);
+      query.limit = pageSize;
+      query.offset = (page - 1) * pageSize;
       query.equalTo('user', _skygear2.default.currentUser.id);
       query.transientInclude('user');
       query.transientInclude('conversation');
