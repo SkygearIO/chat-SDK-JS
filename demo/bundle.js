@@ -79,7 +79,8 @@ var SkygearChatContainer = exports.SkygearChatContainer = function () {
      *
      * @return {Promise<Conversation>} - Promise of the new Conversation Record
      */
-    value: function createConversation(participants, title) {
+    value: function createConversation(participants) {
+      var title = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
       var meta = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
       var options = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
 
@@ -131,7 +132,8 @@ var SkygearChatContainer = exports.SkygearChatContainer = function () {
 
   }, {
     key: 'createDirectConversation',
-    value: function createDirectConversation(user, title) {
+    value: function createDirectConversation(user) {
+      var title = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
       var meta = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
       var options = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
 
