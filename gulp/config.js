@@ -8,7 +8,7 @@ module.exports = {
     settings: {
       transform: ['babelify']
     },
-    standalone: 'skygear',
+    standalone: 'skygearChat',
     src: './lib/index.js',
     dest: './dist',
     outputName: 'bundle.js',
