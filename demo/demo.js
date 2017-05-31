@@ -267,6 +267,25 @@ class Demo {
     return this.plugin.unsubscribeTypingIndicator(this.conversation);
   }
 
+  editMessage(messageID, body)
+  {
+    return this.plugin.editMessage(
+      messageID,
+      body        
+    ).then(function(result){
+      console.log(result);
+    }); 
+  }
+
+  deleteMessage(messageID)
+  {
+    return this.plugin.deleteMessage(
+      messageID
+    ).then(function(result){
+      console.log(result);
+    });    
+  }
+
   _handler(data) {
     if (this.handler) {
       this.handler(data);
