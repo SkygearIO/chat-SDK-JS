@@ -485,6 +485,73 @@ var SkygearChatContainer = exports.SkygearChatContainer = function () {
     }
 
     /**
+     * editMessage edit the body, meta and asset of an existing message
+     *
+     * @example
+     * const skygearChat = require('skygear-chat');
+     * skygearChat.editMessage(
+     *   message,
+     *    'new message Body',
+     * ).then(function(result) {
+     *   console.log('Save success', result);
+     * });
+     *
+     * @param {Message} message - The message object to be edited
+     * @param {string} body - New message body
+     * @param {object} metadata - New application specific meta data for display
+     * purpose, omitting thie parameter will keep the old meta
+     * @param {File} asset - New file object to be saves as attachment of this
+     * message, omitting thie parameter will keep the old asset
+     * @return {Promise<Mesage>} A promise to save result
+     */
+
+  }, {
+    key: 'editMessage',
+    value: function editMessage(message) {
+      var body = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+      var metadata = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
+      var asset = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
+
+      if (body) {
+        message.body = body;
+      }
+      if (metadata) {
+        message.metadata = metadata;
+      }
+      if (asset) {
+        var skyAsset = new _skygear2.default.Asset({
+          file: asset,
+          name: asset.name
+        });
+        message.attachment = skyAsset;
+      }
+      return _skygear2.default.privateDB.save(message);
+    }
+
+    /**
+     * deleteMessage delete an existing message
+     *
+     * @example
+     * const skygearChat = require('skygear-chat');
+     * skygearChat.deleteMessage(
+     *    message
+     * ).then(function(result) {
+     *    console.log('Deletion success', result);
+     * });
+     *
+     * @param {Message} message - The message object to be deleted
+     * @return {Promise<Message>} A promise to deleted message
+     */
+
+  }, {
+    key: 'deleteMessage',
+    value: function deleteMessage(message) {
+      return _skygear2.default.lambda('chat:delete_message', [message._id]).then(function (data) {
+        return new Message(data);
+      });
+    }
+
+    /**
      * getUnreadCount return following unread count;
      *
      * 1. The total unread message count of current user.
