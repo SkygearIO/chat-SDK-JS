@@ -7,6 +7,7 @@ var inputVal = function(_id) {
 }
 
 var User = skygear.Record.extend('user');
+var Message = skygear.Record.extend('message');
 
 class Demo {
   constructor(container, plugin) {
@@ -267,23 +268,38 @@ class Demo {
     return this.plugin.unsubscribeTypingIndicator(this.conversation);
   }
 
-  editMessage(messageID, body)
-  {
-    return this.plugin.editMessage(
-      messageID,
-      body        
-    ).then(function(result){
-      console.log(result);
-    }); 
+  editMessage(messageID, newBody, newMeta) {
+    // This is a hack and for normal use-case, we should use the message
+    // object queried from getMessages
+    const query = new skygear.Query(Message);
+    query.equalTo('_id', messageID);
+    return skygear.privateDB.query(query).then(function (records) {
+      if (records.length > 0) {
+        var message = records[0];
+        message.body = newBody;
+        return this.plugin.editMessage(
+          message,
+          newBody,
+          newMeta
+        ).then(function(result){
+          console.log(result);
+        });
+      }
+      throw new Error('no message found');
+    }.bind(this));
   }
 
-  deleteMessage(messageID)
-  {
+  deleteMessage(messageID) {
+    // This is a hack and for normal use-case, we should use the message
+    // object queried from getMessages
+    const message = new skygear.Record('message', {
+      _id: 'message/' + messageID
+    });
     return this.plugin.deleteMessage(
-      messageID
+      message
     ).then(function(result){
       console.log(result);
-    });    
+    });
   }
 
   _handler(data) {

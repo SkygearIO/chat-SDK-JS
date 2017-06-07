@@ -119,28 +119,39 @@
     <hr/>
     <h3>Edit Message</h3>
     <p>
-        <label>message ID</label><br/>
-        <input type='text' id="message-id"><br/>
-        <label>new Body</label><br/>
-        <input type='text' id="body"><br/>
-        <button
-          onclick="demo.editMessage(
-          inputVal('message-id'),
-          inputVal('body'));"
-        >Edit Message
-        </button>
-     
+      <label>Message ID</label><br/>
+      <em>message/</em><input type='text' id="edit-id"><br/>
+    </p>
+    <p>
+      <label>New Body</label><br/>
+      <input type='text' id="edit-body"><br/>
+    </p>
+    <p>
+      <label>New metadata</label><br />
+      <textarea id="edit-metadata">null</textarea>
+    </p>
+    <p>
+      <button
+        onclick="demo.editMessage(
+        inputVal('edit-id'),
+        inputVal('edit-body'),
+        JSON.parse(inputVal('edit-metadata'))
+      );"
+      >Edit Message
+      </button>
     </p>
     <hr/>
     <h3>Delete Message</h3>
     <p>
-        <label>message ID</label><br/>
-        <input type='text' id="delete-message-id"><br/>
-        <button
-          onclick="demo.deleteMessage(
-          inputVal('delete-message-id'));"
-        >Delete Message
-        </button>
+      <label>Message ID</label><br/>
+      <em>message/</em><input type='text' id="delete-message-id"><br/>
+    </p>
+    <p>
+      <button
+        onclick="demo.deleteMessage(
+        inputVal('delete-message-id'));"
+      >Delete Message
+      </button>
     </p>
     <hr/>
     <h3>Typing and send message</h3>
