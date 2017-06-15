@@ -104,32 +104,6 @@ class Demo {
     });
   }
 
-  fetchUserConversationTo(el) {
-    return this.plugin.getUserConversation(this.conversation).then(function (result) {
-      var ul = $(el);
-      console.log(result);
-      ul.textContent = JSON.stringify(result);
-    });
-  }
-
-  fetchUserConversationsTo(el) {
-    return this.plugin.getUserConversations().then(function (result) {
-      var ul = $(el);
-      ul.textContent = '';
-      console.log(result);
-      result.forEach(function (uc) {
-        var liEl = document.createElement('div');
-        var text = uc.$transient.conversation.title + ': ';
-        var conversation = uc.$transient.conversation;
-        if (conversation.$transient.last_message) {
-          text = text + uc.$transient.conversation.$transient.last_message.body;
-        }
-        liEl.textContent = text;
-        ul.appendChild(liEl);
-      });
-    });
-  }
-
   leaveConversation() {
     return this.plugin.leaveConversation(this.conversation);
   }
