@@ -612,7 +612,7 @@ var SkygearChatContainer = exports.SkygearChatContainer = function () {
       var limit = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 50;
       var beforeTime = arguments[2];
 
-      var conversationID = conversatio.id;
+      var conversationID = conversation._id;
       return _skygear2.default.lambda('chat:get_messages', [conversationID, limit, beforeTime]).then(function (data) {
         data.results = data.results.map(function (message_data) {
           return new Message(message_data);
@@ -907,9 +907,26 @@ var Conversation = function () {
       this.admin_ids = _underscore2.default.unique(admin_ids);
     }
     this.unread_count = 0;
+    this.last_message_ref = null;
   }
 
-  _createClass(Conversation, null, [{
+  _createClass(Conversation, [{
+    key: 'toRecord',
+    value: function toRecord() {
+      var record = new ConversationRecord({
+        title: this.title,
+        admin_ids: this.admin_ids,
+        participant_ids: this.participant_ids,
+        distinct_by_participants: this.distinct_by_participants,
+        meta: this.meta,
+        last_message: this.last_message_ref,
+        _id: this._id,
+        id: this.id
+      });
+
+      return record;
+    }
+  }], [{
     key: 'fromRecord',
     value: function fromRecord(record) {
       var unread_count = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
@@ -920,25 +937,13 @@ var Conversation = function () {
       conversation.last_message_ref = record.last_message;
       conversation.admin_ids = record.admin_ids;
       conversation.participant_ids = record.participant_ids;
-      conversation.distinct_by_participant = record.distinct_by_participant;
+      conversation.distinct_by_participants = record.distinct_by_participants;
       conversation.meta = record.meta;
       conversation.last_read_message_ref = last_read_message_ref;
       conversation.unread_count = unread_count;
-      conversation.id = record._id;
+      conversation.id = record.id;
+      conversation._id = record._id;
       return conversation;
-    }
-  }, {
-    key: 'toRecord',
-    value: function toRecord(conversation) {
-      return new ConversationRecord({
-        title: conversation.title,
-        admin_ids: conversation.admin_ids,
-        participant_ids: conversation.participant_ids,
-        distinct_by_participant: conversation.distinct_by_participant,
-        meta: conversation.meta,
-        last_message: conversation.last_messsage_ref,
-        _id: conversation.id
-      });
     }
   }]);
 
