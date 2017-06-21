@@ -124,23 +124,24 @@ var SkygearChatContainer = exports.SkygearChatContainer = function () {
     }
 
     /**
-     * _getMessageIDsByConversations get last_message and last_read_mesage ID's from conversations
+     * _getMessageIDsByUserConversations get last_message and last_read_mesage ID's from user conversations
      *
-     * @param {[]Conversation} conversations - Array of conversations
+     * @param {[]Record} userConversations - Array of user conversation records
      * @return {Promise<[] String>} - A promise to array of message IDs
      *
      */
 
   }, {
-    key: '_getMessageIDsByConversations',
-    value: function _getMessageIDsByConversations(conversations) {
-      return _underscore2.default.reduce(conversations, function (mids, conversation) {
-        if (conversation.last_message_ref) {
-          var mid = _skygear2.default.Record.parseID(conversation.last_message_ref.id)[1];
+    key: '_getMessageIDsByUserConversations',
+    value: function _getMessageIDsByUserConversations(userConversations) {
+      return _underscore2.default.reduce(userConversations, function (mids, record) {
+        var conversation = record.$transient.conversation;
+        if (conversation.last_message) {
+          var mid = _skygear2.default.Record.parseID(conversation.last_message.id)[1];
           mids.push(mid);
         }
-        if (conversation.last_read_message_ref) {
-          var last_read_message_id = _skygear2.default.Record.parseID(conversation.last_read_message_ref.id)[1];
+        if (record.last_read_message) {
+          var last_read_message_id = _skygear2.default.Record.parseID(record.last_read_message.id)[1];
           mids.push(last_read_message_id);
         }
         return mids;
@@ -168,28 +169,36 @@ var SkygearChatContainer = exports.SkygearChatContainer = function () {
     }
 
     /**
-     * _getMessagesOfConversations get last_message record and
+     * _getConversationsWithMessages get last_message record and
      * last_read_message from database and assign to corresponding conversation object
      *
-     * @param {[] Conversation} conversations - Array of conversations
+     * @param {[]Record} records - Array of user conversation records
      * @return {Promise<Object.<string, Message>>} A promise to dictionary of messages
      *
      */
 
   }, {
-    key: '_getMessagesOfConversations',
-    value: function _getMessagesOfConversations(conversations) {
-      var messageIDs = this._getMessageIDsByConversations(conversations);
-      var messagesByID = this._getMessagesByIDs(messageIDs);
-      return _underscore2.default.map(conversations, function (conversation) {
-        if (conversation.last_message_ref) {
-          conversation.last_message = messagesByID[conversation.last_message_ref.id];
-        }
+    key: '_getConversationsWithMessages',
+    value: function _getConversationsWithMessages(records) {
+      var messageIDs = this._getMessageIDsByUserConversations(records);
+      return this._getMessagesByIDs(messageIDs).then(function (messagesByID) {
+        return _underscore2.default.map(records, function (userConversation) {
+          var last_message = null;
+          var last_read_message = null;
 
-        if (conversation.last_read_message_ref) {
-          conversation.last_read_message = messagesByID[conversation.last_read_message_ref];
-        }
-        return conversation;
+          var last_message_ref_from_record = userConversation.$transient.conversation.last_message;
+          var last_read_message_ref_from_record = userConversation.last_read_message;
+
+          if (last_message_ref_from_record) {
+            last_message = messagesByID[last_message_ref_from_record._id];
+          }
+
+          if (last_read_message_ref_from_record) {
+            last_read_message = messagesByID[last_read_message_ref_from_record._id];
+          }
+
+          return _conversation2.default.fromRecord(userConversation.$transient.conversation, userConversation.unread_count, last_message, last_read_message_ref_from_record, last_read_message);
+        });
       });
     }
 
@@ -197,6 +206,7 @@ var SkygearChatContainer = exports.SkygearChatContainer = function () {
      * getConversation query a Conversation Record from Skygear
      *
      * @param {string} conversationID - ConversationID
+     * @param {boolean} [includeLastMessage=true] - message is fetched and assigned to each conversation object.
      * @return {Promise<Conversation>}  A promise to array of Conversation
      */
 
@@ -216,11 +226,10 @@ var SkygearChatContainer = exports.SkygearChatContainer = function () {
       return _skygear2.default.publicDB.query(query).then(function (records) {
         if (records.length > 0) {
           var uc = records[0];
-          var conversation = _conversation2.default.fromRecord(uc.$transient.conversation, uc.unread_count, uc.last_read_message);
           if (includeLastMessage) {
-            return _this._getMessagesOfConversations([conversation])[0];
+            return _this._getConversationsWithMessages([uc])[0];
           } else {
-            return conversation;
+            return _conversation2.default.fromRecord(uc.$transient.conversation, uc.unread_count);
           }
         }
         throw new Error('no conversation found');
@@ -234,7 +243,8 @@ var SkygearChatContainer = exports.SkygearChatContainer = function () {
      * @param {number} [page=1] - Which page to display, default to the 1. The
      * first page
      * @param {number} [pageSize=50] - How many item pre page, default to 50.
-     * @return {Promise<[]Conversation>} A promise to array of Conversation
+     * @param {boolean} [includeLastMessage=true] - message is fetched and assigned to each conversation object.
+     * @return {Promise<[]Conversation>} A promise to array of Conversation.
      */
 
   }, {
@@ -254,13 +264,12 @@ var SkygearChatContainer = exports.SkygearChatContainer = function () {
       query.limit = pageSize;
       query.offset = (page - 1) * pageSize;
       return _skygear2.default.publicDB.query(query).then(function (records) {
-        var conversations = _underscore2.default.map(records, function (record) {
-          return _conversation2.default.fromRecord(record.$transient.conversation, record.unread_count, record.last_read_message);
-        });
         if (includeLastMessage) {
-          return _this2._getMessagesOfConversations(conversations);
+          return _this2._getConversationsWithMessages(records);
         }
-        return conversations;
+        return _underscore2.default.map(records, function (record) {
+          return _conversation2.default.fromRecord(record.$transient.conversation, record.unread_count);
+        });
       });
     }
 
@@ -910,8 +919,25 @@ var Conversation = function () {
     this.last_message_ref = null;
   }
 
+  /**
+   * fromRecord create a Conversation record from conversation record, unread_count and messages
+   * @param  {Record} record - Conversation Record
+   * @param  {Int}    unread_count - Unread Count of an user in conversation
+   * @param  {Record} last_message - Conversation Last Message Object
+   * @param  {Reference} last_read_message_ref - Reference to User Last Read Message
+   * @param  {Record}    last_read_message - User Last Read Message Object
+   * @return {Conversation} Conversation object
+   */
+
   _createClass(Conversation, [{
     key: 'toRecord',
+
+
+    /**
+     * toRecord - create record object from Conversation
+     * @return {Record} Record object
+     */
+
     value: function toRecord() {
       var record = new ConversationRecord({
         title: this.title,
@@ -930,19 +956,19 @@ var Conversation = function () {
     key: 'fromRecord',
     value: function fromRecord(record) {
       var unread_count = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
-      var last_read_message_ref = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
+      var last_message = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
+      var last_read_message_ref = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
+      var last_read_message = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : null;
 
       var conversation = new Conversation();
-      conversation.title = record.title;
-      conversation.last_message_ref = record.last_message;
-      conversation.admin_ids = record.admin_ids;
-      conversation.participant_ids = record.participant_ids;
-      conversation.distinct_by_participants = record.distinct_by_participants;
-      conversation.meta = record.meta;
-      conversation.last_read_message_ref = last_read_message_ref;
+      record.attributeKeys.forEach(function (key) {
+        conversation[key] = record[key];
+      });
+      conversation.last_message_ref = conversation.last_message;
       conversation.unread_count = unread_count;
-      conversation.id = record.id;
-      conversation._id = record._id;
+      conversation.last_message = last_message;
+      conversation.last_read_message = last_read_message;
+      conversation.last_read_message_ref = last_read_message_ref;
       return conversation;
     }
   }]);
