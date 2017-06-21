@@ -227,7 +227,9 @@ var SkygearChatContainer = exports.SkygearChatContainer = function () {
         if (records.length > 0) {
           var uc = records[0];
           if (includeLastMessage) {
-            return _this._getConversationsWithMessages([uc])[0];
+            return _this._getConversationsWithMessages([uc]).then(function (result) {
+              return result[0];
+            });
           } else {
             return _conversation2.default.fromRecord(uc.$transient.conversation, uc.unread_count);
           }
@@ -458,7 +460,7 @@ var SkygearChatContainer = exports.SkygearChatContainer = function () {
     value: function createMessage(conversation, body, metadata, asset) {
       var message = new Message();
 
-      message.conversation_id = new _skygear2.default.Reference(conversation.id);
+      message.conversation = new _skygear2.default.Reference(conversation.id);
       message.body = body;
 
       if (metadata === undefined || metadata === null) {
@@ -822,7 +824,7 @@ var SkygearChatContainer = exports.SkygearChatContainer = function () {
      * the conversation view.
      * `updated` - when a message is received by other, the message delivery
      * status is changed. For example, from `delivered` to `some_read`. You can
-     * check the `conversation_status` fields to see the new delivery status.
+     * check the `message_status` fields to see the new delivery status.
      *
      * @param {function} handler - function to be invoke when a notification arrive
      */
@@ -964,6 +966,8 @@ var Conversation = function () {
       record.attributeKeys.forEach(function (key) {
         conversation[key] = record[key];
       });
+      conversation.id = record.id;
+      conversation._id = record._id;
       conversation.last_message_ref = conversation.last_message;
       conversation.unread_count = unread_count;
       conversation.last_message = last_message;
