@@ -209,6 +209,22 @@ class Demo {
     }.bind(this));
   }
 
+  getMessageReceiptsTo(messageID, el) {
+    // This is a hack and for normal use-case, we should use the message
+    // object queried from getMessages
+    const message = new skygear.Record('message', {
+      _id: 'message/' + messageID
+    });
+
+    return this.plugin.getMessageReceipts(message).then(function (result) {
+      var ul = $(el);
+      ul.innerHTML = "";
+      console.log(result);
+      ul.textContent = JSON.stringify(result);
+    }.bind(this));
+  }
+
+
   createMessage(content, metadata, asset, el) {
     return this.plugin.createMessage(
       this.conversation,

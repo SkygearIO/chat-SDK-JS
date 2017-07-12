@@ -98,6 +98,18 @@
     >Fetch messages
     </button></p>
     <hr/>
+    <h3>Message Receipts</h3>
+    <ul id="receipts">
+    </ul>
+    <em>message/</em><input id="message-receipt" type="text" />
+    <p><button
+      onclick="demo.getMessageReceiptsTo(
+      inputVal('message-receipt'),
+      'receipts');"
+    >Fetch receipts
+    </button></p>
+    <hr/>
+
     <h3>Mark as last read</h3>
     <p>
       <label>Last Read Message ID</label>
