@@ -35,6 +35,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Message = _skygear2.default.Record.extend('message');
+var Receipt = _skygear2.default.Record.extend('receipt');
 var UserConversation = _skygear2.default.Record.extend('user_conversation');
 /**
  * SkygearChatContainer provide API access to the chat plugin.
@@ -582,7 +583,7 @@ var SkygearChatContainer = exports.SkygearChatContainer = function () {
     }
 
     /**
-     * getMessages return an array of message in a conversation. The way of
+     * getMessages returns an array of message in a conversation. The way of
      * query is to provide `limit` and `beforeTime`. The expected way is to
      * query from the latest message first. And use the message `createdAt` to
      * query the next pages via setting `beforeTime` when user scroll.
@@ -631,6 +632,24 @@ var SkygearChatContainer = exports.SkygearChatContainer = function () {
         this.markAsDelivered(data.results);
         return data.results;
       }.bind(this));
+    }
+
+    /**
+     * getMessageReceipts returns an array of receipts of a message.
+     * @param {Message} message - the message
+     * @return {Promise<[]Receipt>} - array of Receipt records
+     */
+
+  }, {
+    key: 'getMessageReceipts',
+    value: function getMessageReceipts(message) {
+      var messageID = message._id;
+      return _skygear2.default.lambda('chat:get_receipt', [messageID]).then(function (data) {
+        data.receipts = data.receipts.map(function (record) {
+          return new Receipt(record);
+        });
+        return data.receipts;
+      });
     }
 
     /**
