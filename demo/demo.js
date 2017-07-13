@@ -56,22 +56,22 @@ class Demo {
   }
 
   displayCurrentUser() {
-    if (skygear.currentUser) {
-      this.usernameEl.textContent = skygear.currentUser.username;
-      this.emailEl.textContent = skygear.currentUser.email;
-      this.tokenEl.textContent = this.container.accessToken;
+    if (skygear.auth.currentUser) {
+      this.usernameEl.textContent = skygear.auth.currentUser.username;
+      this.emailEl.textContent = skygear.auth.currentUser.email;
+      this.tokenEl.textContent = this.container.auth.accessToken;
     }
   }
 
   loginSkygear(username, pw) {
-    return this.container.loginWithUsername(username, pw).then(function (result) {
+    return this.container.auth.loginWithUsername(username, pw).then(function (result) {
       console.log(result);
       this.displayCurrentUser();
     }.bind(this));
   }
 
   signupSkygear(username, pw) {
-    return this.container.signupWithUsername(username, pw).then(function (result) {
+    return this.container.auth.signupWithUsername(username, pw).then(function (result) {
       console.log(result);
       this.displayCurrentUser();
     }.bind(this));
@@ -118,7 +118,7 @@ class Demo {
   }
 
   createDirectConversation(username) {
-    return this.container.discoverUserByUsernames([username]).then(function (users) {
+    return this.container.auth.discoverUserByUsernames([username]).then(function (users) {
       var user = users[0]
       return this.plugin.createDirectConversation(user, username).then(function (result) {
         console.log(result);
@@ -137,7 +137,7 @@ class Demo {
         users.push(u);
       }
     });
-    return this.container.discoverUserByUsernames(users).then(function (users) {
+    return this.container.auth.discoverUserByUsernames(users).then(function (users) {
       return this.plugin.createConversation(
           users,
           'From Demo'
@@ -150,7 +150,7 @@ class Demo {
 
   addParticipant(conversationID, username, resultTo) {
     const resultEl = $(resultTo);
-    return this.container.discoverUserByUsernames([username]).then(function (users) {
+    return this.container.auth.discoverUserByUsernames([username]).then(function (users) {
       return this.plugin.addParticipants(this.conversation, users).then(function (result) {
         console.log(result);
         resultEl.textContent = JSON.stringify(result);
@@ -160,7 +160,7 @@ class Demo {
 
   removeParticipant(conversationID, username, resultTo) {
     const resultEl = $(resultTo);
-    return this.container.discoverUserByUsernames([username]).then(function (users) {
+    return this.container.auth.discoverUserByUsernames([username]).then(function (users) {
       return this.plugin.removeParticipants(this.conversation, users).then(function (result) {
         console.log(result);
         resultEl.textContent = JSON.stringify(result);
@@ -170,7 +170,7 @@ class Demo {
 
   addAdmin(conversationID, username, resultTo) {
     const resultEl = $(resultTo);
-    return this.container.discoverUserByUsernames([username]).then(function (users) {
+    return this.container.auth.discoverUserByUsernames([username]).then(function (users) {
       return this.plugin.addAdmins(this.conversation, users).then(function (result) {
         console.log(result);
         resultEl.textContent = JSON.stringify(result);
@@ -180,7 +180,7 @@ class Demo {
 
   removeAdmin(conversationID, username, resultTo) {
     const resultEl = $(resultTo);
-    return this.container.discoverUserByUsernames([username]).then(function (users) {
+    return this.container.auth.discoverUserByUsernames([username]).then(function (users) {
       return this.plugin.removeAdmins(this.conversation, users).then(function (result) {
         console.log(result);
         resultEl.textContent = JSON.stringify(result);
@@ -188,16 +188,13 @@ class Demo {
     }.bind(this));
   }
 
-  markAsLastRead(messageID, el) {
+  markAsRead(messageID) {
     // This is a hack and for normal use-case, we should use the message
     // object queried from getMessages
     const message = new skygear.Record('message', {
       _id: 'message/' + messageID
     });
-    return this.plugin.markAsLastMessageRead(this.conversation, message).then(function (result) {
-      var rEl = $(el);
-      rEl.textContent = JSON.stringify(result);
-    });
+    return this.plugin.markAsRead([message]);
   }
 
   getMessagesTo(limit, beforeTime, el) {

@@ -110,19 +110,17 @@
     </button></p>
     <hr/>
 
-    <h3>Mark as last read</h3>
+    <h3>Mark as read</h3>
     <p>
-      <label>Last Read Message ID</label>
+      <label>Message ID</label>
       <br />
-      <em>message/</em><input id="last-read" type="text" />
+      <em>message/</em><input id="read" type="text" />
     </p>
     <p><button
-      onclick="demo.markAsLastRead(
-      inputVal('last-read'),
-      'last-read-result');"
-    >Mark this as last read message
+      onclick="demo.markAsRead(
+      inputVal('read'));"
+    >Mark this as read message
     </button></p>
-    <p id="last-read-result"></p>
     <hr/>
     <h3>Edit Message</h3>
     <p>
