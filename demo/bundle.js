@@ -4,7 +4,7 @@ global.skygear = require('skygear');
 global.skygear_chat = require('../dist');
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../dist":4,"skygear":56}],2:[function(require,module,exports){
+},{"../dist":4,"skygear":61}],2:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -219,7 +219,7 @@ var SkygearChatContainer = exports.SkygearChatContainer = function () {
       var includeLastMessage = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
 
       var query = new _skygear2.default.Query(UserConversation);
-      query.equalTo('user', _skygear2.default.currentUser.id);
+      query.equalTo('user', _skygear2.default.auth.currentUser.id);
       query.equalTo('conversation', new _skygear2.default.Reference('conversation/' + conversationID));
       query.transientInclude('user');
       query.transientInclude('conversation');
@@ -261,7 +261,7 @@ var SkygearChatContainer = exports.SkygearChatContainer = function () {
       var includeLastMessage = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
 
       var query = new _skygear2.default.Query(UserConversation);
-      query.equalTo('user', _skygear2.default.currentUser.id);
+      query.equalTo('user', _skygear2.default.auth.currentUser.id);
       query.transientInclude('user');
       query.transientInclude('conversation');
       query.limit = pageSize;
@@ -298,7 +298,7 @@ var SkygearChatContainer = exports.SkygearChatContainer = function () {
     key: '_getUserConversation',
     value: function _getUserConversation(conversation) {
       var query = new _skygear2.default.Query(UserConversation);
-      query.equalTo('user', _skygear2.default.currentUser.id);
+      query.equalTo('user', _skygear2.default.auth.currentUser.id);
       query.equalTo('conversation', new _skygear2.default.Reference(conversation.id));
       return _skygear2.default.publicDB.query(query).then(function (records) {
         if (records.length > 0) {
@@ -880,7 +880,7 @@ var SkygearChatContainer = exports.SkygearChatContainer = function () {
 
 var chatContainer = new SkygearChatContainer();
 exports.default = chatContainer;
-},{"./conversation":3,"./pubsub":5,"skygear":56,"underscore":64}],3:[function(require,module,exports){
+},{"./conversation":3,"./pubsub":5,"skygear":61,"underscore":69}],3:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -926,7 +926,7 @@ var Conversation = function () {
     var participant_ids = _underscore2.default.map(participants, function (user) {
       return user._id;
     });
-    participant_ids.push(_skygear2.default.currentUser.id);
+    participant_ids.push(_skygear2.default.auth.currentUser.id);
     this.participant_ids = _underscore2.default.unique(participant_ids);
     if (_underscore2.default.isEmpty(options.admins)) {
       this.admin_ids = this.participant_ids;
@@ -1000,7 +1000,7 @@ var Conversation = function () {
 }();
 
 exports.default = Conversation;
-},{"skygear":56,"underscore":64}],4:[function(require,module,exports){
+},{"skygear":61,"underscore":69}],4:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1189,7 +1189,7 @@ var SkygearChatPubsub = function () {
 }();
 
 exports.default = SkygearChatPubsub;
-},{"skygear":56,"underscore":64,"uuid":67}],6:[function(require,module,exports){
+},{"skygear":61,"underscore":69,"uuid":72}],6:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1250,7 +1250,7 @@ function createTypingDetector(conversation) {
     }
   };
 }
-},{"./container.js":2,"skygear":56}],7:[function(require,module,exports){
+},{"./container.js":2,"skygear":61}],7:[function(require,module,exports){
 ;(function () {
 
   var object = typeof exports != 'undefined' ? exports : this; // #8: web workers
@@ -1818,41 +1818,48 @@ d.gs = function (dscr, get, set/*, options*/) {
 	return !options ? desc : assign(normalizeOpts(options), desc);
 };
 
-},{"es5-ext/object/assign":13,"es5-ext/object/is-callable":16,"es5-ext/object/normalize-options":20,"es5-ext/string/#/contains":23}],13:[function(require,module,exports){
-'use strict';
+},{"es5-ext/object/assign":14,"es5-ext/object/is-callable":17,"es5-ext/object/normalize-options":22,"es5-ext/string/#/contains":25}],13:[function(require,module,exports){
+"use strict";
 
-module.exports = require('./is-implemented')()
+// eslint-disable-next-line no-empty-function
+module.exports = function () {};
+
+},{}],14:[function(require,module,exports){
+"use strict";
+
+module.exports = require("./is-implemented")()
 	? Object.assign
-	: require('./shim');
+	: require("./shim");
 
-},{"./is-implemented":14,"./shim":15}],14:[function(require,module,exports){
-'use strict';
+},{"./is-implemented":15,"./shim":16}],15:[function(require,module,exports){
+"use strict";
 
 module.exports = function () {
 	var assign = Object.assign, obj;
-	if (typeof assign !== 'function') return false;
-	obj = { foo: 'raz' };
-	assign(obj, { bar: 'dwa' }, { trzy: 'trzy' });
-	return (obj.foo + obj.bar + obj.trzy) === 'razdwatrzy';
+	if (typeof assign !== "function") return false;
+	obj = { foo: "raz" };
+	assign(obj, { bar: "dwa" }, { trzy: "trzy" });
+	return (obj.foo + obj.bar + obj.trzy) === "razdwatrzy";
 };
 
-},{}],15:[function(require,module,exports){
-'use strict';
+},{}],16:[function(require,module,exports){
+"use strict";
 
-var keys  = require('../keys')
-  , value = require('../valid-value')
+var keys  = require("../keys")
+  , value = require("../valid-value")
+  , max   = Math.max;
 
-  , max = Math.max;
-
-module.exports = function (dest, src/*, …srcn*/) {
-	var error, i, l = max(arguments.length, 2), assign;
+module.exports = function (dest, src /*, …srcn*/) {
+	var error, i, length = max(arguments.length, 2), assign;
 	dest = Object(value(dest));
 	assign = function (key) {
-		try { dest[key] = src[key]; } catch (e) {
+		try {
+			dest[key] = src[key];
+		} catch (e) {
 			if (!error) error = e;
 		}
 	};
-	for (i = 1; i < l; ++i) {
+	for (i = 1; i < length; ++i) {
 		src = arguments[i];
 		keys(src).forEach(assign);
 	}
@@ -1860,41 +1867,58 @@ module.exports = function (dest, src/*, …srcn*/) {
 	return dest;
 };
 
-},{"../keys":17,"../valid-value":22}],16:[function(require,module,exports){
+},{"../keys":19,"../valid-value":24}],17:[function(require,module,exports){
 // Deprecated
 
-'use strict';
+"use strict";
 
-module.exports = function (obj) { return typeof obj === 'function'; };
+module.exports = function (obj) {
+ return typeof obj === "function";
+};
 
-},{}],17:[function(require,module,exports){
-'use strict';
+},{}],18:[function(require,module,exports){
+"use strict";
 
-module.exports = require('./is-implemented')()
+var _undefined = require("../function/noop")(); // Support ES3 engines
+
+module.exports = function (val) {
+ return (val !== _undefined) && (val !== null);
+};
+
+},{"../function/noop":13}],19:[function(require,module,exports){
+"use strict";
+
+module.exports = require("./is-implemented")()
 	? Object.keys
-	: require('./shim');
+	: require("./shim");
 
-},{"./is-implemented":18,"./shim":19}],18:[function(require,module,exports){
-'use strict';
+},{"./is-implemented":20,"./shim":21}],20:[function(require,module,exports){
+"use strict";
 
 module.exports = function () {
 	try {
-		Object.keys('primitive');
+		Object.keys("primitive");
 		return true;
-	} catch (e) { return false; }
+	} catch (e) {
+ return false;
+}
 };
 
-},{}],19:[function(require,module,exports){
-'use strict';
+},{}],21:[function(require,module,exports){
+"use strict";
+
+var isValue = require("../is-value");
 
 var keys = Object.keys;
 
 module.exports = function (object) {
-	return keys(object == null ? object : Object(object));
+	return keys(isValue(object) ? Object(object) : object);
 };
 
-},{}],20:[function(require,module,exports){
-'use strict';
+},{"../is-value":18}],22:[function(require,module,exports){
+"use strict";
+
+var isValue = require("./is-value");
 
 var forEach = Array.prototype.forEach, create = Object.create;
 
@@ -1903,50 +1927,53 @@ var process = function (src, obj) {
 	for (key in src) obj[key] = src[key];
 };
 
-module.exports = function (options/*, …options*/) {
+// eslint-disable-next-line no-unused-vars
+module.exports = function (opts1 /*, …options*/) {
 	var result = create(null);
 	forEach.call(arguments, function (options) {
-		if (options == null) return;
+		if (!isValue(options)) return;
 		process(Object(options), result);
 	});
 	return result;
 };
 
-},{}],21:[function(require,module,exports){
-'use strict';
+},{"./is-value":18}],23:[function(require,module,exports){
+"use strict";
 
 module.exports = function (fn) {
-	if (typeof fn !== 'function') throw new TypeError(fn + " is not a function");
+	if (typeof fn !== "function") throw new TypeError(fn + " is not a function");
 	return fn;
 };
 
-},{}],22:[function(require,module,exports){
-'use strict';
+},{}],24:[function(require,module,exports){
+"use strict";
+
+var isValue = require("./is-value");
 
 module.exports = function (value) {
-	if (value == null) throw new TypeError("Cannot use null or undefined");
+	if (!isValue(value)) throw new TypeError("Cannot use null or undefined");
 	return value;
 };
 
-},{}],23:[function(require,module,exports){
-'use strict';
+},{"./is-value":18}],25:[function(require,module,exports){
+"use strict";
 
-module.exports = require('./is-implemented')()
+module.exports = require("./is-implemented")()
 	? String.prototype.contains
-	: require('./shim');
+	: require("./shim");
 
-},{"./is-implemented":24,"./shim":25}],24:[function(require,module,exports){
-'use strict';
+},{"./is-implemented":26,"./shim":27}],26:[function(require,module,exports){
+"use strict";
 
-var str = 'razdwatrzy';
+var str = "razdwatrzy";
 
 module.exports = function () {
-	if (typeof str.contains !== 'function') return false;
-	return ((str.contains('dwa') === true) && (str.contains('foo') === false));
+	if (typeof str.contains !== "function") return false;
+	return (str.contains("dwa") === true) && (str.contains("foo") === false);
 };
 
-},{}],25:[function(require,module,exports){
-'use strict';
+},{}],27:[function(require,module,exports){
+"use strict";
 
 var indexOf = String.prototype.indexOf;
 
@@ -1954,7 +1981,7 @@ module.exports = function (searchString/*, position*/) {
 	return indexOf.call(this, searchString, arguments[1]) > -1;
 };
 
-},{}],26:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 'use strict';
 
 var d        = require('d')
@@ -2088,7 +2115,7 @@ module.exports = exports = function (o) {
 };
 exports.methods = methods;
 
-},{"d":12,"es5-ext/object/valid-callable":21}],27:[function(require,module,exports){
+},{"d":12,"es5-ext/object/valid-callable":23}],29:[function(require,module,exports){
 /*!
  * Determine if an object is a Buffer
  *
@@ -2111,7 +2138,7 @@ function isSlowBuffer (obj) {
   return typeof obj.readFloatLE === 'function' && typeof obj.slice === 'function' && isBuffer(obj.slice(0, 0))
 }
 
-},{}],28:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 (function(root) {
   var localStorageMemory = {};
   var cache = {};
@@ -2195,5636 +2222,7 @@ function isSlowBuffer (obj) {
   }
 })(this);
 
-},{}],29:[function(require,module,exports){
-(function(){
-  var crypt = require('crypt'),
-      utf8 = require('charenc').utf8,
-      isBuffer = require('is-buffer'),
-      bin = require('charenc').bin,
-
-  // The core
-  md5 = function (message, options) {
-    // Convert to byte array
-    if (message.constructor == String)
-      if (options && options.encoding === 'binary')
-        message = bin.stringToBytes(message);
-      else
-        message = utf8.stringToBytes(message);
-    else if (isBuffer(message))
-      message = Array.prototype.slice.call(message, 0);
-    else if (!Array.isArray(message))
-      message = message.toString();
-    // else, assume byte array already
-
-    var m = crypt.bytesToWords(message),
-        l = message.length * 8,
-        a =  1732584193,
-        b = -271733879,
-        c = -1732584194,
-        d =  271733878;
-
-    // Swap endian
-    for (var i = 0; i < m.length; i++) {
-      m[i] = ((m[i] <<  8) | (m[i] >>> 24)) & 0x00FF00FF |
-             ((m[i] << 24) | (m[i] >>>  8)) & 0xFF00FF00;
-    }
-
-    // Padding
-    m[l >>> 5] |= 0x80 << (l % 32);
-    m[(((l + 64) >>> 9) << 4) + 14] = l;
-
-    // Method shortcuts
-    var FF = md5._ff,
-        GG = md5._gg,
-        HH = md5._hh,
-        II = md5._ii;
-
-    for (var i = 0; i < m.length; i += 16) {
-
-      var aa = a,
-          bb = b,
-          cc = c,
-          dd = d;
-
-      a = FF(a, b, c, d, m[i+ 0],  7, -680876936);
-      d = FF(d, a, b, c, m[i+ 1], 12, -389564586);
-      c = FF(c, d, a, b, m[i+ 2], 17,  606105819);
-      b = FF(b, c, d, a, m[i+ 3], 22, -1044525330);
-      a = FF(a, b, c, d, m[i+ 4],  7, -176418897);
-      d = FF(d, a, b, c, m[i+ 5], 12,  1200080426);
-      c = FF(c, d, a, b, m[i+ 6], 17, -1473231341);
-      b = FF(b, c, d, a, m[i+ 7], 22, -45705983);
-      a = FF(a, b, c, d, m[i+ 8],  7,  1770035416);
-      d = FF(d, a, b, c, m[i+ 9], 12, -1958414417);
-      c = FF(c, d, a, b, m[i+10], 17, -42063);
-      b = FF(b, c, d, a, m[i+11], 22, -1990404162);
-      a = FF(a, b, c, d, m[i+12],  7,  1804603682);
-      d = FF(d, a, b, c, m[i+13], 12, -40341101);
-      c = FF(c, d, a, b, m[i+14], 17, -1502002290);
-      b = FF(b, c, d, a, m[i+15], 22,  1236535329);
-
-      a = GG(a, b, c, d, m[i+ 1],  5, -165796510);
-      d = GG(d, a, b, c, m[i+ 6],  9, -1069501632);
-      c = GG(c, d, a, b, m[i+11], 14,  643717713);
-      b = GG(b, c, d, a, m[i+ 0], 20, -373897302);
-      a = GG(a, b, c, d, m[i+ 5],  5, -701558691);
-      d = GG(d, a, b, c, m[i+10],  9,  38016083);
-      c = GG(c, d, a, b, m[i+15], 14, -660478335);
-      b = GG(b, c, d, a, m[i+ 4], 20, -405537848);
-      a = GG(a, b, c, d, m[i+ 9],  5,  568446438);
-      d = GG(d, a, b, c, m[i+14],  9, -1019803690);
-      c = GG(c, d, a, b, m[i+ 3], 14, -187363961);
-      b = GG(b, c, d, a, m[i+ 8], 20,  1163531501);
-      a = GG(a, b, c, d, m[i+13],  5, -1444681467);
-      d = GG(d, a, b, c, m[i+ 2],  9, -51403784);
-      c = GG(c, d, a, b, m[i+ 7], 14,  1735328473);
-      b = GG(b, c, d, a, m[i+12], 20, -1926607734);
-
-      a = HH(a, b, c, d, m[i+ 5],  4, -378558);
-      d = HH(d, a, b, c, m[i+ 8], 11, -2022574463);
-      c = HH(c, d, a, b, m[i+11], 16,  1839030562);
-      b = HH(b, c, d, a, m[i+14], 23, -35309556);
-      a = HH(a, b, c, d, m[i+ 1],  4, -1530992060);
-      d = HH(d, a, b, c, m[i+ 4], 11,  1272893353);
-      c = HH(c, d, a, b, m[i+ 7], 16, -155497632);
-      b = HH(b, c, d, a, m[i+10], 23, -1094730640);
-      a = HH(a, b, c, d, m[i+13],  4,  681279174);
-      d = HH(d, a, b, c, m[i+ 0], 11, -358537222);
-      c = HH(c, d, a, b, m[i+ 3], 16, -722521979);
-      b = HH(b, c, d, a, m[i+ 6], 23,  76029189);
-      a = HH(a, b, c, d, m[i+ 9],  4, -640364487);
-      d = HH(d, a, b, c, m[i+12], 11, -421815835);
-      c = HH(c, d, a, b, m[i+15], 16,  530742520);
-      b = HH(b, c, d, a, m[i+ 2], 23, -995338651);
-
-      a = II(a, b, c, d, m[i+ 0],  6, -198630844);
-      d = II(d, a, b, c, m[i+ 7], 10,  1126891415);
-      c = II(c, d, a, b, m[i+14], 15, -1416354905);
-      b = II(b, c, d, a, m[i+ 5], 21, -57434055);
-      a = II(a, b, c, d, m[i+12],  6,  1700485571);
-      d = II(d, a, b, c, m[i+ 3], 10, -1894986606);
-      c = II(c, d, a, b, m[i+10], 15, -1051523);
-      b = II(b, c, d, a, m[i+ 1], 21, -2054922799);
-      a = II(a, b, c, d, m[i+ 8],  6,  1873313359);
-      d = II(d, a, b, c, m[i+15], 10, -30611744);
-      c = II(c, d, a, b, m[i+ 6], 15, -1560198380);
-      b = II(b, c, d, a, m[i+13], 21,  1309151649);
-      a = II(a, b, c, d, m[i+ 4],  6, -145523070);
-      d = II(d, a, b, c, m[i+11], 10, -1120210379);
-      c = II(c, d, a, b, m[i+ 2], 15,  718787259);
-      b = II(b, c, d, a, m[i+ 9], 21, -343485551);
-
-      a = (a + aa) >>> 0;
-      b = (b + bb) >>> 0;
-      c = (c + cc) >>> 0;
-      d = (d + dd) >>> 0;
-    }
-
-    return crypt.endian([a, b, c, d]);
-  };
-
-  // Auxiliary functions
-  md5._ff  = function (a, b, c, d, x, s, t) {
-    var n = a + (b & c | ~b & d) + (x >>> 0) + t;
-    return ((n << s) | (n >>> (32 - s))) + b;
-  };
-  md5._gg  = function (a, b, c, d, x, s, t) {
-    var n = a + (b & d | c & ~d) + (x >>> 0) + t;
-    return ((n << s) | (n >>> (32 - s))) + b;
-  };
-  md5._hh  = function (a, b, c, d, x, s, t) {
-    var n = a + (b ^ c ^ d) + (x >>> 0) + t;
-    return ((n << s) | (n >>> (32 - s))) + b;
-  };
-  md5._ii  = function (a, b, c, d, x, s, t) {
-    var n = a + (c ^ (b | ~d)) + (x >>> 0) + t;
-    return ((n << s) | (n >>> (32 - s))) + b;
-  };
-
-  // Package private blocksize
-  md5._blocksize = 16;
-  md5._digestsize = 16;
-
-  module.exports = function (message, options) {
-    if (message === undefined || message === null)
-      throw new Error('Illegal argument ' + message);
-
-    var digestbytes = crypt.wordsToBytes(md5(message, options));
-    return options && options.asBytes ? digestbytes :
-        options && options.asString ? bin.bytesToString(digestbytes) :
-        crypt.bytesToHex(digestbytes);
-  };
-
-})();
-
-},{"charenc":8,"crypt":11,"is-buffer":27}],30:[function(require,module,exports){
-(function (global){
-/*! https://mths.be/punycode v1.3.2 by @mathias */
-;(function(root) {
-
-	/** Detect free variables */
-	var freeExports = typeof exports == 'object' && exports &&
-		!exports.nodeType && exports;
-	var freeModule = typeof module == 'object' && module &&
-		!module.nodeType && module;
-	var freeGlobal = typeof global == 'object' && global;
-	if (
-		freeGlobal.global === freeGlobal ||
-		freeGlobal.window === freeGlobal ||
-		freeGlobal.self === freeGlobal
-	) {
-		root = freeGlobal;
-	}
-
-	/**
-	 * The `punycode` object.
-	 * @name punycode
-	 * @type Object
-	 */
-	var punycode,
-
-	/** Highest positive signed 32-bit float value */
-	maxInt = 2147483647, // aka. 0x7FFFFFFF or 2^31-1
-
-	/** Bootstring parameters */
-	base = 36,
-	tMin = 1,
-	tMax = 26,
-	skew = 38,
-	damp = 700,
-	initialBias = 72,
-	initialN = 128, // 0x80
-	delimiter = '-', // '\x2D'
-
-	/** Regular expressions */
-	regexPunycode = /^xn--/,
-	regexNonASCII = /[^\x20-\x7E]/, // unprintable ASCII chars + non-ASCII chars
-	regexSeparators = /[\x2E\u3002\uFF0E\uFF61]/g, // RFC 3490 separators
-
-	/** Error messages */
-	errors = {
-		'overflow': 'Overflow: input needs wider integers to process',
-		'not-basic': 'Illegal input >= 0x80 (not a basic code point)',
-		'invalid-input': 'Invalid input'
-	},
-
-	/** Convenience shortcuts */
-	baseMinusTMin = base - tMin,
-	floor = Math.floor,
-	stringFromCharCode = String.fromCharCode,
-
-	/** Temporary variable */
-	key;
-
-	/*--------------------------------------------------------------------------*/
-
-	/**
-	 * A generic error utility function.
-	 * @private
-	 * @param {String} type The error type.
-	 * @returns {Error} Throws a `RangeError` with the applicable error message.
-	 */
-	function error(type) {
-		throw RangeError(errors[type]);
-	}
-
-	/**
-	 * A generic `Array#map` utility function.
-	 * @private
-	 * @param {Array} array The array to iterate over.
-	 * @param {Function} callback The function that gets called for every array
-	 * item.
-	 * @returns {Array} A new array of values returned by the callback function.
-	 */
-	function map(array, fn) {
-		var length = array.length;
-		var result = [];
-		while (length--) {
-			result[length] = fn(array[length]);
-		}
-		return result;
-	}
-
-	/**
-	 * A simple `Array#map`-like wrapper to work with domain name strings or email
-	 * addresses.
-	 * @private
-	 * @param {String} domain The domain name or email address.
-	 * @param {Function} callback The function that gets called for every
-	 * character.
-	 * @returns {Array} A new string of characters returned by the callback
-	 * function.
-	 */
-	function mapDomain(string, fn) {
-		var parts = string.split('@');
-		var result = '';
-		if (parts.length > 1) {
-			// In email addresses, only the domain name should be punycoded. Leave
-			// the local part (i.e. everything up to `@`) intact.
-			result = parts[0] + '@';
-			string = parts[1];
-		}
-		// Avoid `split(regex)` for IE8 compatibility. See #17.
-		string = string.replace(regexSeparators, '\x2E');
-		var labels = string.split('.');
-		var encoded = map(labels, fn).join('.');
-		return result + encoded;
-	}
-
-	/**
-	 * Creates an array containing the numeric code points of each Unicode
-	 * character in the string. While JavaScript uses UCS-2 internally,
-	 * this function will convert a pair of surrogate halves (each of which
-	 * UCS-2 exposes as separate characters) into a single code point,
-	 * matching UTF-16.
-	 * @see `punycode.ucs2.encode`
-	 * @see <https://mathiasbynens.be/notes/javascript-encoding>
-	 * @memberOf punycode.ucs2
-	 * @name decode
-	 * @param {String} string The Unicode input string (UCS-2).
-	 * @returns {Array} The new array of code points.
-	 */
-	function ucs2decode(string) {
-		var output = [],
-		    counter = 0,
-		    length = string.length,
-		    value,
-		    extra;
-		while (counter < length) {
-			value = string.charCodeAt(counter++);
-			if (value >= 0xD800 && value <= 0xDBFF && counter < length) {
-				// high surrogate, and there is a next character
-				extra = string.charCodeAt(counter++);
-				if ((extra & 0xFC00) == 0xDC00) { // low surrogate
-					output.push(((value & 0x3FF) << 10) + (extra & 0x3FF) + 0x10000);
-				} else {
-					// unmatched surrogate; only append this code unit, in case the next
-					// code unit is the high surrogate of a surrogate pair
-					output.push(value);
-					counter--;
-				}
-			} else {
-				output.push(value);
-			}
-		}
-		return output;
-	}
-
-	/**
-	 * Creates a string based on an array of numeric code points.
-	 * @see `punycode.ucs2.decode`
-	 * @memberOf punycode.ucs2
-	 * @name encode
-	 * @param {Array} codePoints The array of numeric code points.
-	 * @returns {String} The new Unicode string (UCS-2).
-	 */
-	function ucs2encode(array) {
-		return map(array, function(value) {
-			var output = '';
-			if (value > 0xFFFF) {
-				value -= 0x10000;
-				output += stringFromCharCode(value >>> 10 & 0x3FF | 0xD800);
-				value = 0xDC00 | value & 0x3FF;
-			}
-			output += stringFromCharCode(value);
-			return output;
-		}).join('');
-	}
-
-	/**
-	 * Converts a basic code point into a digit/integer.
-	 * @see `digitToBasic()`
-	 * @private
-	 * @param {Number} codePoint The basic numeric code point value.
-	 * @returns {Number} The numeric value of a basic code point (for use in
-	 * representing integers) in the range `0` to `base - 1`, or `base` if
-	 * the code point does not represent a value.
-	 */
-	function basicToDigit(codePoint) {
-		if (codePoint - 48 < 10) {
-			return codePoint - 22;
-		}
-		if (codePoint - 65 < 26) {
-			return codePoint - 65;
-		}
-		if (codePoint - 97 < 26) {
-			return codePoint - 97;
-		}
-		return base;
-	}
-
-	/**
-	 * Converts a digit/integer into a basic code point.
-	 * @see `basicToDigit()`
-	 * @private
-	 * @param {Number} digit The numeric value of a basic code point.
-	 * @returns {Number} The basic code point whose value (when used for
-	 * representing integers) is `digit`, which needs to be in the range
-	 * `0` to `base - 1`. If `flag` is non-zero, the uppercase form is
-	 * used; else, the lowercase form is used. The behavior is undefined
-	 * if `flag` is non-zero and `digit` has no uppercase form.
-	 */
-	function digitToBasic(digit, flag) {
-		//  0..25 map to ASCII a..z or A..Z
-		// 26..35 map to ASCII 0..9
-		return digit + 22 + 75 * (digit < 26) - ((flag != 0) << 5);
-	}
-
-	/**
-	 * Bias adaptation function as per section 3.4 of RFC 3492.
-	 * http://tools.ietf.org/html/rfc3492#section-3.4
-	 * @private
-	 */
-	function adapt(delta, numPoints, firstTime) {
-		var k = 0;
-		delta = firstTime ? floor(delta / damp) : delta >> 1;
-		delta += floor(delta / numPoints);
-		for (/* no initialization */; delta > baseMinusTMin * tMax >> 1; k += base) {
-			delta = floor(delta / baseMinusTMin);
-		}
-		return floor(k + (baseMinusTMin + 1) * delta / (delta + skew));
-	}
-
-	/**
-	 * Converts a Punycode string of ASCII-only symbols to a string of Unicode
-	 * symbols.
-	 * @memberOf punycode
-	 * @param {String} input The Punycode string of ASCII-only symbols.
-	 * @returns {String} The resulting string of Unicode symbols.
-	 */
-	function decode(input) {
-		// Don't use UCS-2
-		var output = [],
-		    inputLength = input.length,
-		    out,
-		    i = 0,
-		    n = initialN,
-		    bias = initialBias,
-		    basic,
-		    j,
-		    index,
-		    oldi,
-		    w,
-		    k,
-		    digit,
-		    t,
-		    /** Cached calculation results */
-		    baseMinusT;
-
-		// Handle the basic code points: let `basic` be the number of input code
-		// points before the last delimiter, or `0` if there is none, then copy
-		// the first basic code points to the output.
-
-		basic = input.lastIndexOf(delimiter);
-		if (basic < 0) {
-			basic = 0;
-		}
-
-		for (j = 0; j < basic; ++j) {
-			// if it's not a basic code point
-			if (input.charCodeAt(j) >= 0x80) {
-				error('not-basic');
-			}
-			output.push(input.charCodeAt(j));
-		}
-
-		// Main decoding loop: start just after the last delimiter if any basic code
-		// points were copied; start at the beginning otherwise.
-
-		for (index = basic > 0 ? basic + 1 : 0; index < inputLength; /* no final expression */) {
-
-			// `index` is the index of the next character to be consumed.
-			// Decode a generalized variable-length integer into `delta`,
-			// which gets added to `i`. The overflow checking is easier
-			// if we increase `i` as we go, then subtract off its starting
-			// value at the end to obtain `delta`.
-			for (oldi = i, w = 1, k = base; /* no condition */; k += base) {
-
-				if (index >= inputLength) {
-					error('invalid-input');
-				}
-
-				digit = basicToDigit(input.charCodeAt(index++));
-
-				if (digit >= base || digit > floor((maxInt - i) / w)) {
-					error('overflow');
-				}
-
-				i += digit * w;
-				t = k <= bias ? tMin : (k >= bias + tMax ? tMax : k - bias);
-
-				if (digit < t) {
-					break;
-				}
-
-				baseMinusT = base - t;
-				if (w > floor(maxInt / baseMinusT)) {
-					error('overflow');
-				}
-
-				w *= baseMinusT;
-
-			}
-
-			out = output.length + 1;
-			bias = adapt(i - oldi, out, oldi == 0);
-
-			// `i` was supposed to wrap around from `out` to `0`,
-			// incrementing `n` each time, so we'll fix that now:
-			if (floor(i / out) > maxInt - n) {
-				error('overflow');
-			}
-
-			n += floor(i / out);
-			i %= out;
-
-			// Insert `n` at position `i` of the output
-			output.splice(i++, 0, n);
-
-		}
-
-		return ucs2encode(output);
-	}
-
-	/**
-	 * Converts a string of Unicode symbols (e.g. a domain name label) to a
-	 * Punycode string of ASCII-only symbols.
-	 * @memberOf punycode
-	 * @param {String} input The string of Unicode symbols.
-	 * @returns {String} The resulting Punycode string of ASCII-only symbols.
-	 */
-	function encode(input) {
-		var n,
-		    delta,
-		    handledCPCount,
-		    basicLength,
-		    bias,
-		    j,
-		    m,
-		    q,
-		    k,
-		    t,
-		    currentValue,
-		    output = [],
-		    /** `inputLength` will hold the number of code points in `input`. */
-		    inputLength,
-		    /** Cached calculation results */
-		    handledCPCountPlusOne,
-		    baseMinusT,
-		    qMinusT;
-
-		// Convert the input in UCS-2 to Unicode
-		input = ucs2decode(input);
-
-		// Cache the length
-		inputLength = input.length;
-
-		// Initialize the state
-		n = initialN;
-		delta = 0;
-		bias = initialBias;
-
-		// Handle the basic code points
-		for (j = 0; j < inputLength; ++j) {
-			currentValue = input[j];
-			if (currentValue < 0x80) {
-				output.push(stringFromCharCode(currentValue));
-			}
-		}
-
-		handledCPCount = basicLength = output.length;
-
-		// `handledCPCount` is the number of code points that have been handled;
-		// `basicLength` is the number of basic code points.
-
-		// Finish the basic string - if it is not empty - with a delimiter
-		if (basicLength) {
-			output.push(delimiter);
-		}
-
-		// Main encoding loop:
-		while (handledCPCount < inputLength) {
-
-			// All non-basic code points < n have been handled already. Find the next
-			// larger one:
-			for (m = maxInt, j = 0; j < inputLength; ++j) {
-				currentValue = input[j];
-				if (currentValue >= n && currentValue < m) {
-					m = currentValue;
-				}
-			}
-
-			// Increase `delta` enough to advance the decoder's <n,i> state to <m,0>,
-			// but guard against overflow
-			handledCPCountPlusOne = handledCPCount + 1;
-			if (m - n > floor((maxInt - delta) / handledCPCountPlusOne)) {
-				error('overflow');
-			}
-
-			delta += (m - n) * handledCPCountPlusOne;
-			n = m;
-
-			for (j = 0; j < inputLength; ++j) {
-				currentValue = input[j];
-
-				if (currentValue < n && ++delta > maxInt) {
-					error('overflow');
-				}
-
-				if (currentValue == n) {
-					// Represent delta as a generalized variable-length integer
-					for (q = delta, k = base; /* no condition */; k += base) {
-						t = k <= bias ? tMin : (k >= bias + tMax ? tMax : k - bias);
-						if (q < t) {
-							break;
-						}
-						qMinusT = q - t;
-						baseMinusT = base - t;
-						output.push(
-							stringFromCharCode(digitToBasic(t + qMinusT % baseMinusT, 0))
-						);
-						q = floor(qMinusT / baseMinusT);
-					}
-
-					output.push(stringFromCharCode(digitToBasic(q, 0)));
-					bias = adapt(delta, handledCPCountPlusOne, handledCPCount == basicLength);
-					delta = 0;
-					++handledCPCount;
-				}
-			}
-
-			++delta;
-			++n;
-
-		}
-		return output.join('');
-	}
-
-	/**
-	 * Converts a Punycode string representing a domain name or an email address
-	 * to Unicode. Only the Punycoded parts of the input will be converted, i.e.
-	 * it doesn't matter if you call it on a string that has already been
-	 * converted to Unicode.
-	 * @memberOf punycode
-	 * @param {String} input The Punycoded domain name or email address to
-	 * convert to Unicode.
-	 * @returns {String} The Unicode representation of the given Punycode
-	 * string.
-	 */
-	function toUnicode(input) {
-		return mapDomain(input, function(string) {
-			return regexPunycode.test(string)
-				? decode(string.slice(4).toLowerCase())
-				: string;
-		});
-	}
-
-	/**
-	 * Converts a Unicode string representing a domain name or an email address to
-	 * Punycode. Only the non-ASCII parts of the domain name will be converted,
-	 * i.e. it doesn't matter if you call it with a domain that's already in
-	 * ASCII.
-	 * @memberOf punycode
-	 * @param {String} input The domain name or email address to convert, as a
-	 * Unicode string.
-	 * @returns {String} The Punycode representation of the given domain name or
-	 * email address.
-	 */
-	function toASCII(input) {
-		return mapDomain(input, function(string) {
-			return regexNonASCII.test(string)
-				? 'xn--' + encode(string)
-				: string;
-		});
-	}
-
-	/*--------------------------------------------------------------------------*/
-
-	/** Define the public API */
-	punycode = {
-		/**
-		 * A string representing the current Punycode.js version number.
-		 * @memberOf punycode
-		 * @type String
-		 */
-		'version': '1.3.2',
-		/**
-		 * An object of methods to convert from JavaScript's internal character
-		 * representation (UCS-2) to Unicode code points, and back.
-		 * @see <https://mathiasbynens.be/notes/javascript-encoding>
-		 * @memberOf punycode
-		 * @type Object
-		 */
-		'ucs2': {
-			'decode': ucs2decode,
-			'encode': ucs2encode
-		},
-		'decode': decode,
-		'encode': encode,
-		'toASCII': toASCII,
-		'toUnicode': toUnicode
-	};
-
-	/** Expose `punycode` */
-	// Some AMD build optimizers, like r.js, check for specific condition patterns
-	// like the following:
-	if (
-		typeof define == 'function' &&
-		typeof define.amd == 'object' &&
-		define.amd
-	) {
-		define('punycode', function() {
-			return punycode;
-		});
-	} else if (freeExports && freeModule) {
-		if (module.exports == freeExports) { // in Node.js or RingoJS v0.8.0+
-			freeModule.exports = punycode;
-		} else { // in Narwhal or RingoJS v0.7.0-
-			for (key in punycode) {
-				punycode.hasOwnProperty(key) && (freeExports[key] = punycode[key]);
-			}
-		}
-	} else { // in Rhino or a web browser
-		root.punycode = punycode;
-	}
-
-}(this));
-
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}],31:[function(require,module,exports){
-// Copyright Joyent, Inc. and other Node contributors.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a
-// copy of this software and associated documentation files (the
-// "Software"), to deal in the Software without restriction, including
-// without limitation the rights to use, copy, modify, merge, publish,
-// distribute, sublicense, and/or sell copies of the Software, and to permit
-// persons to whom the Software is furnished to do so, subject to the
-// following conditions:
-//
-// The above copyright notice and this permission notice shall be included
-// in all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
-// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
-// USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-'use strict';
-
-// If obj.hasOwnProperty has been overridden, then calling
-// obj.hasOwnProperty(prop) will break.
-// See: https://github.com/joyent/node/issues/1707
-function hasOwnProperty(obj, prop) {
-  return Object.prototype.hasOwnProperty.call(obj, prop);
-}
-
-module.exports = function(qs, sep, eq, options) {
-  sep = sep || '&';
-  eq = eq || '=';
-  var obj = {};
-
-  if (typeof qs !== 'string' || qs.length === 0) {
-    return obj;
-  }
-
-  var regexp = /\+/g;
-  qs = qs.split(sep);
-
-  var maxKeys = 1000;
-  if (options && typeof options.maxKeys === 'number') {
-    maxKeys = options.maxKeys;
-  }
-
-  var len = qs.length;
-  // maxKeys <= 0 means that we should not limit keys count
-  if (maxKeys > 0 && len > maxKeys) {
-    len = maxKeys;
-  }
-
-  for (var i = 0; i < len; ++i) {
-    var x = qs[i].replace(regexp, '%20'),
-        idx = x.indexOf(eq),
-        kstr, vstr, k, v;
-
-    if (idx >= 0) {
-      kstr = x.substr(0, idx);
-      vstr = x.substr(idx + 1);
-    } else {
-      kstr = x;
-      vstr = '';
-    }
-
-    k = decodeURIComponent(kstr);
-    v = decodeURIComponent(vstr);
-
-    if (!hasOwnProperty(obj, k)) {
-      obj[k] = v;
-    } else if (isArray(obj[k])) {
-      obj[k].push(v);
-    } else {
-      obj[k] = [obj[k], v];
-    }
-  }
-
-  return obj;
-};
-
-var isArray = Array.isArray || function (xs) {
-  return Object.prototype.toString.call(xs) === '[object Array]';
-};
-
-},{}],32:[function(require,module,exports){
-// Copyright Joyent, Inc. and other Node contributors.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a
-// copy of this software and associated documentation files (the
-// "Software"), to deal in the Software without restriction, including
-// without limitation the rights to use, copy, modify, merge, publish,
-// distribute, sublicense, and/or sell copies of the Software, and to permit
-// persons to whom the Software is furnished to do so, subject to the
-// following conditions:
-//
-// The above copyright notice and this permission notice shall be included
-// in all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
-// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
-// USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-'use strict';
-
-var stringifyPrimitive = function(v) {
-  switch (typeof v) {
-    case 'string':
-      return v;
-
-    case 'boolean':
-      return v ? 'true' : 'false';
-
-    case 'number':
-      return isFinite(v) ? v : '';
-
-    default:
-      return '';
-  }
-};
-
-module.exports = function(obj, sep, eq, name) {
-  sep = sep || '&';
-  eq = eq || '=';
-  if (obj === null) {
-    obj = undefined;
-  }
-
-  if (typeof obj === 'object') {
-    return map(objectKeys(obj), function(k) {
-      var ks = encodeURIComponent(stringifyPrimitive(k)) + eq;
-      if (isArray(obj[k])) {
-        return map(obj[k], function(v) {
-          return ks + encodeURIComponent(stringifyPrimitive(v));
-        }).join(sep);
-      } else {
-        return ks + encodeURIComponent(stringifyPrimitive(obj[k]));
-      }
-    }).join(sep);
-
-  }
-
-  if (!name) return '';
-  return encodeURIComponent(stringifyPrimitive(name)) + eq +
-         encodeURIComponent(stringifyPrimitive(obj));
-};
-
-var isArray = Array.isArray || function (xs) {
-  return Object.prototype.toString.call(xs) === '[object Array]';
-};
-
-function map (xs, f) {
-  if (xs.map) return xs.map(f);
-  var res = [];
-  for (var i = 0; i < xs.length; i++) {
-    res.push(f(xs[i], i));
-  }
-  return res;
-}
-
-var objectKeys = Object.keys || function (obj) {
-  var res = [];
-  for (var key in obj) {
-    if (Object.prototype.hasOwnProperty.call(obj, key)) res.push(key);
-  }
-  return res;
-};
-
-},{}],33:[function(require,module,exports){
-'use strict';
-
-exports.decode = exports.parse = require('./decode');
-exports.encode = exports.stringify = require('./encode');
-
-},{"./decode":31,"./encode":32}],34:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.AccessLevel = undefined;
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _AccessLevelMap;
-
-var _lodash = require('lodash');
-
-var _lodash2 = _interopRequireDefault(_lodash);
-
-var _role = require('./role');
-
-var _role2 = _interopRequireDefault(_role);
-
-var _user = require('./user');
-
-var _user2 = _interopRequireDefault(_user);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; } /**
-                                                                                                                                                                                                                   * Copyright 2015 Oursky Ltd.
-                                                                                                                                                                                                                   *
-                                                                                                                                                                                                                   * Licensed under the Apache License, Version 2.0 (the "License");
-                                                                                                                                                                                                                   * you may not use this file except in compliance with the License.
-                                                                                                                                                                                                                   * You may obtain a copy of the License at
-                                                                                                                                                                                                                   *
-                                                                                                                                                                                                                   *     http://www.apache.org/licenses/LICENSE-2.0
-                                                                                                                                                                                                                   *
-                                                                                                                                                                                                                   * Unless required by applicable law or agreed to in writing, software
-                                                                                                                                                                                                                   * distributed under the License is distributed on an "AS IS" BASIS,
-                                                                                                                                                                                                                   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-                                                                                                                                                                                                                   * See the License for the specific language governing permissions and
-                                                                                                                                                                                                                   * limitations under the License.
-                                                                                                                                                                                                                   */
-
-
-var AccessLevel = exports.AccessLevel = {
-  NoAccessLevel: null,
-  ReadOnlyLevel: 'read',
-  ReadWriteLevel: 'write'
-};
-
-var AccessLevelMap = (_AccessLevelMap = {}, _defineProperty(_AccessLevelMap, AccessLevel.NoAccessLevel, 0), _defineProperty(_AccessLevelMap, AccessLevel.ReadOnlyLevel, 1), _defineProperty(_AccessLevelMap, AccessLevel.ReadWriteLevel, 2), _AccessLevelMap);
-
-function accessLevelNumber(level) {
-  return AccessLevelMap[level] || 0;
-}
-
-var ACL = function () {
-  function ACL(attrs) {
-    var _this = this;
-
-    _classCallCheck(this, ACL);
-
-    // default ACL: public read only
-    this.public = AccessLevel.ReadOnlyLevel;
-    this.roles = {};
-    this.users = {};
-
-    if (attrs) {
-      this.public = AccessLevel.NoAccessLevel;
-
-      _lodash2.default.forEach(attrs, function (perAttr) {
-        perAttr.level = perAttr.level || AccessLevel.ReadOnlyLevel;
-        if (perAttr.public) {
-          if (accessLevelNumber(perAttr.level) > accessLevelNumber(_this.public)) {
-            _this.public = perAttr.level;
-          }
-        } else if (perAttr.role) {
-          var theRole = _role2.default.define(perAttr.role);
-          var currentLevel = _this.roles[theRole.name];
-          if (accessLevelNumber(perAttr.level) > accessLevelNumber(currentLevel)) {
-            _this.roles[theRole.name] = perAttr.level;
-          }
-        } else if (perAttr.user_id) {
-          var theUser = new _user2.default({ user_id: perAttr.user_id }); //eslint-disable-line
-          var _currentLevel = _this.users[theUser.id];
-          if (accessLevelNumber(perAttr.level) > accessLevelNumber(_currentLevel)) {
-            _this.users[theUser.id] = perAttr.level;
-          }
-        } else {
-          throw new Error('Invalid ACL Entry: ' + JSON.stringify(perAttr));
-        }
-      });
-    }
-  }
-
-  _createClass(ACL, [{
-    key: 'toJSON',
-    value: function toJSON() {
-      var json = [];
-      if (this.public) {
-        json.push({
-          public: true,
-          level: this.public
-        });
-      }
-
-      _lodash2.default.each(this.roles, function (perRoleLevel, perRoleName) {
-        if (perRoleLevel) {
-          json.push({
-            role: perRoleName,
-            level: perRoleLevel
-          });
-        }
-      });
-
-      _lodash2.default.each(this.users, function (perUserLevel, perUserId) {
-        if (perUserLevel) {
-          json.push({
-            user_id: perUserId, //eslint-disable-line
-            level: perUserLevel
-          });
-        }
-      });
-
-      return json;
-    }
-  }, {
-    key: 'setPublicNoAccess',
-    value: function setPublicNoAccess() {
-      this.public = AccessLevel.NoAccessLevel;
-    }
-  }, {
-    key: 'setPublicReadOnly',
-    value: function setPublicReadOnly() {
-      this.public = AccessLevel.ReadOnlyLevel;
-    }
-  }, {
-    key: 'setPublicReadWriteAccess',
-    value: function setPublicReadWriteAccess() {
-      this.public = AccessLevel.ReadWriteLevel;
-    }
-  }, {
-    key: 'setNoAccessForRole',
-    value: function setNoAccessForRole(role) {
-      if (!role || !(role instanceof _role2.default)) {
-        throw new Error(role + ' is not a role.');
-      }
-
-      this.roles[role.name] = AccessLevel.NoAccessLevel;
-    }
-  }, {
-    key: 'setReadOnlyForRole',
-    value: function setReadOnlyForRole(role) {
-      if (!role || !(role instanceof _role2.default)) {
-        throw new Error(role + ' is not a role.');
-      }
-
-      this.roles[role.name] = AccessLevel.ReadOnlyLevel;
-    }
-  }, {
-    key: 'setReadWriteAccessForRole',
-    value: function setReadWriteAccessForRole(role) {
-      if (!role || !(role instanceof _role2.default)) {
-        throw new Error(role + ' is not a role.');
-      }
-
-      this.roles[role.name] = AccessLevel.ReadWriteLevel;
-    }
-  }, {
-    key: 'setNoAccessForUser',
-    value: function setNoAccessForUser(user) {
-      if (!user || !(user instanceof _user2.default)) {
-        throw new Error(user + ' is not a user.');
-      }
-
-      this.users[user.id] = AccessLevel.NoAccessLevel;
-    }
-  }, {
-    key: 'setReadOnlyForUser',
-    value: function setReadOnlyForUser(user) {
-      if (!user || !(user instanceof _user2.default)) {
-        throw new Error(user + ' is not a user.');
-      }
-
-      this.users[user.id] = AccessLevel.ReadOnlyLevel;
-    }
-  }, {
-    key: 'setReadWriteAccessForUser',
-    value: function setReadWriteAccessForUser(user) {
-      if (!user || !(user instanceof _user2.default)) {
-        throw new Error(user + ' is not a user.');
-      }
-
-      this.users[user.id] = AccessLevel.ReadWriteLevel;
-    }
-  }, {
-    key: 'hasPublicReadAccess',
-    value: function hasPublicReadAccess() {
-      return accessLevelNumber(this.public) >= accessLevelNumber(AccessLevel.ReadOnlyLevel);
-    }
-  }, {
-    key: 'hasPublicWriteAccess',
-    value: function hasPublicWriteAccess() {
-      return accessLevelNumber(this.public) === accessLevelNumber(AccessLevel.ReadWriteLevel);
-    }
-  }, {
-    key: 'hasReadAccess',
-    value: function hasReadAccess(role) {
-      return this.hasReadAccessForRole(role);
-    }
-  }, {
-    key: 'hasWriteAccess',
-    value: function hasWriteAccess(role) {
-      return this.hasWriteAccessForRole(role);
-    }
-  }, {
-    key: 'hasReadAccessForRole',
-    value: function hasReadAccessForRole(role) {
-      if (!role || !(role instanceof _role2.default)) {
-        throw new Error(role + ' is not a role.');
-      }
-
-      return this.hasPublicReadAccess() || accessLevelNumber(this.roles[role.name]) >= accessLevelNumber(AccessLevel.ReadOnlyLevel);
-    }
-  }, {
-    key: 'hasWriteAccessForRole',
-    value: function hasWriteAccessForRole(role) {
-      if (!role || !(role instanceof _role2.default)) {
-        throw new Error(role + ' is not a role.');
-      }
-
-      return this.hasPublicWriteAccess() || accessLevelNumber(this.roles[role.name]) >= accessLevelNumber(AccessLevel.ReadWriteLevel);
-    }
-  }, {
-    key: 'hasReadAccessForUser',
-    value: function hasReadAccessForUser(user) {
-      if (!user || !(user instanceof _user2.default)) {
-        throw new Error(user + ' is not a user.');
-      }
-
-      var roles = user.roles;
-
-      if (this.hasPublicReadAccess() || accessLevelNumber(this.users[user.id]) >= accessLevelNumber(AccessLevel.ReadOnlyLevel)) {
-        return true;
-      }
-
-      var _iteratorNormalCompletion = true;
-      var _didIteratorError = false;
-      var _iteratorError = undefined;
-
-      try {
-        for (var _iterator = roles[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-          var role = _step.value;
-
-          if (this.hasReadAccessForRole(role)) {
-            return true;
-          }
-        }
-      } catch (err) {
-        _didIteratorError = true;
-        _iteratorError = err;
-      } finally {
-        try {
-          if (!_iteratorNormalCompletion && _iterator.return) {
-            _iterator.return();
-          }
-        } finally {
-          if (_didIteratorError) {
-            throw _iteratorError;
-          }
-        }
-      }
-
-      return false;
-    }
-  }, {
-    key: 'hasWriteAccessForUser',
-    value: function hasWriteAccessForUser(user) {
-      if (!user || !(user instanceof _user2.default)) {
-        throw new Error(user + ' is not a user.');
-      }
-
-      var roles = user.roles;
-
-      if (this.hasPublicWriteAccess() || accessLevelNumber(this.users[user.id]) >= accessLevelNumber(AccessLevel.ReadWriteLevel)) {
-        return true;
-      }
-
-      var _iteratorNormalCompletion2 = true;
-      var _didIteratorError2 = false;
-      var _iteratorError2 = undefined;
-
-      try {
-        for (var _iterator2 = roles[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-          var role = _step2.value;
-
-          if (this.hasWriteAccessForRole(role)) {
-            return true;
-          }
-        }
-      } catch (err) {
-        _didIteratorError2 = true;
-        _iteratorError2 = err;
-      } finally {
-        try {
-          if (!_iteratorNormalCompletion2 && _iterator2.return) {
-            _iterator2.return();
-          }
-        } finally {
-          if (_didIteratorError2) {
-            throw _iteratorError2;
-          }
-        }
-      }
-
-      return false;
-    }
-  }], [{
-    key: 'fromJSON',
-    value: function fromJSON(attrs) {
-      return new ACL(attrs);
-    }
-  }]);
-
-  return ACL;
-}();
-
-exports.default = ACL;
-},{"./role":48,"./user":51,"lodash":53}],35:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); /**
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Copyright 2015 Oursky Ltd.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Licensed under the Apache License, Version 2.0 (the "License");
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * you may not use this file except in compliance with the License.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * You may obtain a copy of the License at
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *     http://www.apache.org/licenses/LICENSE-2.0
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Unless required by applicable law or agreed to in writing, software
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * distributed under the License is distributed on an "AS IS" BASIS,
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * See the License for the specific language governing permissions and
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * limitations under the License.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      */
-
-
-var _Base = require('Base64');
-
-var _w3cBlob = require('w3c-blob');
-
-var _w3cBlob2 = _interopRequireDefault(_w3cBlob);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Asset = function () {
-  function Asset(attrs) {
-    _classCallCheck(this, Asset);
-
-    attrs = attrs || {};
-
-    var name = attrs.name;
-    var file = attrs.file;
-    var contentType = attrs.contentType;
-    var url = attrs.url;
-    var base64 = attrs.base64;
-
-    if (!name) {
-      throw new Error('Name should not be empty');
-    }
-    if (file) {
-      if (!contentType && file.type) {
-        contentType = file.type;
-      }
-      if (!contentType) {
-        throw new Error('ContentType cannot be inferred from file, ' + 'please provide a content type manually');
-      }
-    } else if (url) {
-      // do nothing
-    } else if (base64) {
-      file = base64StringtoBlob(base64);
-    } else {
-      throw new Error('Either file or url should present');
-    }
-
-    this.name = name;
-    this.file = file;
-    this.contentType = contentType;
-    this.url = url;
-  }
-
-  _createClass(Asset, [{
-    key: 'toJSON',
-    value: function toJSON() {
-      return {
-        $type: 'asset',
-        $name: this.name,
-        $url: this.url
-      };
-    }
-  }], [{
-    key: 'fromJSON',
-    value: function fromJSON(attrs) {
-      return new Asset({
-        name: attrs.$name,
-        url: attrs.$url,
-        contentType: attrs.$content_type
-      });
-    }
-  }]);
-
-  return Asset;
-}();
-
-// adapted from https://gist.github.com/fupslot/5015897
-
-
-exports.default = Asset;
-function base64StringtoBlob(base64) {
-  var byteString = (0, _Base.atob)(base64);
-
-  var ab = new ArrayBuffer(byteString.length);
-  var ia = new Uint8Array(ab);
-  for (var i = 0; i < byteString.length; i++) {
-    ia[i] = byteString.charCodeAt(i);
-  }
-
-  var bb = new _w3cBlob2.default([ab]);
-  return bb;
-}
-module.exports = exports['default'];
-},{"Base64":7,"w3c-blob":72}],36:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); /**
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Copyright 2015 Oursky Ltd.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Licensed under the Apache License, Version 2.0 (the "License");
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * you may not use this file except in compliance with the License.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * You may obtain a copy of the License at
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *     http://www.apache.org/licenses/LICENSE-2.0
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Unless required by applicable law or agreed to in writing, software
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * distributed under the License is distributed on an "AS IS" BASIS,
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * See the License for the specific language governing permissions and
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * limitations under the License.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      */
-
-
-var _store = require('./store');
-
-var _store2 = _interopRequireDefault(_store);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Cache = function () {
-  function Cache(prefix) {
-    _classCallCheck(this, Cache);
-
-    this._maxRetryCount = 1;
-    this.prefix = prefix;
-    this.map = {};
-    this.store = (0, _store2.default)();
-  }
-
-  _createClass(Cache, [{
-    key: '_applyNamespaceOnKey',
-    value: function _applyNamespaceOnKey(key) {
-      return this.prefix + ':' + key;
-    }
-  }, {
-    key: 'set',
-    value: function set(key, value) {
-      var namespacedKey = this._applyNamespaceOnKey(key);
-      this.map[namespacedKey] = value;
-      var stringifiedValue = JSON.stringify(value);
-      return this._setWithRetry(namespacedKey, stringifiedValue);
-    }
-  }, {
-    key: '_setWithRetry',
-    value: function _setWithRetry(namespacedKey, stringifiedValue) {
-      var _this = this;
-
-      var attempt = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
-
-      return this.store.setPurgeableItem(namespacedKey, stringifiedValue).catch(function (error) {
-        // base case
-        if (attempt >= _this._maxRetryCount) {
-          return Promise.reject(error);
-        }
-        // recursive case
-        // It seems that there is no easy way to
-        // convert an asynchronous recursion into
-        // iterative style with for-loop.
-        return _this._setWithRetry(namespacedKey, stringifiedValue, attempt + 1);
-      });
-    }
-  }, {
-    key: 'get',
-    value: function get(key) {
-      var namespacedKey = this._applyNamespaceOnKey(key);
-      if (this.map[namespacedKey]) {
-        return Promise.resolve(this.map[namespacedKey]);
-      }
-      return this.store.getItem(namespacedKey).then(function (jsonStr) {
-        if (jsonStr) {
-          var cachedJSON = JSON.parse(jsonStr);
-          return cachedJSON;
-        }
-        return Promise.reject();
-      });
-    }
-  }]);
-
-  return Cache;
-}();
-
-exports.default = Cache;
-module.exports = exports['default'];
-},{"./store":49}],37:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.USER_CHANGED = undefined;
-
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
-
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _asset = require('./asset');
-
-var _asset2 = _interopRequireDefault(_asset);
-
-var _user = require('./user');
-
-var _user2 = _interopRequireDefault(_user);
-
-var _role = require('./role');
-
-var _role2 = _interopRequireDefault(_role);
-
-var _acl = require('./acl');
-
-var _acl2 = _interopRequireDefault(_acl);
-
-var _record = require('./record');
-
-var _record2 = _interopRequireDefault(_record);
-
-var _reference = require('./reference');
-
-var _reference2 = _interopRequireDefault(_reference);
-
-var _query = require('./query');
-
-var _query2 = _interopRequireDefault(_query);
-
-var _database = require('./database');
-
-var _database2 = _interopRequireDefault(_database);
-
-var _pubsub = require('./pubsub');
-
-var _pubsub2 = _interopRequireDefault(_pubsub);
-
-var _relation = require('./relation');
-
-var _geolocation = require('./geolocation');
-
-var _geolocation2 = _interopRequireDefault(_geolocation);
-
-var _store = require('./store');
-
-var _store2 = _interopRequireDefault(_store);
-
-var _type = require('./type');
-
-var _error = require('./error');
-
-var _util = require('./util');
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-/**
- * Copyright 2015 Oursky Ltd.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-/* eslint camelcase: 0 */
-var request = require('superagent');
-var _ = require('lodash');
-var ee = require('event-emitter');
-
-var USER_CHANGED = exports.USER_CHANGED = 'userChanged';
-
-var Container = function () {
-  function Container() {
-    _classCallCheck(this, Container);
-
-    this.url = 'http://myapp.skygeario.com/';
-    this.apiKey = null;
-    this.token = null;
-    this._accessToken = null;
-    this._user = null;
-    this._deviceID = null;
-    this._getAccessToken();
-    this._getDeviceID();
-    this._privateDB = null;
-    this._publicDB = null;
-    this.request = request;
-    this._internalPubsub = new _pubsub2.default(this, true);
-    this._relation = new _relation.RelationAction(this);
-    this._pubsub = new _pubsub2.default(this, false);
-    this.autoPubsub = true;
-    this._cacheResponse = true;
-    this.ee = ee({});
-    /**
-     * Options for how much time to wait for client request to complete.
-     *
-     * @type {Object}
-     * @property {number} [timeoutOptions.deadline] - deadline for the request
-     * and response to complete (in milliseconds)
-     * @property {number} [timeoutOptions.response=60000] - maximum time to
-     * wait for an response (in milliseconds)
-     *
-     * @see http://visionmedia.github.io/superagent/#timeouts
-     */
-    this.timeoutOptions = {
-      response: 60000
-    };
-  }
-
-  _createClass(Container, [{
-    key: 'config',
-    value: function config(options) {
-      var _this = this;
-
-      if (options.apiKey) {
-        this.apiKey = options.apiKey;
-      }
-      if (options.endPoint) {
-        this.endPoint = options.endPoint;
-      }
-
-      var promises = [this._getUser(), this._getAccessToken(), this._getDeviceID()];
-      return Promise.all(promises).then(function () {
-        _this.reconfigurePubsubIfNeeded();
-        return _this;
-      }, function () {
-        return _this;
-      });
-    }
-  }, {
-    key: 'configApiKey',
-    value: function configApiKey(ApiKey) {
-      this.apiKey = ApiKey;
-    }
-  }, {
-    key: 'clearCache',
-    value: function clearCache() {
-      return this.store.clearPurgeableItems();
-    }
-  }, {
-    key: 'onUserChanged',
-    value: function onUserChanged(listener) {
-      this.ee.on(USER_CHANGED, listener);
-      return new _util.EventHandle(this.ee, USER_CHANGED, listener);
-    }
-  }, {
-    key: 'signupWithUsername',
-    value: function signupWithUsername(username, password) {
-      return this._signup(username, null, password);
-    }
-  }, {
-    key: 'signupWithEmail',
-    value: function signupWithEmail(email, password) {
-      return this._signup(null, email, password);
-    }
-  }, {
-    key: 'signupWithUsernameAndProfile',
-    value: function signupWithUsernameAndProfile(username, password) {
-      var _this2 = this;
-
-      var profile = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
-
-      return this.signupWithUsername(username, password).then(function (user) {
-        return _this2._createProfile(user, profile);
-      });
-    }
-  }, {
-    key: 'signupWithEmailAndProfile',
-    value: function signupWithEmailAndProfile(email, password) {
-      var _this3 = this;
-
-      var profile = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
-
-      return this.signupWithEmail(email, password).then(function (user) {
-        return _this3._createProfile(user, profile);
-      });
-    }
-  }, {
-    key: 'signupAnonymously',
-    value: function signupAnonymously() {
-      return this._signup(null, null, null);
-    }
-  }, {
-    key: '_signup',
-    value: function _signup(username, email, password) {
-      return this.makeRequest('auth:signup', {
-        username: username,
-        email: email,
-        password: password
-      }).then(this._authResolve.bind(this));
-    }
-  }, {
-    key: '_createProfile',
-    value: function _createProfile(user, profile) {
-      var record = new this.UserRecord(_extends({
-        _id: 'user/' + user.id
-      }, profile));
-      return this.publicDB.save(record);
-    }
-  }, {
-    key: '_authResolve',
-    value: function _authResolve(body) {
-      var _this4 = this;
-
-      return Promise.all([this._setUser(body.result), this._setAccessToken(body.result.access_token)]).then(function () {
-        _this4.reconfigurePubsubIfNeeded();
-        return _this4.currentUser;
-      });
-    }
-  }, {
-    key: 'loginWithUsername',
-    value: function loginWithUsername(username, password) {
-      return this.makeRequest('auth:login', {
-        username: username,
-        password: password
-      }).then(this._authResolve.bind(this));
-    }
-  }, {
-    key: 'loginWithEmail',
-    value: function loginWithEmail(email, password) {
-      return this.makeRequest('auth:login', {
-        email: email,
-        password: password
-      }).then(this._authResolve.bind(this));
-    }
-  }, {
-    key: 'loginWithProvider',
-    value: function loginWithProvider(provider, authData) {
-      return this.makeRequest('auth:login', {
-        provider: provider,
-        auth_data: authData
-      }).then(this._authResolve.bind(this));
-    }
-  }, {
-    key: 'logout',
-    value: function logout() {
-      var _this5 = this;
-
-      return this.unregisterDevice().then(function () {
-        _this5.clearCache();
-        return _this5.makeRequest('auth:logout', {});
-      }, function (error) {
-        if (error.code === _error.ErrorCodes.InvalidArgument && error.message === 'Missing device id') {
-          _this5.clearCache();
-          return _this5.makeRequest('auth:logout', {});
-        }
-        return Promise.reject(error);
-      }).then(function () {
-        return Promise.all([_this5._setAccessToken(null), _this5._setUser(null)]).then(function () {
-          return null;
-        });
-      }, function (err) {
-        return _this5._setAccessToken(null).then(function () {
-          return Promise.reject(err);
-        });
-      });
-    }
-  }, {
-    key: 'whoami',
-    value: function whoami() {
-      return this.makeRequest('me', {}).then(this._authResolve.bind(this));
-    }
-  }, {
-    key: 'changePassword',
-    value: function changePassword(oldPassword, newPassword) {
-      var invalidate = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
-
-      if (invalidate) {
-        throw Error('Invalidate is not yet implemented');
-      }
-      return this.makeRequest('auth:password', {
-        old_password: oldPassword,
-        password: newPassword
-      }).then(this._authResolve.bind(this));
-    }
-  }, {
-    key: 'saveUser',
-    value: function saveUser(user) {
-      var _this6 = this;
-
-      var payload = {
-        _id: user.id, // eslint-disable-line camelcase
-        email: user.email,
-        username: user.username
-      };
-      if (user.roles) {
-        payload.roles = _.map(user.roles, function (perRole) {
-          return perRole.name;
-        });
-      }
-      return this.makeRequest('user:update', payload).then(function (body) {
-        var newUser = _this6.User.fromJSON(body.result);
-        var currentUser = _this6.currentUser;
-
-        if (newUser && currentUser && newUser.id === currentUser.id) {
-          return _this6._setUser(body.result);
-        } else {
-          return newUser;
-        }
-      });
-    }
-  }, {
-    key: '_getUsersBy',
-    value: function _getUsersBy(emails, usernames) {
-      var _this7 = this;
-
-      return this.makeRequest('user:query', {
-        emails: emails,
-        usernames: usernames
-      }).then(function (body) {
-        return body.result.map(function (r) {
-          return new _this7.User(r.data);
-        });
-      });
-    }
-  }, {
-    key: 'getUsersByEmail',
-    value: function getUsersByEmail(emails) {
-      return this._getUsersBy(emails, null);
-    }
-  }, {
-    key: 'getUsersByUsername',
-    value: function getUsersByUsername(usernames) {
-      return this._getUsersBy(null, usernames);
-    }
-  }, {
-    key: 'discoverUserByEmails',
-    value: function discoverUserByEmails(emails) {
-      return this.publicDB.query(new _query2.default(this.UserRecord).havingEmails(emails));
-    }
-  }, {
-    key: 'discoverUserByUsernames',
-    value: function discoverUserByUsernames(usernames) {
-      return this.publicDB.query(new _query2.default(this.UserRecord).havingUsernames(usernames));
-    }
-  }, {
-    key: 'setAdminRole',
-    value: function setAdminRole(roles) {
-      var roleNames = _.map(roles, function (perRole) {
-        return perRole.name;
-      });
-
-      return this.makeRequest('role:admin', {
-        roles: roleNames
-      }).then(function (body) {
-        return body.result;
-      });
-    }
-  }, {
-    key: 'setDefaultRole',
-    value: function setDefaultRole(roles) {
-      var roleNames = _.map(roles, function (perRole) {
-        return perRole.name;
-      });
-
-      return this.makeRequest('role:default', {
-        roles: roleNames
-      }).then(function (body) {
-        return body.result;
-      });
-    }
-  }, {
-    key: 'setDefaultACL',
-    value: function setDefaultACL(acl) {
-      this.Record.defaultACL = acl;
-    }
-  }, {
-    key: 'setRecordCreateAccess',
-    value: function setRecordCreateAccess(recordClass, roles) {
-      var roleNames = _.map(roles, function (perRole) {
-        return perRole.name;
-      });
-
-      return this.makeRequest('schema:access', {
-        type: recordClass.recordType,
-        create_roles: roleNames
-      }).then(function (body) {
-        return body.result;
-      });
-    }
-  }, {
-    key: 'setRecordDefaultAccess',
-    value: function setRecordDefaultAccess(recordClass, acl) {
-      return this.makeRequest('schema:default_access', {
-        type: recordClass.recordType,
-        default_access: acl.toJSON()
-      }).then(function (body) {
-        return body.result;
-      });
-    }
-  }, {
-    key: 'inferDeviceType',
-    value: function inferDeviceType() {
-      // To be implmented by subclass
-      // TODO: probably web / node, handle it later
-      throw new Error('Failed to infer type, please supply a value');
-    }
-
-    /**
-     * You can register your device for receiving push notifications.
-     *
-     * @param {string} token - The device token
-     * @param {string} type - The device type (either 'ios' or 'android')
-     * @param {string} topic - The device topic, refer to application bundle
-     * identifier on iOS and application package name on Android.
-     **/
-
-  }, {
-    key: 'registerDevice',
-    value: function registerDevice(token, type, topic) {
-      var _this8 = this;
-
-      if (!token) {
-        throw new Error('Token cannot be empty');
-      }
-      if (!type) {
-        type = this.inferDeviceType();
-      }
-
-      var deviceID = void 0;
-      if (this.deviceID) {
-        deviceID = this.deviceID;
-      }
-
-      return this.makeRequest('device:register', {
-        type: type,
-        id: deviceID,
-        topic: topic,
-        device_token: token
-      }).then(function (body) {
-        return _this8._setDeviceID(body.result.id);
-      }, function (error) {
-        // Will set the deviceID to null and try again iff deviceID is not null.
-        // The deviceID can be deleted remotely, by apns feedback.
-        // If the current deviceID is already null, will regards as server fail.
-        var errorCode = null;
-        if (error.error) {
-          errorCode = error.error.code;
-        }
-        if (_this8.deviceID && errorCode === _error.ErrorCodes.ResourceNotFound) {
-          return _this8._setDeviceID(null).then(function () {
-            return _this8.registerDevice(token, type);
-          });
-        } else {
-          return Promise.reject(error);
-        }
-      });
-    }
-  }, {
-    key: 'unregisterDevice',
-    value: function unregisterDevice() {
-      var _this9 = this;
-
-      if (!this.deviceID) {
-        return Promise.reject(new _error.SkygearError('Missing device id', _error.ErrorCodes.InvalidArgument));
-      }
-
-      return this.makeRequest('device:unregister', {
-        id: this.deviceID
-      }).then(function () {
-        // do nothing
-        return;
-      }, function (error) {
-        var errorCode = null;
-        if (error.error) {
-          errorCode = error.error.code;
-        }
-        if (errorCode === _error.ErrorCodes.ResourceNotFound) {
-          // regard it as success
-          return _this9._setDeviceID(null);
-        } else {
-          return Promise.reject(error);
-        }
-      });
-    }
-  }, {
-    key: 'lambda',
-    value: function lambda(name, data) {
-      return this.makeRequest(name, {
-        args: data
-      }).then(function (resp) {
-        return resp.result;
-      });
-    }
-  }, {
-    key: 'makeUploadAssetRequest',
-    value: function makeUploadAssetRequest(asset) {
-      var _this10 = this;
-
-      return new Promise(function (resolve, reject) {
-        _this10.makeRequest('asset:put', {
-          filename: asset.name,
-          'content-type': asset.contentType,
-          'content-size': asset.file.size
-        }).then(function (res) {
-          var newAsset = _asset2.default.fromJSON(res.result.asset);
-          var postRequest = res.result['post-request'];
-
-          var postUrl = postRequest.action;
-          if (postUrl.indexOf('/') === 0) {
-            postUrl = postUrl.substring(1);
-          }
-          if (postUrl.indexOf('http') !== 0) {
-            postUrl = _this10.url + postUrl;
-          }
-
-          var _request = _this10.request.post(postUrl).set('X-Skygear-API-Key', _this10.apiKey);
-          if (postRequest['extra-fields']) {
-            _.forEach(postRequest['extra-fields'], function (value, key) {
-              _request = _request.field(key, value);
-            });
-          }
-
-          _request.attach('file', asset.file).end(function (err) {
-            if (err) {
-              reject(err);
-              return;
-            }
-
-            resolve(newAsset);
-          });
-        }, function (err) {
-          reject(err);
-        });
-      });
-    }
-  }, {
-    key: 'sendRequestObject',
-    value: function sendRequestObject(action, data) {
-      if (this.apiKey === null) {
-        throw Error('Please config ApiKey');
-      }
-      var _data = _.assign({
-        action: action,
-        api_key: this.apiKey,
-        access_token: this.accessToken
-      }, data);
-      var _action = action.replace(/:/g, '/');
-      var req = this.request.post(this.url + _action).set('X-Skygear-API-Key', this.apiKey).set('X-Skygear-Access-Token', this.accessToken).set('Accept', 'application/json');
-      if (this.timeoutOptions !== undefined && this.timeoutOptions !== null) {
-        req = req.timeout(this.timeoutOptions);
-      }
-      return req.send(_data);
-    }
-  }, {
-    key: 'makeRequest',
-    value: function makeRequest(action, data) {
-      var _this11 = this;
-
-      var _request = this.sendRequestObject(action, data);
-      return new Promise(function (resolve, reject) {
-        _request.end(function (err, res) {
-          // Do an application JSON parse because in some condition, the
-          // content-type header will got strip and it will not deserial
-          // the json for us.
-          var body = getRespJSON(res);
-
-          if (err) {
-            var _ret = function () {
-              var skyErr = body.error || err;
-              if (skyErr.code === _this11.ErrorCodes.AccessTokenNotAccepted) {
-                return {
-                  v: Promise.all([_this11._setAccessToken(null), _this11._setUser(null)]).then(function () {
-                    reject({
-                      status: err.status,
-                      error: skyErr
-                    });
-                  })
-                };
-              }
-              reject({
-                status: err.status,
-                error: skyErr
-              });
-            }();
-
-            if ((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object") return _ret.v;
-          } else {
-            resolve(body);
-          }
-        });
-      });
-    }
-  }, {
-    key: '_getUser',
-    value: function _getUser() {
-      var _this12 = this;
-
-      return this.store.getItem('skygear-user').then(function (userJSON) {
-        var attrs = JSON.parse(userJSON);
-        _this12._user = _this12.User.fromJSON(attrs);
-      }, function (err) {
-        console.warn('Failed to get user', err);
-        _this12._user = null;
-        return null;
-      });
-    }
-  }, {
-    key: '_setUser',
-    value: function _setUser(attrs) {
-      var _this13 = this;
-
-      var value = void 0;
-      if (attrs !== null) {
-        this._user = new this.User(attrs);
-        value = JSON.stringify(this._user.toJSON());
-      } else {
-        this._user = null;
-        value = null;
-      }
-
-      var setItem = value === null ? this.store.removeItem('skygear-user') : this.store.setItem('skygear-user', value);
-      return setItem.then(function () {
-        _this13.ee.emit(USER_CHANGED, _this13._user);
-        return value;
-      }, function (err) {
-        console.warn('Failed to persist user', err);
-        return value;
-      });
-    }
-  }, {
-    key: '_getAccessToken',
-    value: function _getAccessToken() {
-      var _this14 = this;
-
-      return this.store.getItem('skygear-accesstoken').then(function (token) {
-        _this14._accessToken = token;
-        return token;
-      }, function (err) {
-        console.warn('Failed to get access', err);
-        _this14._accessToken = null;
-        return null;
-      });
-    }
-  }, {
-    key: '_setAccessToken',
-    value: function _setAccessToken(value) {
-      this._accessToken = value;
-      var setItem = value === null ? this.store.removeItem('skygear-accesstoken') : this.store.setItem('skygear-accesstoken', value);
-      return setItem.then(function () {
-        return value;
-      }, function (err) {
-        console.warn('Failed to persist accesstoken', err);
-        return value;
-      });
-    }
-  }, {
-    key: '_getDeviceID',
-    value: function _getDeviceID() {
-      var _this15 = this;
-
-      return this.store.getItem('skygear-deviceid').then(function (deviceID) {
-        _this15._deviceID = deviceID;
-        return deviceID;
-      }, function (err) {
-        console.warn('Failed to get deviceid', err);
-        _this15._deviceID = null;
-        return null;
-      });
-    }
-  }, {
-    key: '_setDeviceID',
-    value: function _setDeviceID(value) {
-      var _this16 = this;
-
-      this._deviceID = value;
-      var setItem = value === null ? this.store.removeItem('skygear-deviceid') : this.store.setItem('skygear-deviceid', value);
-      return setItem.then(function () {
-        return value;
-      }, function (err) {
-        console.warn('Failed to persist deviceid', err);
-        return value;
-      }).then(function (deviceID) {
-        _this16.reconfigurePubsubIfNeeded();
-        return deviceID;
-      });
-    }
-  }, {
-    key: 'reconfigurePubsubIfNeeded',
-    value: function reconfigurePubsubIfNeeded() {
-      if (!this.autoPubsub) {
-        return;
-      }
-
-      this._internalPubsub.reset();
-      if (this.deviceID !== null) {
-        this._internalPubsub.subscribe('_sub_' + this.deviceID, function (data) {
-          console.log('Receivied data for subscription: ' + data);
-        });
-      }
-      this._internalPubsub.reconfigure();
-      this._pubsub.reconfigure();
-    }
-
-    /**
-     * Subscribe a function callback on receiving message at the specified
-     * channel.
-     *
-     * @param {string} channel - Name of the channel to subscribe
-     * @param {function(object:*)} callback - function to be trigger with
-     * incoming data.
-     **/
-
-  }, {
-    key: 'on',
-    value: function on(channel, callback) {
-      return this.pubsub.on(channel, callback);
-    }
-
-    /**
-     * Unsubscribe a function callback on the specified channel.
-     *
-     * If pass in `callback` is null, all callbacks in the specified channel
-     * will be removed.
-     *
-     * @param {string} channel - Name of the channel to unsubscribe
-     * @param {function(object:*)=} callback - function to be trigger with
-     * incoming data.
-     **/
-
-  }, {
-    key: 'off',
-    value: function off(channel) {
-      var callback = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
-
-      this.pubsub.off(channel, callback);
-    }
-  }, {
-    key: 'defaultACL',
-    get: function get() {
-      return this.Record.defaultACL;
-    }
-  }, {
-    key: 'Query',
-    get: function get() {
-      return _query2.default;
-    }
-  }, {
-    key: 'User',
-    get: function get() {
-      return _user2.default;
-    }
-  }, {
-    key: 'Role',
-    get: function get() {
-      return _role2.default;
-    }
-  }, {
-    key: 'ACL',
-    get: function get() {
-      return _acl2.default;
-    }
-  }, {
-    key: 'Record',
-    get: function get() {
-      return _record2.default;
-    }
-  }, {
-    key: 'UserRecord',
-    get: function get() {
-      return _record2.default.extend('user');
-    }
-  }, {
-    key: 'Sequence',
-    get: function get() {
-      return _type.Sequence;
-    }
-  }, {
-    key: 'Asset',
-    get: function get() {
-      return _asset2.default;
-    }
-  }, {
-    key: 'Reference',
-    get: function get() {
-      return _reference2.default;
-    }
-  }, {
-    key: 'Geolocation',
-    get: function get() {
-      return _geolocation2.default;
-    }
-  }, {
-    key: 'ErrorCodes',
-    get: function get() {
-      return _error.ErrorCodes;
-    }
-  }, {
-    key: 'currentUser',
-    get: function get() {
-      return this._user;
-    }
-  }, {
-    key: 'cacheResponse',
-    get: function get() {
-      return this._cacheResponse;
-    },
-    set: function set(value) {
-      var b = !!value;
-      this._cacheResponse = b;
-      if (this._publicDB) {
-        this._publicDB.cacheResponse = b;
-      }
-      if (this._privateDB) {
-        this._privateDB.cacheResponse = b;
-      }
-    }
-  }, {
-    key: 'accessToken',
-    get: function get() {
-      return this._accessToken;
-    }
-  }, {
-    key: 'deviceID',
-    get: function get() {
-      return this._deviceID;
-    }
-  }, {
-    key: 'endPoint',
-    get: function get() {
-      return this.url;
-    },
-    set: function set(newEndPoint) {
-      // TODO: Check the format
-      if (newEndPoint) {
-        if (!_.endsWith(newEndPoint, '/')) {
-          newEndPoint = newEndPoint + '/';
-        }
-        this.url = newEndPoint;
-      }
-    }
-  }, {
-    key: 'store',
-    get: function get() {
-      if (!this._store) {
-        this._store = (0, _store2.default)();
-      }
-      return this._store;
-    }
-  }, {
-    key: 'publicDB',
-    get: function get() {
-      if (this._publicDB === null) {
-        this._publicDB = new _database2.default('_public', this);
-        this._publicDB.cacheResponse = this._cacheResponse;
-      }
-      return this._publicDB;
-    }
-  }, {
-    key: 'privateDB',
-    get: function get() {
-      if (this.accessToken === null) {
-        throw new Error('You must login before access to privateDB');
-      }
-      if (this._privateDB === null) {
-        this._privateDB = new _database2.default('_private', this);
-        this._privateDB.cacheResponse = this._cacheResponse;
-      }
-      return this._privateDB;
-    }
-  }, {
-    key: 'Database',
-    get: function get() {
-      return _database2.default;
-    }
-  }, {
-    key: 'relation',
-    get: function get() {
-      return this._relation;
-    }
-  }, {
-    key: 'pubsub',
-    get: function get() {
-      return this._pubsub;
-    }
-  }]);
-
-  return Container;
-}();
-
-exports.default = Container;
-
-
-function getRespJSON(res) {
-  if (res && res.body) {
-    return res.body;
-  }
-  if (res && res.text) {
-    try {
-      return JSON.parse(res.text);
-    } catch (err) {
-      console.log('getRespJSON error. error: ', err);
-    }
-  }
-
-  return {};
-}
-},{"./acl":34,"./asset":35,"./database":38,"./error":39,"./geolocation":40,"./pubsub":42,"./query":43,"./record":45,"./reference":46,"./relation":47,"./role":48,"./store":49,"./type":50,"./user":51,"./util":52,"event-emitter":26,"lodash":53,"superagent":57}],38:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _cache = require('./cache');
-
-var _cache2 = _interopRequireDefault(_cache);
-
-var _asset = require('./asset');
-
-var _asset2 = _interopRequireDefault(_asset);
-
-var _record = require('./record');
-
-var _record2 = _interopRequireDefault(_record);
-
-var _query2 = require('./query');
-
-var _query3 = _interopRequireDefault(_query2);
-
-var _query_result = require('./query_result');
-
-var _query_result2 = _interopRequireDefault(_query_result);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-/**
- * Copyright 2015 Oursky Ltd.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-var _ = require('lodash');
-
-var Database = function () {
-  function Database(dbID, container) {
-    _classCallCheck(this, Database);
-
-    if (dbID !== '_public' && dbID !== '_private' && dbID !== '_union') {
-      throw new Error('Invalid database_id');
-    }
-    this.dbID = dbID;
-    this.container = container;
-    this._cacheStore = new _cache2.default(this.dbID);
-    this._cacheResponse = true;
-  }
-
-  _createClass(Database, [{
-    key: 'getRecordByID',
-    value: function getRecordByID(id) {
-      var _Record$parseID = _record2.default.parseID(id),
-          _Record$parseID2 = _slicedToArray(_Record$parseID, 2),
-          recordType = _Record$parseID2[0],
-          recordId = _Record$parseID2[1];
-
-      var query = new _query3.default(_record2.default.extend(recordType)).equalTo('_id', recordId);
-      return this.query(query).then(function (users) {
-        if (users.length === 1) {
-          return users[0];
-        } else {
-          throw new Error(id + ' does not exist');
-        }
-      });
-    }
-  }, {
-    key: 'query',
-    value: function query(_query) {
-      var _this = this;
-
-      var cacheCallback = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-
-      var remoteReturned = false;
-      var cacheStore = this.cacheStore;
-      var Cls = _query.recordCls;
-      var queryJSON = _query.toJSON();
-
-      if (!queryJSON.offset && queryJSON.page > 0) {
-        queryJSON.offset = queryJSON.limit * (queryJSON.page - 1);
-      }
-
-      var payload = _.assign({
-        database_id: this.dbID //eslint-disable-line
-      }, queryJSON);
-
-      if (cacheCallback) {
-        cacheStore.get(_query.hash).then(function (body) {
-          if (remoteReturned) {
-            return;
-          }
-          var records = _.map(body.result, function (attrs) {
-            return new Cls(attrs);
-          });
-          var result = _query_result2.default.createFromResult(records, body.info);
-          cacheCallback(result, true);
-        }, function (err) {
-          console.log('No cache found', err);
-        });
-      }
-      return this.container.makeRequest('record:query', payload).then(function (body) {
-        var records = _.map(body.result, function (attrs) {
-          return new Cls(attrs);
-        });
-        var result = _query_result2.default.createFromResult(records, body.info);
-        remoteReturned = true;
-        if (_this.cacheResponse) {
-          cacheStore.set(_query.hash, body);
-        }
-        return result;
-      });
-    }
-  }, {
-    key: '_presaveAssetTask',
-    value: function _presaveAssetTask(key, asset) {
-      if (asset.file) {
-        return this.container.makeUploadAssetRequest(asset).then(function (a) {
-          return [key, a];
-        });
-      } else {
-        return Promise.resolve([key, asset]);
-      }
-    }
-  }, {
-    key: '_presave',
-    value: function _presave(record) {
-      // for every (key, value) pair, process the pair in a Promise
-      // the Promise should be resolved by the transformed [key, value] pair
-      var tasks = _.map(record, function (value, key) {
-        if (value instanceof _asset2.default) {
-          return this._presaveAssetTask(key, value);
-        } else {
-          return Promise.resolve([key, value]);
-        }
-      });
-
-      return Promise.all(tasks).then(function (keyvalues) {
-        _.each(keyvalues, function (_ref) {
-          var _ref2 = _slicedToArray(_ref, 2),
-              key = _ref2[0],
-              value = _ref2[1];
-
-          record[key] = value;
-        });
-        return record;
-      });
-    }
-  }, {
-    key: 'del',
-    value: function del(record) {
-      return this.delete(record);
-    }
-  }, {
-    key: 'save',
-    value: function save(_records) {
-      var _this2 = this;
-
-      var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-
-      var records = _records;
-      if (!_.isArray(records)) {
-        records = [records];
-      }
-
-      if (_.some(records, function (r) {
-        return r === undefined || r === null;
-      })) {
-        return Promise.reject('Invalid input, unable to save undefined and null');
-      }
-
-      var presaveTasks = _.map(records, this._presave.bind(this));
-      return Promise.all(presaveTasks).then(function (processedRecords) {
-        var payload = {
-          database_id: _this2.dbID //eslint-disable-line
-        };
-
-        if (options.atomic) {
-          payload.atomic = true;
-        }
-
-        payload.records = _.map(processedRecords, function (perRecord) {
-          return perRecord.toJSON();
-        });
-
-        return _this2.container.makeRequest('record:save', payload);
-      }).then(function (body) {
-        var results = body.result;
-        var savedRecords = [];
-        var errors = [];
-
-        _.forEach(results, function (perResult, idx) {
-          if (perResult._type === 'error') {
-            savedRecords[idx] = undefined;
-            errors[idx] = perResult;
-          } else {
-            records[idx].update(perResult);
-            records[idx].updateTransient(perResult._transient, true);
-
-            savedRecords[idx] = records[idx];
-            errors[idx] = undefined;
-          }
-        });
-
-        if (records.length === 1) {
-          if (errors[0]) {
-            return Promise.reject(errors[0]);
-          }
-          return savedRecords[0];
-        }
-        return { savedRecords: savedRecords, errors: errors };
-      });
-    }
-  }, {
-    key: 'delete',
-    value: function _delete(_records) {
-      var records = _records;
-      if (!_.isArray(records)) {
-        records = [records];
-      }
-
-      var ids = _.map(records, function (perRecord) {
-        return perRecord.id;
-      });
-      var payload = {
-        database_id: this.dbID, //eslint-disable-line
-        ids: ids
-      };
-
-      return this.container.makeRequest('record:delete', payload).then(function (body) {
-        var results = body.result;
-        var errors = [];
-
-        _.forEach(results, function (perResult, idx) {
-          if (perResult._type === 'error') {
-            errors[idx] = perResult;
-          } else {
-            errors[idx] = undefined;
-          }
-        });
-
-        if (records.length === 1) {
-          if (errors[0]) {
-            return Promise.reject(errors[0]);
-          }
-          return;
-        }
-        return errors;
-      });
-    }
-  }, {
-    key: 'cacheStore',
-    get: function get() {
-      return this._cacheStore;
-    }
-  }, {
-    key: 'cacheResponse',
-    get: function get() {
-      return this._cacheResponse;
-    },
-    set: function set(value) {
-      var b = !!value;
-      this._cacheResponse = b;
-    }
-  }]);
-
-  return Database;
-}();
-
-exports.default = Database;
-module.exports = exports['default'];
-},{"./asset":35,"./cache":36,"./query":43,"./query_result":44,"./record":45,"lodash":53}],39:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.SkygearError = exports.ErrorCodes = undefined;
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _lodash = require('lodash');
-
-var _lodash2 = _interopRequireDefault(_lodash);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-function _extendableBuiltin(cls) {
-  function ExtendableBuiltin() {
-    cls.apply(this, arguments);
-  }
-
-  ExtendableBuiltin.prototype = Object.create(cls.prototype, {
-    constructor: {
-      value: cls,
-      enumerable: false,
-      writable: true,
-      configurable: true
-    }
-  });
-
-  if (Object.setPrototypeOf) {
-    Object.setPrototypeOf(ExtendableBuiltin, cls);
-  } else {
-    ExtendableBuiltin.__proto__ = cls;
-  }
-
-  return ExtendableBuiltin;
-} /**
-   * Copyright 2015 Oursky Ltd.
-   *
-   * Licensed under the Apache License, Version 2.0 (the "License");
-   * you may not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *     http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing, software
-   * distributed under the License is distributed on an "AS IS" BASIS,
-   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   * See the License for the specific language governing permissions and
-   * limitations under the License.
-   */
-
-
-var ErrorCodes = exports.ErrorCodes = {
-  NotAuthenticated: 101,
-  PermissionDenied: 102,
-  AccessKeyNotAccepted: 103,
-  AccessTokenNotAccepted: 104,
-  InvalidCredentials: 105,
-  InvalidSignature: 106,
-  BadRequest: 107,
-  InvalidArgument: 108,
-  Duplicated: 109,
-  ResourceNotFound: 110,
-  NotSupported: 111,
-  NotImplemented: 112,
-  ConstraintViolated: 113,
-  IncompatibleSchema: 114,
-  AtomicOperationFailure: 115,
-  PartialOperationFailure: 116,
-  UndefinedOperation: 117,
-  PluginUnavailable: 118,
-  PluginTimeout: 119,
-  RecordQueryInvalid: 120,
-  PluginInitializing: 121,
-  UnexpectedError: 10000
-};
-
-function codeToString(code) {
-  return _lodash2.default.findKey(ErrorCodes, function (value) {
-    return code === value;
-  });
-}
-
-/**
- * SkygearError is an error object containing information of an error
- * occurred.
- *
- * @example
- * let err = new SkygearError(
- *   'Unable to parse data',
- *   UnexpectedError,
- *   { content: 'BADDATA' }
- * );
- */
-
-var SkygearError = exports.SkygearError = function (_extendableBuiltin2) {
-  _inherits(SkygearError, _extendableBuiltin2);
-
-  /**
-   * Creates a SkygearError.
-   * @param {string} message - an error message
-   * @param {number} code - a code for the error condition
-   * @param {Object} info - more information about the error
-   */
-  function SkygearError(message, code, info) {
-    _classCallCheck(this, SkygearError);
-
-    var _this = _possibleConstructorReturn(this, (SkygearError.__proto__ || Object.getPrototypeOf(SkygearError)).call(this, message));
-
-    _this.message = message;
-    _this.code = code || ErrorCodes.UnexpectedError;
-    _this.info = info || null;
-    return _this;
-  }
-
-  _createClass(SkygearError, [{
-    key: 'toString',
-    value: function toString() {
-      return 'SkygearError: ' + this.message;
-    }
-
-    /* eslint-disable complexity */
-
-  }, {
-    key: 'toLocaleString',
-    value: function toLocaleString() {
-      switch (this.code) {
-        case ErrorCodes.NotAuthenticated:
-          return 'You have to be authenticated to perform this operation.';
-        case ErrorCodes.PermissionDenied:
-        case ErrorCodes.AccessKeyNotAccepted:
-        case ErrorCodes.AccessTokenNotAccepted:
-          return 'You are not allowed to perform this operation.';
-        case ErrorCodes.InvalidCredentials:
-          return 'You are not allowed to log in because ' + 'the credentials you provided are not valid.';
-        case ErrorCodes.InvalidSignature:
-        case ErrorCodes.BadRequest:
-          return 'The server is unable to process the request.';
-        case ErrorCodes.InvalidArgument:
-          return 'The server is unable to process the data.';
-        case ErrorCodes.Duplicated:
-          return 'This request contains duplicate of an existing ' + 'resource on the server.';
-        case ErrorCodes.ResourceNotFound:
-          return 'The requested resource is not found.';
-        case ErrorCodes.NotSupported:
-          return 'This operation is not supported.';
-        case ErrorCodes.NotImplemented:
-          return 'This operation is not implemented.';
-        case ErrorCodes.ConstraintViolated:
-        case ErrorCodes.IncompatibleSchema:
-        case ErrorCodes.AtomicOperationFailure:
-        case ErrorCodes.PartialOperationFailure:
-          return 'A problem occurred while processing this request.';
-        case ErrorCodes.UndefinedOperation:
-          return 'The requested operation is not available.';
-        case ErrorCodes.PluginInitializing:
-        case ErrorCodes.PluginUnavailable:
-          return 'The server is not ready yet.';
-        case ErrorCodes.PluginTimeout:
-          return 'The server took too long to process.';
-        case ErrorCodes.RecordQueryInvalid:
-          return 'A problem occurred while processing this request.';
-        default:
-          return 'An unexpected error has occurred.';
-      }
-    }
-    /* eslint-enable complexity */
-
-  }, {
-    key: 'toJSON',
-    value: function toJSON() {
-      var result = {
-        name: codeToString(this.code),
-        code: this.code,
-        message: this.message
-      };
-      if (this.info) {
-        result.info = this.info;
-      }
-      return result;
-    }
-  }], [{
-    key: 'fromJSON',
-    value: function fromJSON(attrs) {
-      return new SkygearError(attrs.message, attrs.code || ErrorCodes.UnexpectedError, attrs.info || null);
-    }
-  }]);
-
-  return SkygearError;
-}(_extendableBuiltin(Error));
-},{"lodash":53}],40:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); /**
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Copyright 2015 Oursky Ltd.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Licensed under the Apache License, Version 2.0 (the "License");
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * you may not use this file except in compliance with the License.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * You may obtain a copy of the License at
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *     http://www.apache.org/licenses/LICENSE-2.0
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Unless required by applicable law or agreed to in writing, software
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * distributed under the License is distributed on an "AS IS" BASIS,
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * See the License for the specific language governing permissions and
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * limitations under the License.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      */
-
-
-var _lodash = require('lodash');
-
-var _lodash2 = _interopRequireDefault(_lodash);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Geolocation = function () {
-  function Geolocation(latitude, longitude) {
-    _classCallCheck(this, Geolocation);
-
-    if (!_lodash2.default.isNumber(latitude)) {
-      throw new Error('Latitude is not a number');
-    }
-    if (latitude < -90 || latitude > 90) {
-      throw new Error('Latitude is not in expected range (-90, 90)');
-    }
-    if (!_lodash2.default.isNumber(longitude)) {
-      throw new Error('Longitude is not a number');
-    }
-    if (longitude < -180 || longitude > 180) {
-      throw new Error('Longitude is not in expected range (-180, 180)');
-    }
-    this.latitude = latitude;
-    this.longitude = longitude;
-  }
-
-  _createClass(Geolocation, [{
-    key: 'toJSON',
-    value: function toJSON() {
-      return {
-        $lat: this.latitude,
-        $lng: this.longitude,
-        $type: 'geo'
-      };
-    }
-  }], [{
-    key: 'fromJSON',
-    value: function fromJSON(attrs) {
-      return new Geolocation(attrs.$lat, attrs.$lng);
-    }
-  }]);
-
-  return Geolocation;
-}();
-
-exports.default = Geolocation;
-module.exports = exports['default'];
-},{"lodash":53}],41:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _container = require('./container');
-
-var _container2 = _interopRequireDefault(_container);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var defaultContainer = new _container2.default(); /**
-                                                   * Copyright 2015 Oursky Ltd.
-                                                   *
-                                                   * Licensed under the Apache License, Version 2.0 (the "License");
-                                                   * you may not use this file except in compliance with the License.
-                                                   * You may obtain a copy of the License at
-                                                   *
-                                                   *     http://www.apache.org/licenses/LICENSE-2.0
-                                                   *
-                                                   * Unless required by applicable law or agreed to in writing, software
-                                                   * distributed under the License is distributed on an "AS IS" BASIS,
-                                                   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-                                                   * See the License for the specific language governing permissions and
-                                                   * limitations under the License.
-                                                   */
-exports.default = defaultContainer;
-module.exports = exports['default'];
-},{"./container":37}],42:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _util = require('./util');
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-/**
- * Copyright 2015 Oursky Ltd.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-var _ = require('lodash');
-var _ws = require('websocket');
-var WebSocket = null;
-if (_ws) {
-  WebSocket = _ws.w3cwebsocket;
-} else {
-  WebSocket = window.WebSocket; //eslint-disable-line
-}
-var url = require('url');
-var ee = require('event-emitter');
-
-var ON_OPEN = 'onOpen';
-var ON_CLOSE = 'onClose';
-
-var Pubsub = function () {
-  function Pubsub(container) {
-    var internal = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-
-    _classCallCheck(this, Pubsub);
-
-    this._container = container;
-    this._ws = null;
-    this._internal = internal;
-    this._queue = [];
-    this.ee = ee({});
-    this._handlers = {};
-    this._reconnectWait = 5000;
-    this._retryCount = 0;
-  }
-
-  _createClass(Pubsub, [{
-    key: 'onOpen',
-    value: function onOpen(listener) {
-      this.ee.on(ON_OPEN, listener);
-      return new _util.EventHandle(this.ee, ON_OPEN, listener);
-    }
-  }, {
-    key: 'onClose',
-    value: function onClose(listener) {
-      this.ee.on(ON_CLOSE, listener);
-      return new _util.EventHandle(this.ee, ON_CLOSE, listener);
-    }
-  }, {
-    key: '_pubsubUrl',
-    value: function _pubsubUrl() {
-      var internal = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
-
-      var parsedUrl = url.parse(this._container.endPoint);
-      var protocol = parsedUrl.protocol === 'https:' ? 'wss:' : 'ws:';
-      var path = internal ? '/_/pubsub' : '/pubsub';
-      var queryString = '?api_key=' + this._container.apiKey;
-      return protocol + '//' + parsedUrl.host + path + queryString;
-    }
-  }, {
-    key: '_hasCredentials',
-    value: function _hasCredentials() {
-      return !!this._container.apiKey;
-    }
-  }, {
-    key: 'reconfigure',
-    value: function reconfigure() {
-      if (!this._hasCredentials()) {
-        this.close();
-        return;
-      }
-
-      this.connect();
-    }
-  }, {
-    key: '_onopen',
-    value: function _onopen() {
-      var _this = this;
-
-      // Trigger registed onOpen callback
-      this.ee.emit(ON_OPEN, true);
-
-      // Resubscribe previously subscribed channels
-      _.forEach(this._handlers, function (handlers, channel) {
-        _this._sendSubscription(channel);
-      });
-
-      // Flushed queued messages to the server
-      _.forEach(this._queue, function (data) {
-        _this._ws.send(JSON.stringify(data));
-      });
-      this._queue = [];
-    }
-  }, {
-    key: '_onmessage',
-    value: function _onmessage(data) {
-      _.forEach(this._handlers[data.channel], function (handler) {
-        handler(data.data);
-      });
-    }
-  }, {
-    key: 'on',
-    value: function on(channel, callback) {
-      return this.subscribe(channel, callback);
-    }
-
-    /**
-     * Subscribe the channel for just one message.
-     *
-     * This function takes one message off from a pubsub channel,
-     * returning a promise of that message. When a message
-     * is received from the channel, the channel will be unsubscribed.
-     *
-     * @param {string} channel Channel to listen on
-     * @return {Promise} Promise of next message in this channel
-     */
-
-  }, {
-    key: 'once',
-    value: function once(channel) {
-      var _this2 = this;
-
-      return new Promise(function (resolve) {
-        var handler = function handler(data) {
-          _this2.unsubscribe(channel, handler);
-          resolve(data);
-        };
-        _this2.subscribe(channel, handler);
-      });
-    }
-  }, {
-    key: 'publish',
-    value: function publish(channel, data) {
-      if (!channel) {
-        throw new Error('Missing channel to publish');
-      }
-
-      if (!data) {
-        throw new Error('Missing data to publish');
-      }
-
-      var publishData = {
-        action: 'pub',
-        channel: channel,
-        data: data
-      };
-      if (this.connected) {
-        this._ws.send(JSON.stringify(publishData));
-      } else {
-        this._queue.push(publishData);
-      }
-    }
-  }, {
-    key: '_sendSubscription',
-    value: function _sendSubscription(channel) {
-      if (this.connected) {
-        var data = {
-          action: 'sub',
-          channel: channel
-        };
-        this._ws.send(JSON.stringify(data));
-      }
-    }
-  }, {
-    key: '_sendRemoveSubscription',
-    value: function _sendRemoveSubscription(channel) {
-      if (this.connected) {
-        var data = {
-          action: 'unsub',
-          channel: channel
-        };
-        this._ws.send(JSON.stringify(data));
-      }
-    }
-  }, {
-    key: 'off',
-    value: function off(channel) {
-      var callback = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
-
-      this.unsubscribe(channel, callback);
-    }
-  }, {
-    key: 'subscribe',
-    value: function subscribe(channel, handler) {
-      if (!channel) {
-        throw new Error('Missing channel to subscribe');
-      }
-
-      var alreadyExists = this.hasHandlers(channel);
-      this._register(channel, handler);
-      if (!alreadyExists) {
-        this._sendSubscription(channel);
-      }
-      return handler;
-    }
-  }, {
-    key: 'unsubscribe',
-    value: function unsubscribe(channel) {
-      var _this3 = this;
-
-      var handler = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
-
-      if (!channel) {
-        throw new Error('Missing channel to unsubscribe');
-      }
-
-      if (!this.hasHandlers(channel)) {
-        return;
-      }
-
-      var handlersToRemove;
-      if (handler) {
-        handlersToRemove = [handler];
-      } else {
-        handlersToRemove = this._handlers[channel];
-      }
-
-      _.forEach(handlersToRemove, function (handlerToRemove) {
-        _this3._unregister(channel, handlerToRemove);
-      });
-
-      if (!this.hasHandlers(channel)) {
-        this._sendRemoveSubscription(channel);
-      }
-    }
-  }, {
-    key: 'hasHandlers',
-    value: function hasHandlers(channel) {
-      var handlers = this._handlers[channel];
-      return handlers ? handlers.length > 0 : false;
-    }
-  }, {
-    key: '_register',
-    value: function _register(channel, handler) {
-      if (!this._handlers[channel]) {
-        this._handlers[channel] = [];
-      }
-      this._handlers[channel].push(handler);
-    }
-  }, {
-    key: '_unregister',
-    value: function _unregister(channel, handler) {
-      var handlers = this._handlers[channel];
-      handlers = _.reject(handlers, function (item) {
-        return item === handler;
-      });
-      if (handlers.length > 0) {
-        this._handlers[channel] = handlers;
-      } else {
-        delete this._handlers[channel];
-      }
-    }
-  }, {
-    key: '_reconnect',
-    value: function _reconnect() {
-      var _this4 = this;
-
-      var interval = _.min([this._reconnectWait * this._retryCount, 60000]);
-      _.delay(function () {
-        _this4._retryCount += 1;
-        _this4.connect();
-      }, interval);
-    }
-  }, {
-    key: 'reset',
-    value: function reset() {
-      this.close();
-      this._handlers = {};
-    }
-  }, {
-    key: 'close',
-    value: function close() {
-      if (this._ws) {
-        this._ws.close();
-        this._ws = null;
-      }
-    }
-  }, {
-    key: '_setWebSocket',
-    value: function _setWebSocket(ws) {
-      var _this5 = this;
-
-      var emitter = this.ee;
-      this._ws = ws;
-
-      if (!this._ws) {
-        return;
-      }
-
-      this._ws.onopen = function () {
-        _this5._retryCount = 0;
-        _this5._onopen();
-      };
-      this._ws.onclose = function () {
-        emitter.emit(ON_CLOSE, false);
-        _this5._reconnect();
-      };
-      this._ws.onmessage = function (evt) {
-        var message;
-        try {
-          message = JSON.parse(evt.data);
-        } catch (e) {
-          console.log('Got malformed websocket data:', evt.data);
-          return;
-        }
-        _this5._onmessage(message);
-      };
-    }
-  }, {
-    key: 'connect',
-    value: function connect() {
-      if (!this._hasCredentials() || this.connected) {
-        return;
-      }
-
-      var pubsubUrl = this._pubsubUrl(this._internal);
-      var ws = new this.WebSocket(pubsubUrl);
-      this._setWebSocket(ws);
-    }
-  }, {
-    key: 'connected',
-    get: function get() {
-      return this._ws && this._ws.readyState === 1;
-    }
-  }, {
-    key: 'WebSocket',
-    get: function get() {
-      return WebSocket;
-    }
-  }]);
-
-  return Pubsub;
-}();
-
-exports.default = Pubsub;
-module.exports = exports['default'];
-},{"./util":52,"event-emitter":26,"lodash":53,"url":65,"websocket":73}],43:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); /**
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Copyright 2015 Oursky Ltd.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Licensed under the Apache License, Version 2.0 (the "License");
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * you may not use this file except in compliance with the License.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * You may obtain a copy of the License at
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *     http://www.apache.org/licenses/LICENSE-2.0
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Unless required by applicable law or agreed to in writing, software
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * distributed under the License is distributed on an "AS IS" BASIS,
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * See the License for the specific language governing permissions and
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * limitations under the License.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      */
-
-
-var _lodash = require('lodash');
-
-var _lodash2 = _interopRequireDefault(_lodash);
-
-var _md = require('md5');
-
-var _md2 = _interopRequireDefault(_md);
-
-var _util = require('./util');
-
-var _record = require('./record');
-
-var _record2 = _interopRequireDefault(_record);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-/**
-* Query object provides database query functions.
-* @example
-* const Note = skygear.Record.extend('note');
-* const query = new skygear.Query(Note);
-* query.equalTo('title', 'First note');
-* skygear.publicDB.query(query).then((notes) => {
-* }, (error) => {
-*   console.error(error)
-* });'
-*/
-
-var Query = function () {
-
-  /**
-   * constructor - Create Query object from a Record Class
-   * @param {Record} recordCls - Record Class
-   *
-   */
-  function Query(recordCls) {
-    _classCallCheck(this, Query);
-
-    if (!_record2.default.validType(recordCls.recordType)) {
-      throw new Error('RecordType is not valid. Please start with alphanumeric string.');
-    }
-    this.recordCls = recordCls;
-    this.recordType = recordCls.recordType;
-    this._predicate = [];
-    this._orPredicate = [];
-    this._sort = [];
-    this._include = {};
-    this._negation = false;
-    this.overallCount = false;
-    this.limit = 50;
-    this.offset = 0;
-    this.page = 0;
-  }
-
-  /**
-   * like - Set a like predicate
-   * @param  {string} key
-   * @param  {string} value
-   * @return {Query}  self
-   */
-
-  _createClass(Query, [{
-    key: 'like',
-    value: function like(key, value) {
-      this._predicate.push(['like', { $type: 'keypath', $val: key }, value]);
-      return this;
-    }
-
-    /**
-     * notLike - Set a negated like predicate
-     * @param  {string} key
-     * @param  {string} value
-     * @return {Query}  self
-     */
-
-  }, {
-    key: 'notLike',
-    value: function notLike(key, value) {
-      this._predicate.push(['not', ['like', { $type: 'keypath', $val: key }, value]]);
-
-      return this;
-    }
-
-    /**
-     * caseInsensitiveLike - Set a case-insensitive like predicate
-     * @param  {string} key
-     * @param  {string} value
-     * @return {Query}  self
-     */
-
-  }, {
-    key: 'caseInsensitiveLike',
-    value: function caseInsensitiveLike(key, value) {
-      this._predicate.push(['ilike', { $type: 'keypath', $val: key }, value]);
-      return this;
-    }
-
-    /**
-     * caseInsensitiveNotLike - Set a case-insensitive negated like predicate
-     * @param  {string} key
-     * @param  {string} value
-     * @return {Query}  self
-     */
-
-  }, {
-    key: 'caseInsensitiveNotLike',
-    value: function caseInsensitiveNotLike(key, value) {
-      this._predicate.push(['not', ['ilike', { $type: 'keypath', $val: key }, value]]);
-      return this;
-    }
-
-    /**
-     * equalTo - Set an equal predicate
-     * @param  {string} key
-     * @param  {string} value
-     * @return {Query}  self
-     */
-
-  }, {
-    key: 'equalTo',
-    value: function equalTo(key, value) {
-      this._predicate.push(['eq', { $type: 'keypath', $val: key }, value]);
-      return this;
-    }
-
-    /**
-     * notEqualTo - Set a not equal predicate
-     * @param  {string} key
-     * @param  {string} value
-     * @return {Query}  self
-     */
-
-  }, {
-    key: 'notEqualTo',
-    value: function notEqualTo(key, value) {
-      this._predicate.push(['neq', { $type: 'keypath', $val: key }, value]);
-      return this;
-    }
-
-    /**
-     * greaterThan - Set a greater than predicate
-     * @param  {string} key
-     * @param  {string} value
-     * @return {Query}  self
-     */
-
-  }, {
-    key: 'greaterThan',
-    value: function greaterThan(key, value) {
-      this._predicate.push(['gt', { $type: 'keypath', $val: key }, value]);
-      return this;
-    }
-
-    /**
-     * greaterThanOrEqualTo - Set a greater than or equal to predicate
-     * @param  {string} key
-     * @param  {string} value
-     * @return {Query}  self
-     */
-
-  }, {
-    key: 'greaterThanOrEqualTo',
-    value: function greaterThanOrEqualTo(key, value) {
-      this._predicate.push(['gte', { $type: 'keypath', $val: key }, value]);
-      return this;
-    }
-
-    /**
-     * lessThan - Set a less than predicate
-     * @param  {string} key
-     * @param  {string} value
-     * @return {Query}  self
-     */
-
-  }, {
-    key: 'lessThan',
-    value: function lessThan(key, value) {
-      this._predicate.push(['lt', { $type: 'keypath', $val: key }, value]);
-      return this;
-    }
-
-    /**
-     * lessThanOrEqualTo - Set a less than or equal to predicate
-     * @param  {string} key
-     * @param  {string} value
-     * @return {Query}  self
-     */
-
-  }, {
-    key: 'lessThanOrEqualTo',
-    value: function lessThanOrEqualTo(key, value) {
-      this._predicate.push(['lte', { $type: 'keypath', $val: key }, value]);
-      return this;
-    }
-
-    /**
-     * distanceLessThan - Set a distance less than query
-     * @param  {string} key
-     * @param  {Geolocation} loc
-     * @param  {Number}  distance
-     * @return {Query}  self
-     */
-
-  }, {
-    key: 'distanceLessThan',
-    value: function distanceLessThan(key, loc, distance) {
-      this._predicate.push(['lt', ['func', 'distance', { $type: 'keypath', $val: key }, { $type: 'geo', $lng: loc.longitude, $lat: loc.latitude }], distance]);
-      return this;
-    }
-
-    /**
-     * distanceGreaterThan - Set a distance greater than query
-     * @param  {string} key
-     * @param  {geolocation} loc
-     * @param  {Number}  distance
-     * @return {Query}  self
-     */
-
-  }, {
-    key: 'distanceGreaterThan',
-    value: function distanceGreaterThan(key, loc, distance) {
-      this._predicate.push(['gt', ['func', 'distance', { $type: 'keypath', $val: key }, { $type: 'geo', $lng: loc.longitude, $lat: loc.latitude }], distance]);
-      return this;
-    }
-
-    /**
-     * contains - Set a contains predicate
-     * @throws {Error}  Throws Error if lookupArray is not an array.
-     * @param  {string} key
-     * @param  {Array}   lookupArray - values
-     * @return {Query}  self
-     */
-
-  }, {
-    key: 'contains',
-    value: function contains(key, lookupArray) {
-      if (!_lodash2.default.isArray(lookupArray)) {
-        throw new Error('The second argument of contains must be an array.');
-      }
-
-      this._predicate.push(['in', { $type: 'keypath', $val: key }, lookupArray]);
-      return this;
-    }
-
-    /**
-     * notContains - Set a not contains predicate
-     * @throws {Error}  Throws Error if lookupArray is not an array.
-     * @param  {string} key
-     * @param  {Array}   lookupArray - values
-     * @return {Query}  self
-     */
-
-  }, {
-    key: 'notContains',
-    value: function notContains(key, lookupArray) {
-      if (!_lodash2.default.isArray(lookupArray)) {
-        throw new Error('The second argument of contains must be an array.');
-      }
-
-      this._predicate.push(['not', ['in', { $type: 'keypath', $val: key }, lookupArray]]);
-      return this;
-    }
-
-    /**
-     * containsValue - Set a contains value predicate
-     * @throws {Error}  Throws Error if needle is not a string.
-     * @param  {string} key
-     * @param  {string} needle
-     * @return {Query}  self
-     */
-
-  }, {
-    key: 'containsValue',
-    value: function containsValue(key, needle) {
-      if (!_lodash2.default.isString(needle)) {
-        throw new Error('The second argument of containsValue must be a string.');
-      }
-
-      this._predicate.push(['in', needle, { $type: 'keypath', $val: key }]);
-      return this;
-    }
-
-    /**
-     * notContainsValue - Set a not contains value predicate
-     * @throws {Error}  Throws Error if needle is not a string.
-     * @param  {string} key
-     * @param  {string} needle
-     * @return {Query}  self
-     */
-
-  }, {
-    key: 'notContainsValue',
-    value: function notContainsValue(key, needle) {
-      if (!_lodash2.default.isString(needle)) {
-        throw new Error('The second argument of containsValue must be a string.');
-      }
-
-      this._predicate.push(['not', ['in', needle, { $type: 'keypath', $val: key }]]);
-      return this;
-    }
-
-    /**
-     * havingRelation - Set a having relation predicate
-     * @param  {string} key
-     * @param  {string} rel - relationship, either 'friend' or 'follow'
-     * @return {Query}  self
-     */
-
-  }, {
-    key: 'havingRelation',
-    value: function havingRelation(key, rel) {
-      var name = rel.prototype.identifier;
-      if (name === 'friend') {
-        name = '_friend';
-      } else if (name === 'follow') {
-        name = '_follow';
-      }
-
-      this._predicate.push(['func', 'userRelation', { $type: 'keypath', $val: key }, { $type: 'relation', $name: name, $direction: rel.prototype.direction }]);
-      return this;
-    }
-
-    /**
-     * notHavingRelation - Set a not having relation predicate
-     * @param  {string} key
-     * @param  {string} rel - relationship, either 'friend' or 'follow'
-     * @return {Query}  self
-     */
-
-  }, {
-    key: 'notHavingRelation',
-    value: function notHavingRelation(key, rel) {
-      var name = rel.prototype.identifier;
-      if (name === 'friend') {
-        name = '_friend';
-      } else if (name === 'follow') {
-        name = '_follow';
-      }
-
-      this._predicate.push(['not', ['func', 'userRelation', { $type: 'keypath', $val: key }, { $type: 'relation', $name: name, $direction: rel.prototype.direction }]]);
-      return this;
-    }
-
-    /**
-     * havingEmails - Set a having email predicate, for {user} record only.
-     * @throw  {Error}  throw Error if record type is not 'user'
-     * @param  {Array}  emails - emails of users.
-     * @return {Query}  self
-     */
-
-  }, {
-    key: 'havingEmails',
-    value: function havingEmails(emails) {
-      if (this.recordType !== 'user') {
-        throw new Error('havingEmails predicate only works on user record');
-      }
-      if (!_lodash2.default.isArray(emails)) {
-        emails = [emails];
-      }
-
-      this._predicate.push(['func', 'userDiscover', { emails: emails }]);
-      return this;
-    }
-
-    /**
-     * havingUsernames - Set a having username predicate, for {user} record only.
-     * @throw  {Error}  throw Error if record type is not 'user'
-     * @param  {Array}  usernames - usernames of users.
-     * @return {Query}  self
-     */
-
-  }, {
-    key: 'havingUsernames',
-    value: function havingUsernames(usernames) {
-      if (this.recordType !== 'user') {
-        throw new Error('havingUsernames predicate only works on user record');
-      }
-      if (!_lodash2.default.isArray(usernames)) {
-        usernames = [usernames];
-      }
-
-      this._predicate.push(['func', 'userDiscover', { usernames: usernames }]);
-      return this;
-    }
-
-    /**
-     * addDescending -  Set descending predicate
-     * @param {string} key
-     * @return {Query} self
-     */
-
-  }, {
-    key: 'addDescending',
-    value: function addDescending(key) {
-      this._sort.push([{ $type: 'keypath', $val: key }, 'desc']);
-      return this;
-    }
-
-    /**
-     * addAscending -  Set ascending predicate
-     * @param {string} key
-     * @return {Query} self
-     */
-
-  }, {
-    key: 'addAscending',
-    value: function addAscending(key) {
-      this._sort.push([{ $type: 'keypath', $val: key }, 'asc']);
-      return this;
-    }
-
-    /**
-     * addDescendingByDistance -  Set descending by distance predicate
-     * @param {string} key
-     * @param {Geolocation} loc
-     * @return {Query} self
-     */
-
-  }, {
-    key: 'addDescendingByDistance',
-    value: function addDescendingByDistance(key, loc) {
-      this._sort.push([['func', 'distance', { $type: 'keypath', $val: key }, { $type: 'geo', $lng: loc.longitude, $lat: loc.latitude }], 'desc']);
-      return this;
-    }
-
-    /**
-     * addAscendingByDistance -  Set ascending by distance predicate
-     * @param {string} key
-     * @param {Geolocation} loc
-     * @return {Query} self
-     */
-
-  }, {
-    key: 'addAscendingByDistance',
-    value: function addAscendingByDistance(key, loc) {
-      this._sort.push([['func', 'distance', { $type: 'keypath', $val: key }, { $type: 'geo', $lng: loc.longitude, $lat: loc.latitude }], 'asc']);
-      return this;
-    }
-
-    /**
-     * transientInclude - transient include
-     * @param {string} key
-     * @param {string} mapToKey
-     * @return {Query} this
-     */
-
-  }, {
-    key: 'transientInclude',
-    value: function transientInclude(key, mapToKey) {
-      mapToKey = mapToKey || key;
-      this._include[mapToKey] = {
-        $type: 'keypath',
-        $val: key
-      };
-      return this;
-    }
-
-    /**
-     * transientIncludeDistance - transient include distance
-     * @param {string} key
-     * @param {string} mapToKey
-     * @param {Geolocation} loc
-     * @return {Query} this
-     */
-
-  }, {
-    key: 'transientIncludeDistance',
-    value: function transientIncludeDistance(key, mapToKey, loc) {
-      mapToKey = mapToKey || key;
-      this._include[mapToKey] = ['func', 'distance', { $type: 'keypath', $val: key }, { $type: 'geo', $lng: loc.longitude, $lat: loc.latitude }];
-      return this;
-    }
-  }, {
-    key: '_orQuery',
-    value: function _orQuery(queries) {
-      var _this = this;
-
-      _lodash2.default.forEach(queries, function (query) {
-        _this._orPredicate.push(query.predicate);
-      });
-    }
-  }, {
-    key: '_getOrPredicate',
-    value: function _getOrPredicate() {
-      var _orPredicate = _lodash2.default.clone(this._orPredicate);
-      if (_orPredicate.length === 0) {
-        return [];
-      } else if (_orPredicate.length === 1) {
-        return _orPredicate[0];
-      } else {
-        _orPredicate.unshift('or');
-        return _orPredicate;
-      }
-    }
-
-    /**
-     * predicate - Preicate Function
-     * @return {Array} Array of {precidate}
-     */
-
-  }, {
-    key: 'toJSON',
-
-
-    /**
-     * toJSON - Serialize Query object
-     * @return {object}
-     */
-
-    /* eslint camelcase: 0 */
-    value: function toJSON() {
-      var payload = {
-        record_type: this.recordType,
-        limit: this.limit,
-        sort: this._sort,
-        include: this._include,
-        count: this.overallCount
-      };
-      if (this.predicate.length > 1) {
-        payload.predicate = (0, _util.toJSON)(this.predicate);
-      }
-      if (this.offset) {
-        payload.offset = this.offset;
-      }
-      if (this.page) {
-        payload.page = this.page;
-      }
-      return payload;
-    }
-
-    /**
-     * clone — clone a Query object from a Query object.
-     * @param {Query} query - query to be cloned.
-     */
-
-  }, {
-    key: 'predicate',
-    get: function get() {
-      var _predicate = _lodash2.default.clone(this._predicate);
-      if (this._orPredicate.length > 0) {
-        _predicate.push(this._getOrPredicate());
-      }
-
-      var innerPredicate = [];
-      if (_predicate.length === 1) {
-        innerPredicate = _predicate[0];
-      } else if (_predicate.length > 0) {
-        _predicate.unshift('and');
-        innerPredicate = _predicate;
-      }
-
-      if (this._negation) {
-        return ['not', innerPredicate];
-      } else {
-        return innerPredicate;
-      }
-    }
-
-    /**
-     * hash - Compute Query object hash code
-     * @return {string} md5 digest of serialized JSON
-     */
-
-  }, {
-    key: 'hash',
-    get: function get() {
-      return (0, _md2.default)(JSON.stringify(this.toJSON()));
-    }
-  }], [{
-    key: 'clone',
-    value: function clone(query) {
-      return Query.fromJSON(query.toJSON());
-    }
-
-    /**
-     * fromJSON — clone a Query object from payload.
-     * @param payload - Payload
-     */
-
-  }, {
-    key: 'fromJSON',
-    value: function fromJSON(payload) {
-      var json = _lodash2.default.cloneDeep(payload);
-      var recordCls = _record2.default.extend(json.record_type);
-      var query = new Query(recordCls);
-
-      query.limit = json.limit;
-      query._sort = json.sort;
-      query.overallCount = json.count;
-
-      if (json.offset) {
-        query.offset = json.offset;
-      }
-
-      if (json.page) {
-        query.page = json.page;
-      }
-
-      if (json.predicate && json.predicate.length > 1) {
-        (function () {
-          var innerPredicate = (0, _util.fromJSON)(json.predicate);
-
-          // unwrap 'not' operator
-          if (innerPredicate[0] === 'not') {
-            query._negation = true;
-            innerPredicate = innerPredicate[1];
-          }
-
-          // unwrap 'and' operator
-          if (innerPredicate.length > 1 && innerPredicate[0] === 'and') {
-            innerPredicate.shift();
-          }
-
-          var _predicate = [];
-          var _orPredicate = [];
-          _lodash2.default.each(innerPredicate, function (perPredicate) {
-            if (perPredicate.length > 1 && perPredicate[0] === 'or') {
-              _orPredicate = perPredicate;
-            } else {
-              _predicate.push(perPredicate);
-            }
-          });
-
-          // unwrap 'or' operator
-          if (_orPredicate.length > 1) {
-            _orPredicate.shift();
-          }
-
-          // handler for single predicate
-          if (_predicate.length > 1 && typeof _predicate[0] === 'string' && _predicate[0] !== 'and') {
-            _predicate = [_predicate];
-          }
-
-          query._predicate = _predicate;
-          query._orPredicate = _orPredicate;
-        })();
-      }
-
-      return query;
-    }
-
-    /**
-     * or - Return a disjunctive query from queries.
-     * @param {Query} queries - Queries
-     */
-
-  }, {
-    key: 'or',
-    value: function or() {
-      var recordType = null;
-      var recordCls = null;
-
-      for (var _len = arguments.length, queries = Array(_len), _key = 0; _key < _len; _key++) {
-        queries[_key] = arguments[_key];
-      }
-
-      _lodash2.default.forEach(queries, function (query) {
-        if (!recordType) {
-          recordType = query.recordType;
-          recordCls = query.recordCls;
-        }
-
-        if (recordType !== query.recordType) {
-          throw new Error('All queries must be for the same recordType.');
-        }
-      });
-
-      var orQuery = new Query(recordCls);
-      orQuery._orQuery(queries);
-      return orQuery;
-    }
-
-    /**
-     * not - Return a negated query
-     * @param {Query} query - Query
-     */
-
-  }, {
-    key: 'not',
-    value: function not(query) {
-      var queryClone = Query.clone(query);
-      queryClone._negation = !queryClone._negation;
-
-      return queryClone;
-    }
-  }]);
-
-  return Query;
-}();
-
-exports.default = Query;
-module.exports = exports['default'];
-},{"./record":45,"./util":52,"lodash":53,"md5":29}],44:[function(require,module,exports){
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-function _extendableBuiltin(cls) {
-  function ExtendableBuiltin() {
-    cls.apply(this, arguments);
-  }
-
-  ExtendableBuiltin.prototype = Object.create(cls.prototype, {
-    constructor: {
-      value: cls,
-      enumerable: false,
-      writable: true,
-      configurable: true
-    }
-  });
-
-  if (Object.setPrototypeOf) {
-    Object.setPrototypeOf(ExtendableBuiltin, cls);
-  } else {
-    ExtendableBuiltin.__proto__ = cls;
-  }
-
-  return ExtendableBuiltin;
-}
-
-/**
- * Copyright 2015 Oursky Ltd.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-var QueryResult = function (_extendableBuiltin2) {
-  _inherits(QueryResult, _extendableBuiltin2);
-
-  function QueryResult() {
-    _classCallCheck(this, QueryResult);
-
-    return _possibleConstructorReturn(this, (QueryResult.__proto__ || Object.getPrototypeOf(QueryResult)).apply(this, arguments));
-  }
-
-  _createClass(QueryResult, [{
-    key: "overallCount",
-    get: function get() {
-      return this._overallCount;
-    }
-  }], [{
-    key: "createFromResult",
-    value: function createFromResult(records, info) {
-      var result = new QueryResult();
-      records.forEach(function (val) {
-        return result.push(val);
-      });
-      result._overallCount = info ? info.count : undefined;
-      return result;
-    }
-  }]);
-
-  return QueryResult;
-}(_extendableBuiltin(Array));
-
-exports.default = QueryResult;
-module.exports = exports["default"];
-},{}],45:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); /**
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Copyright 2015 Oursky Ltd.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Licensed under the Apache License, Version 2.0 (the "License");
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * you may not use this file except in compliance with the License.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * You may obtain a copy of the License at
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *     http://www.apache.org/licenses/LICENSE-2.0
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Unless required by applicable law or agreed to in writing, software
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * distributed under the License is distributed on an "AS IS" BASIS,
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * See the License for the specific language governing permissions and
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * limitations under the License.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      */
-
-
-var _uuid = require('uuid');
-
-var _uuid2 = _interopRequireDefault(_uuid);
-
-var _lodash = require('lodash');
-
-var _lodash2 = _interopRequireDefault(_lodash);
-
-var _util = require('./util');
-
-var _acl = require('./acl');
-
-var _acl2 = _interopRequireDefault(_acl);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var defaultAttrs = {
-  _id: null,
-  _type: null
-};
-
-var _metaAttrs = {
-  _created_at: { //eslint-disable-line
-    parser: function parser(v) {
-      return new Date(v);
-    },
-    newKey: 'createdAt'
-  },
-  _updated_at: { //eslint-disable-line
-    parser: function parser(v) {
-      return new Date(v);
-    },
-    newKey: 'updatedAt'
-  },
-  _ownerID: {
-    parser: function parser(v) {
-      return v;
-    },
-    newKey: 'ownerID'
-  },
-  _created_by: { //eslint-disable-line
-    parser: function parser(v) {
-      return v;
-    },
-    newKey: 'createdBy'
-  },
-  _updated_by: { //eslint-disable-line
-    parser: function parser(v) {
-      return v;
-    },
-    newKey: 'updatedBy'
-  },
-  _access: {
-    parser: function parser(v) {
-      var acl = v;
-      if (v && v.toJSON) {
-        acl = v.toJSON();
-      }
-      return _acl2.default.fromJSON(acl);
-    },
-    newKey: '_access'
-  }
-};
-
-var _metaKey = _lodash2.default.map(_metaAttrs, function (obj) {
-  return obj.newKey;
-});
-
-var Record = function () {
-  function Record(recordType) {
-    var attrs = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : defaultAttrs;
-
-    _classCallCheck(this, Record);
-
-    if (!Record.validType(recordType)) {
-      throw new Error('RecordType is not valid. Please start with alphanumeric string.');
-    }
-    this._recordType = recordType;
-    // Favouring `id`, since `id` will always contains type information if
-    // exist.
-    var id = attrs.id || attrs._id;
-    if (id === null || id === undefined) {
-      id = _uuid2.default.v4();
-    } else {
-      var _Record$parseID = Record.parseID(id),
-          _Record$parseID2 = _slicedToArray(_Record$parseID, 2),
-          type = _Record$parseID2[0],
-          name = _Record$parseID2[1];
-
-      if (type !== this._recordType) {
-        throw new Error('_id is not valid. RecordType mismatch.');
-      }
-      id = name;
-    }
-    delete attrs.id; // because `id` is a readonly property
-    this._id = id;
-    this._access = null;
-    this.update(attrs);
-    this.updateTransient(attrs._transient);
-  }
-
-  _createClass(Record, [{
-    key: 'setAccess',
-    value: function setAccess(acl) {
-      this._access = acl;
-    }
-  }, {
-    key: 'update',
-    value: function update(attrs) {
-      var _this = this;
-
-      _lodash2.default.each(this.attributeKeys, function (key) {
-        delete _this[key];
-      });
-
-      _lodash2.default.each(attrs, function (value, key) {
-        if (key.indexOf('_') !== 0) {
-          if (_lodash2.default.isObject(value)) {
-            _this[key] = (0, _util.fromJSON)(value);
-          } else {
-            _this[key] = value;
-          }
-        } else if (key in _metaAttrs) {
-          var meta = _metaAttrs[key];
-          _this[meta.newKey] = meta.parser(value);
-        }
-      });
-    }
-  }, {
-    key: 'setPublicNoAccess',
-    value: function setPublicNoAccess() {
-      this.access.setPublicNoAccess();
-    }
-  }, {
-    key: 'setPublicReadOnly',
-    value: function setPublicReadOnly() {
-      this.access.setPublicReadOnly();
-    }
-  }, {
-    key: 'setPublicReadWriteAccess',
-    value: function setPublicReadWriteAccess() {
-      this.access.setPublicReadWriteAccess();
-    }
-  }, {
-    key: 'setNoAccessForRole',
-    value: function setNoAccessForRole(role) {
-      this.access.setNoAccessForRole(role);
-    }
-  }, {
-    key: 'setReadOnlyForRole',
-    value: function setReadOnlyForRole(role) {
-      this.access.setReadOnlyForRole(role);
-    }
-  }, {
-    key: 'setReadWriteAccessForRole',
-    value: function setReadWriteAccessForRole(role) {
-      this.access.setReadWriteAccessForRole(role);
-    }
-  }, {
-    key: 'setNoAccessForUser',
-    value: function setNoAccessForUser(user) {
-      this.access.setNoAccessForUser(user);
-    }
-  }, {
-    key: 'setReadOnlyForUser',
-    value: function setReadOnlyForUser(user) {
-      this.access.setReadOnlyForUser(user);
-    }
-  }, {
-    key: 'setReadWriteAccessForUser',
-    value: function setReadWriteAccessForUser(User) {
-      this.access.setReadWriteAccessForUser(User);
-    }
-  }, {
-    key: 'hasPublicReadAccess',
-    value: function hasPublicReadAccess() {
-      this.access.hasPublicReadAccess();
-    }
-  }, {
-    key: 'hasPublicWriteAccess',
-    value: function hasPublicWriteAccess() {
-      this.access.hasPublicWriteAccess();
-    }
-  }, {
-    key: 'hasReadAccess',
-    value: function hasReadAccess(role) {
-      this.access.hasReadAccess(role);
-    }
-  }, {
-    key: 'hasWriteAccess',
-    value: function hasWriteAccess(role) {
-      this.access.hasWriteAccess(role);
-    }
-  }, {
-    key: 'hasReadAccessForRole',
-    value: function hasReadAccessForRole(role) {
-      this.access.hasReadAccessForRole(role);
-    }
-  }, {
-    key: 'hasWriteAccessForRole',
-    value: function hasWriteAccessForRole(role) {
-      this.access.hasWriteAccessForRole(role);
-    }
-  }, {
-    key: 'hasReadAccessForUser',
-    value: function hasReadAccessForUser(user) {
-      this.access.hasReadAccessForUser(user);
-    }
-  }, {
-    key: 'hasWriteAccessForUser',
-    value: function hasWriteAccessForUser(user) {
-      this.access.hasWriteAccessForUser(user);
-    }
-  }, {
-    key: 'updateTransient',
-    value: function updateTransient(transient_) {
-      var merge = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-
-      var newTransient = merge ? _lodash2.default.clone(this._transient) : {};
-      _lodash2.default.each(transient_, function (value, key) {
-        // If value is an object and `_id` field exists, assume
-        // that it is a record.
-        if (_lodash2.default.isObject(value) && '_id' in value) {
-          newTransient[key] = recordDictToObj(value);
-        } else if (_lodash2.default.isObject(value)) {
-          newTransient[key] = (0, _util.fromJSON)(value);
-        } else {
-          newTransient[key] = value;
-        }
-      });
-      this._transient = newTransient;
-    }
-  }, {
-    key: 'toJSON',
-    value: function toJSON() {
-      var _this2 = this;
-
-      var payload = {
-        _id: this.id,
-        _access: this.access && this.access.toJSON()
-      };
-      _lodash2.default.each(this.attributeKeys, function (key) {
-        payload[key] = (0, _util.toJSON)(_this2[key]);
-      });
-
-      return payload;
-    }
-  }, {
-    key: 'recordType',
-    get: function get() {
-      return this._recordType;
-    }
-  }, {
-    key: 'id',
-    get: function get() {
-      return this._recordType + '/' + this._id;
-    }
-  }, {
-    key: 'access',
-    get: function get() {
-      return this._access;
-    }
-  }, {
-    key: 'attributeKeys',
-    get: function get() {
-      var keys = Object.keys(this);
-      return _lodash2.default.filter(keys, function (value) {
-        return value.indexOf('_') !== 0 && !_lodash2.default.includes(_metaKey, value);
-      });
-    }
-  }, {
-    key: '$transient',
-    get: function get() {
-      return this._transient;
-    }
-  }], [{
-    key: 'validType',
-    value: function validType(recordType) {
-      return recordType && recordType.indexOf('_') !== 0;
-    }
-  }, {
-    key: 'parseID',
-    value: function parseID(id) {
-      var tuple = id.split('/');
-      if (tuple.length < 2) {
-        throw new Error('_id is not valid. _id has to be in the format `type/id`');
-      }
-      return [tuple[0], tuple.slice(1).join('/')];
-    }
-  }, {
-    key: 'extend',
-    value: function extend(recordType, instFunc) {
-      if (!Record.validType(recordType)) {
-        throw new Error('RecordType is not valid. Please start with alphanumeric string.');
-      }
-      var RecordProto = {};
-      function RecordCls() {
-        var attrs = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : defaultAttrs;
-
-        Record.call(this, recordType, attrs);
-      }
-      _lodash2.default.assign(RecordProto, instFunc, {
-        constructor: RecordCls
-      });
-      RecordCls.prototype = _lodash2.default.create(Record.prototype, RecordProto);
-      RecordCls.recordType = recordType;
-      return RecordCls;
-    }
-  }]);
-
-  return Record;
-}();
-
-exports.default = Record;
-
-
-function recordDictToObj(dict) {
-  var Cls = Record.extend(dict._id.split('/')[0]);
-  return new Cls(dict);
-}
-module.exports = exports['default'];
-},{"./acl":34,"./util":52,"lodash":53,"uuid":55}],46:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); /**
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Copyright 2015 Oursky Ltd.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Licensed under the Apache License, Version 2.0 (the "License");
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * you may not use this file except in compliance with the License.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * You may obtain a copy of the License at
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *     http://www.apache.org/licenses/LICENSE-2.0
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Unless required by applicable law or agreed to in writing, software
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * distributed under the License is distributed on an "AS IS" BASIS,
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * See the License for the specific language governing permissions and
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * limitations under the License.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      */
-
-
-var _record = require('./record');
-
-var _record2 = _interopRequireDefault(_record);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Reference = function () {
-  function Reference(attrs) {
-    _classCallCheck(this, Reference);
-
-    var id;
-    if (typeof attrs === 'string') {
-      id = attrs;
-    } else {
-      id = attrs.$id;
-      if (!id) {
-        id = attrs.id;
-      }
-    }
-
-    if (!id) {
-      throw new Error('Empty record id');
-    }
-
-    // parse solely to test for string id validity
-    _record2.default.parseID(id);
-
-    this._id = id;
-  }
-
-  _createClass(Reference, [{
-    key: 'toJSON',
-    value: function toJSON() {
-      return {
-        $id: this._id,
-        $type: 'ref'
-      };
-    }
-  }, {
-    key: 'id',
-    get: function get() {
-      return this._id;
-    }
-  }]);
-
-  return Reference;
-}();
-
-exports.default = Reference;
-module.exports = exports['default'];
-},{"./record":45}],47:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.RelationAction = exports.RelationQueryResult = exports.RelationRemoveResult = exports.RelationResult = exports.RelationQuery = exports.Relation = exports.Mutual = exports.Inward = exports.Outward = undefined;
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _user = require('./user');
-
-var _user2 = _interopRequireDefault(_user);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-function _extendableBuiltin(cls) {
-  function ExtendableBuiltin() {
-    cls.apply(this, arguments);
-  }
-
-  ExtendableBuiltin.prototype = Object.create(cls.prototype, {
-    constructor: {
-      value: cls,
-      enumerable: false,
-      writable: true,
-      configurable: true
-    }
-  });
-
-  if (Object.setPrototypeOf) {
-    Object.setPrototypeOf(ExtendableBuiltin, cls);
-  } else {
-    ExtendableBuiltin.__proto__ = cls;
-  }
-
-  return ExtendableBuiltin;
-}
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-/**
- * Copyright 2015 Oursky Ltd.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-var _ = require('lodash');
-
-var Outward = exports.Outward = 'outward';
-var Inward = exports.Inward = 'inward';
-var Mutual = exports.Mutual = 'mutual';
-
-var format = /^[a-zA-Z]+$/;
-
-var Relation = exports.Relation = function () {
-  function Relation(identifier, direction) {
-    var targets = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
-
-    _classCallCheck(this, Relation);
-
-    if (!Relation.validName(identifier)) {
-      throw new Error('Relation identifier can only be [a-zA-Z]+');
-    }
-    this.identifier = identifier;
-    if (Relation.validDirection(direction)) {
-      this.direction = direction;
-    } else {
-      throw new Error('Relation direction not supported.');
-    }
-    this.targets = targets;
-    this.fails = [];
-  }
-
-  _createClass(Relation, [{
-    key: 'targetsID',
-    get: function get() {
-      return _.map(this.targets, function (user) {
-        return user.id;
-      });
-    }
-  }], [{
-    key: 'validDirection',
-    value: function validDirection(direction) {
-      return direction === Mutual || direction === Outward || direction === Inward;
-    }
-  }, {
-    key: 'validName',
-    value: function validName(identifier) {
-      return format.test(identifier);
-    }
-  }]);
-
-  return Relation;
-}();
-
-var RelationQuery = exports.RelationQuery = function () {
-  function RelationQuery(relationCls) {
-    _classCallCheck(this, RelationQuery);
-
-    this.identifier = relationCls.prototype.identifier;
-    this.direction = relationCls.prototype.direction;
-    this.limit = 50;
-    this.page = 0;
-  }
-
-  _createClass(RelationQuery, [{
-    key: 'toJSON',
-    value: function toJSON() {
-      return {
-        name: this.identifier,
-        direction: this.direction,
-        limit: this.limit,
-        page: this.page
-      };
-    }
-  }]);
-
-  return RelationQuery;
-}();
-
-var RelationResult = exports.RelationResult = function RelationResult(results) {
-  _classCallCheck(this, RelationResult);
-
-  this.success = [];
-  this.fails = [];
-  this.partialError = false;
-  var len = results.length;
-  for (var i = 0; i < len; i++) {
-    if (results[i].type === 'error') {
-      this.fails.push(results[i]);
-      this.partialError = true;
-    } else {
-      this.success.push(new _user2.default(results[i].data));
-    }
-  }
-};
-
-var RelationRemoveResult = exports.RelationRemoveResult = function RelationRemoveResult(results) {
-  _classCallCheck(this, RelationRemoveResult);
-
-  this.success = [];
-  this.fails = [];
-  this.partialError = false;
-  var len = results.length;
-  for (var i = 0; i < len; i++) {
-    if (results[i].type === 'error') {
-      this.fails.push(results[i]);
-      this.partialError = true;
-    } else {
-      this.success.push(results[i].id);
-    }
-  }
-};
-
-var RelationQueryResult = exports.RelationQueryResult = function (_extendableBuiltin2) {
-  _inherits(RelationQueryResult, _extendableBuiltin2);
-
-  function RelationQueryResult() {
-    _classCallCheck(this, RelationQueryResult);
-
-    return _possibleConstructorReturn(this, (RelationQueryResult.__proto__ || Object.getPrototypeOf(RelationQueryResult)).apply(this, arguments));
-  }
-
-  _createClass(RelationQueryResult, [{
-    key: 'overallCount',
-    get: function get() {
-      return this._overallCount;
-    }
-  }], [{
-    key: 'createFromBody',
-    value: function createFromBody(body) {
-      var users = _.map(body.result, function (attrs) {
-        return new _user2.default(attrs.data);
-      });
-      var result = new RelationQueryResult();
-      users.forEach(function (val) {
-        return result.push(val);
-      });
-      var info = body.info;
-      result._overallCount = info ? info.count : undefined;
-      return result;
-    }
-  }]);
-
-  return RelationQueryResult;
-}(_extendableBuiltin(Array));
-
-var RelationAction = exports.RelationAction = function () {
-  function RelationAction(container) {
-    _classCallCheck(this, RelationAction);
-
-    this.container = container;
-  }
-
-  _createClass(RelationAction, [{
-    key: 'query',
-    value: function query(queryObj) {
-      return this.container.makeRequest('relation:query', queryObj.toJSON()).then(RelationQueryResult.createFromBody);
-    }
-  }, {
-    key: 'queryFriend',
-    value: function queryFriend(actor) {
-      if (actor === null) {
-        actor = this.container.currentUser;
-      }
-      var query = new RelationQuery(this.Friend);
-      query.user = actor;
-      return this.query(query);
-    }
-  }, {
-    key: 'queryFollower',
-    value: function queryFollower(actor) {
-      if (actor === null) {
-        actor = this.container.currentUser;
-      }
-      var query = new RelationQuery(this.Follower);
-      query.user = actor;
-      return this.query(query);
-    }
-  }, {
-    key: 'queryFollowing',
-    value: function queryFollowing(actor) {
-      if (actor === null) {
-        actor = this.container.currentUser;
-      }
-      var query = new RelationQuery(this.Following);
-      query.user = actor;
-      return this.query(query);
-    }
-  }, {
-    key: 'add',
-    value: function add(relation) {
-      return this.container.makeRequest('relation:add', {
-        name: relation.identifier,
-        direction: relation.direction,
-        targets: relation.targetsID
-      }).then(function (body) {
-        return new RelationResult(body.result);
-      });
-    }
-  }, {
-    key: 'remove',
-    value: function remove(relation) {
-      return this.container.makeRequest('relation:remove', {
-        name: relation.identifier,
-        direction: relation.direction,
-        targets: relation.targetsID
-      }).then(function (body) {
-        return new RelationRemoveResult(body.result);
-      });
-    }
-  }, {
-    key: 'Query',
-    get: function get() {
-      return RelationQuery;
-    }
-  }, {
-    key: 'Friend',
-    get: function get() {
-      return RelationAction.extend('friend', Mutual);
-    }
-  }, {
-    key: 'Follower',
-    get: function get() {
-      return RelationAction.extend('follow', Inward);
-    }
-  }, {
-    key: 'Following',
-    get: function get() {
-      return RelationAction.extend('follow', Outward);
-    }
-  }], [{
-    key: 'extend',
-    value: function extend(identifier, direction) {
-      if (!Relation.validName(identifier)) {
-        throw new Error('Relation identifier can only be [a-zA-Z]+');
-      }
-      var RelationProto = {
-        identifier: identifier,
-        direction: direction
-      };
-      function RelationCls() {
-        var targets = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
-
-        Relation.call(this, identifier, direction);
-        this.targets = targets;
-      }
-      RelationCls.prototype = _.create(Relation.prototype, RelationProto);
-      return RelationCls;
-    }
-  }]);
-
-  return RelationAction;
-}();
-},{"./user":51,"lodash":53}],48:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); /**
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Copyright 2015 Oursky Ltd.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Licensed under the Apache License, Version 2.0 (the "License");
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * you may not use this file except in compliance with the License.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * You may obtain a copy of the License at
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *     http://www.apache.org/licenses/LICENSE-2.0
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Unless required by applicable law or agreed to in writing, software
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * distributed under the License is distributed on an "AS IS" BASIS,
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * See the License for the specific language governing permissions and
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * limitations under the License.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      */
-
-var _lodash = require('lodash');
-
-var _lodash2 = _interopRequireDefault(_lodash);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var definedRoles = {};
-
-var Role = function () {
-  function Role(name) {
-    _classCallCheck(this, Role);
-
-    if (!Role.isValidName(name)) {
-      throw new Error('Role name is not valid. Please start with alphanumeric string.');
-    }
-
-    this._name = name;
-  }
-
-  _createClass(Role, [{
-    key: 'name',
-    get: function get() {
-      return this._name;
-    }
-  }], [{
-    key: 'isValidName',
-    value: function isValidName(name) {
-      if (!name) {
-        return false;
-      }
-
-      return true;
-    }
-  }, {
-    key: 'define',
-    value: function define(name) {
-      var defined = definedRoles[name];
-      if (defined !== undefined) {
-        return defined;
-      }
-
-      defined = new Role(name);
-      definedRoles[name] = defined;
-
-      return defined;
-    }
-  }, {
-    key: 'union',
-    value: function union(roles, aRole) {
-      var duplicatedRole = _lodash2.default.find(roles, function (perRole) {
-        return perRole.name === aRole.name;
-      });
-
-      if (duplicatedRole === undefined) {
-        return _lodash2.default.union(roles, [aRole]);
-      } else {
-        return roles;
-      }
-    }
-  }, {
-    key: 'subtract',
-    value: function subtract(roles, aRole) {
-      return _lodash2.default.filter(roles, function (perRole) {
-        return perRole.name !== aRole.name;
-      });
-    }
-  }, {
-    key: 'contain',
-    value: function contain(roles, aRole) {
-      return _lodash2.default.find(roles, function (perRole) {
-        return perRole.name === aRole.name;
-      }) !== undefined;
-    }
-  }]);
-
-  return Role;
-}();
-
-exports.default = Role;
-module.exports = exports['default'];
-},{"lodash":53}],49:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.setStore = undefined;
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _cookieStorage = require('cookie-storage');
-
-var _util = require('./util');
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-/**
- * Copyright 2015 Oursky Ltd.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-var cookieKeyWhiteList = ['skygear-deviceid', 'skygear-user', 'skygear-accesstoken'];
-var store;
-
-var PURGEABLE_KEYS_KEY = '_skygear_purgeable_keys_';
-
-var SyncStorageDriver = function () {
-  function SyncStorageDriver(syncImpl) {
-    _classCallCheck(this, SyncStorageDriver);
-
-    this._syncImpl = syncImpl;
-  }
-
-  _createClass(SyncStorageDriver, [{
-    key: 'clear',
-    value: function clear(callback) {
-      this._syncImpl.clear();
-      if (callback) {
-        callback(null);
-      }
-      return Promise.resolve();
-    }
-  }, {
-    key: 'getItem',
-    value: function getItem(key, callback) {
-      var value = this._syncImpl.getItem(key);
-      if (callback) {
-        callback(null, value);
-      }
-      return Promise.resolve(value);
-    }
-  }, {
-    key: 'setItem',
-    value: function setItem(key, value, callback) {
-      try {
-        this._syncImpl.setItem(key, value);
-        if (callback) {
-          callback(null);
-        }
-        return Promise.resolve();
-      } catch (e) {
-        if (callback) {
-          callback(e);
-        }
-        return Promise.reject(e);
-      }
-    }
-  }, {
-    key: 'removeItem',
-    value: function removeItem(key, callback) {
-      this._syncImpl.removeItem(key);
-      if (callback) {
-        callback(null);
-      }
-      return Promise.resolve();
-    }
-  }, {
-    key: 'multiGet',
-    value: function multiGet(keys, callback) {
-      var output = [];
-      for (var i = 0; i < keys.length; ++i) {
-        var key = keys[i];
-        var value = this._syncImpl.getItem(key);
-        output.push({
-          key: key,
-          value: value
-        });
-      }
-      if (callback) {
-        callback(null, output);
-      }
-      return Promise.resolve(output);
-    }
-  }, {
-    key: 'multiSet',
-    value: function multiSet(keyValuePairs, callback) {
-      try {
-        for (var i = 0; i < keyValuePairs.length; ++i) {
-          var pair = keyValuePairs[i];
-          var key = pair.key;
-          var value = pair.value;
-          this._syncImpl.setItem(key, value);
-        }
-        if (callback) {
-          callback(null);
-        }
-        return Promise.resolve();
-      } catch (e) {
-        if (callback) {
-          return Promise.callback(e);
-        }
-        return Promise.reject(e);
-      }
-    }
-  }, {
-    key: 'multiRemove',
-    value: function multiRemove(keys, callback) {
-      for (var i = 0; i < keys.length; ++i) {
-        var key = keys[i];
-        this._syncImpl.removeItem(key);
-      }
-      if (callback) {
-        callback(null);
-      }
-      return Promise.resolve();
-    }
-  }, {
-    key: 'key',
-    value: function key(n, callback) {
-      var result = this._syncImpl.key(n);
-      if (callback) {
-        callback(null, result);
-      }
-      return Promise.resolve(result);
-    }
-  }, {
-    key: 'keys',
-    value: function keys(callback) {
-      var length = this._syncImpl.length;
-      var output = [];
-      for (var i = 0; i < length; ++i) {
-        output.push(this._syncImpl.key(i));
-      }
-      if (callback) {
-        callback(null, output);
-      }
-      return Promise.resolve(output);
-    }
-  }, {
-    key: 'length',
-    value: function length(callback) {
-      var length = this._syncImpl.length;
-      if (callback) {
-        callback(null, length);
-      }
-      return Promise.resolve(length);
-    }
-  }]);
-
-  return SyncStorageDriver;
-}();
-
-var Store = function () {
-  function Store(driver, keyWhiteList) {
-    _classCallCheck(this, Store);
-
-    this._driver = driver;
-    this.keyWhiteList = keyWhiteList;
-    this._purgeableKeys = [];
-
-    this._driver.getItem(PURGEABLE_KEYS_KEY).then(function (value) {
-      if (value) {
-        try {
-          var originalKeys = JSON.parse(value);
-          var recentKeys = this._purgeableKeys;
-
-          this._purgeableKeys = this._maintainLRUOrder(originalKeys, recentKeys);
-        } catch (e) {
-          // ignore
-        }
-      }
-    }.bind(this));
-  }
-
-  /*
-   * @param originalKeys
-   * @param recentKeys
-   * @return newKeys with recentKeys come first, followed by deduped
-   *         originalKeys
-   */
-
-
-  _createClass(Store, [{
-    key: '_maintainLRUOrder',
-    value: function _maintainLRUOrder(originalKeys, recentKeys) {
-      var mapping = {};
-      for (var i = 0; i < recentKeys.length; ++i) {
-        mapping[recentKeys[i]] = true;
-      }
-
-      var output = recentKeys.slice();
-      for (var _i = 0; _i < originalKeys.length; ++_i) {
-        if (mapping[originalKeys[_i]]) {
-          continue;
-        }
-        output.push(originalKeys[_i]);
-      }
-      return output;
-    }
-
-    /*
-     * @param originalKeys
-     * @param keysToRemove
-     * @return newKeys without value contained in keysToRemove
-     */
-
-  }, {
-    key: '_removeKeysInLRUOrder',
-    value: function _removeKeysInLRUOrder(originalKeys, keysToRemove) {
-      var mapping = {};
-      for (var i = 0; i < keysToRemove.length; ++i) {
-        mapping[keysToRemove[i]] = true;
-      }
-
-      var output = [];
-      for (var _i2 = 0; _i2 < originalKeys.length; ++_i2) {
-        if (mapping[originalKeys[_i2]]) {
-          continue;
-        }
-        output.push(originalKeys[_i2]);
-      }
-      return output;
-    }
-  }, {
-    key: 'clear',
-    value: function clear(callback) {
-      return this._driver.clear(callback);
-    }
-  }, {
-    key: 'getItem',
-    value: function getItem(key, callback) {
-      return this._driver.getItem(key, callback);
-    }
-  }, {
-    key: 'setItem',
-    value: function setItem(key, value, callback) {
-      var _this = this;
-
-      if (this.keyWhiteList && this.keyWhiteList.indexOf(key) < 0) {
-        return Promise.reject(new Error('Saving key is not permitted'));
-      }
-      return this._driver.setItem(key, value).then(function () {
-        if (callback) {
-          callback(null);
-        }
-        return Promise.resolve();
-      }, function (error) {
-        return _this._purge().then(function () {
-          return Promise.reject(error);
-        });
-      }).catch(function (error) {
-        if (callback) {
-          callback(error);
-        }
-        return Promise.reject(error);
-      });
-    }
-  }, {
-    key: 'setPurgeableItem',
-    value: function setPurgeableItem(key, value, callback) {
-      var _this2 = this;
-
-      if (this.keyWhiteList && this.keyWhiteList.indexOf(key) < 0) {
-        return Promise.reject(new Error('Saving key is not permitted'));
-      }
-      this._purgeableKeys = this._maintainLRUOrder(this._purgeableKeys, [key]);
-
-      var keyValuePairs = [{
-        key: key,
-        value: value
-      }, {
-        key: PURGEABLE_KEYS_KEY,
-        value: JSON.stringify(this._purgeableKeys)
-      }];
-      return this.multiSetTransactionally(keyValuePairs).then(function () {
-        if (callback) {
-          callback(null);
-        }
-        return Promise.resolve();
-      }, function (error) {
-        return _this2._purge().then(function () {
-          return Promise.reject(error);
-        });
-      }).catch(function (error) {
-        if (callback) {
-          callback(error);
-        }
-        return Promise.reject(error);
-      });
-    }
-  }, {
-    key: '_selectKeysToPurge',
-    value: function _selectKeysToPurge(keys) {
-      var index = Math.floor(keys.length / 2);
-      var keysToPurge = keys.slice(index);
-      return keysToPurge;
-    }
-  }, {
-    key: '_purge',
-    value: function _purge() {
-      var keysToPurge = this._selectKeysToPurge(this._purgeableKeys);
-      if (keysToPurge.length <= 0) {
-        return Promise.reject(new Error('no more keys to purge'));
-      }
-
-      this._purgeableKeys = this._removeKeysInLRUOrder(this._purgeableKeys, keysToPurge);
-      return this._driver.multiRemove(keysToPurge).then(function () {
-        return this._driver.setItem(PURGEABLE_KEYS_KEY, JSON.stringify(this._purgeableKeys));
-      }.bind(this));
-    }
-  }, {
-    key: 'multiSetTransactionally',
-    value: function multiSetTransactionally(keyValuePairs, callback) {
-      var _this3 = this;
-
-      var keys = [];
-      for (var i = 0; i < keyValuePairs.length; ++i) {
-        var pair = keyValuePairs[i];
-        var key = pair.key;
-        if (this.keyWhiteList && this.keyWhiteList.indexOf(key) < 0) {
-          return Promise.reject(new Error('Saving key is not permitted'));
-        }
-        keys.push(key);
-      }
-
-      return this._driver.multiGet(keys).then(function (original) {
-        return _this3._driver.multiSet(keyValuePairs).then(function () {
-          if (callback) {
-            callback(null);
-          }
-          return Promise.resolve();
-        }, function (e) {
-          return _this3._driver.multiRemove(keys).then(function () {
-            return _this3._driver.multiSet(original).then(function () {
-              if (callback) {
-                callback(e);
-              }
-              return Promise.reject(e);
-            });
-          });
-        });
-      });
-    }
-  }, {
-    key: 'clearPurgeableItems',
-    value: function clearPurgeableItems(callback) {
-      var keys = this._purgeableKeys.slice();
-      this._purgeableKeys = [];
-      return this._driver.multiRemove(keys, callback);
-    }
-  }, {
-    key: 'removeItem',
-    value: function removeItem(key, callback) {
-      return this._driver.removeItem(key, callback);
-    }
-  }, {
-    key: 'key',
-    value: function key(n, callback) {
-      return this._driver.key(n, callback);
-    }
-  }, {
-    key: 'keys',
-    value: function keys(callback) {
-      return this._driver.keys(callback);
-    }
-  }, {
-    key: 'length',
-    value: function length(callback) {
-      return this._driver.length(callback);
-    }
-  }]);
-
-  return Store;
-}();
-
-var setStore = exports.setStore = function setStore(_store) {
-  store = _store;
-};
-
-exports.default = function () {
-  if (store) {
-    return store;
-  }
-  /* global window: false */
-  if (typeof window !== 'undefined') {
-    // env: browser-like
-    if ((0, _util.isLocalStorageValid)()) {
-      // env: Modern browsers
-      store = new Store(new SyncStorageDriver(window.localStorage));
-    } else {
-      // env: Legacy browsers
-      var cookieImpl = new _cookieStorage.CookieStorage();
-      store = new Store(new SyncStorageDriver(cookieImpl, cookieKeyWhiteList));
-    }
-  } else {
-    // env: node
-    var memoryImpl = require('localstorage-memory');
-    store = new Store(new SyncStorageDriver(memoryImpl));
-  }
-  return store;
-};
-},{"./util":52,"cookie-storage":10,"localstorage-memory":28}],50:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-/**
- * Copyright 2015 Oursky Ltd.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-var Sequence = exports.Sequence = function () {
-  function Sequence() {
-    _classCallCheck(this, Sequence);
-  }
-
-  _createClass(Sequence, [{
-    key: 'toJSON',
-    value: function toJSON() {
-      return {
-        $type: 'seq'
-      };
-    }
-  }]);
-
-  return Sequence;
-}();
-
-var UnknownValue = exports.UnknownValue = function () {
-  function UnknownValue(underlyingType) {
-    _classCallCheck(this, UnknownValue);
-
-    this.underlyingType = underlyingType;
-  }
-
-  _createClass(UnknownValue, [{
-    key: 'toJSON',
-    value: function toJSON() {
-      return {
-        $type: 'unknown',
-        $underlying_type: this.underlyingType //eslint-disable-line camelcase
-      };
-    }
-  }], [{
-    key: 'fromJSON',
-    value: function fromJSON(attrs) {
-      return new UnknownValue(attrs.$underlying_type);
-    }
-  }]);
-
-  return UnknownValue;
-}();
-},{}],51:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); /**
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Copyright 2015 Oursky Ltd.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Licensed under the Apache License, Version 2.0 (the "License");
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * you may not use this file except in compliance with the License.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * You may obtain a copy of the License at
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *     http://www.apache.org/licenses/LICENSE-2.0
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Unless required by applicable law or agreed to in writing, software
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * distributed under the License is distributed on an "AS IS" BASIS,
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * See the License for the specific language governing permissions and
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * limitations under the License.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      */
-
-
-var _lodash = require('lodash');
-
-var _lodash2 = _interopRequireDefault(_lodash);
-
-var _role = require('./role');
-
-var _role2 = _interopRequireDefault(_role);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var User = function () {
-  function User(attrs) {
-    _classCallCheck(this, User);
-
-    var id = attrs.user_id || attrs._id; //eslint-disable-line
-    if (!_lodash2.default.isString(id)) {
-      throw new Error('Missing user_id.');
-    }
-    this.email = attrs.email;
-    this.username = attrs.username;
-    this.id = id;
-    if (attrs.last_login_at) {
-      this.lastLoginAt = new Date(attrs.last_login_at); //eslint-disable-line
-    }
-    if (attrs.last_seen_at) {
-      this.lastSeenAt = new Date(attrs.last_seen_at); //eslint-disable-line
-    }
-
-    this.roles = [];
-    if (attrs.roles) {
-      this.roles = _lodash2.default.map(attrs.roles, _role2.default.define);
-    }
-  }
-
-  _createClass(User, [{
-    key: 'toJSON',
-    value: function toJSON() {
-      var result = {
-        user_id: this.id, //eslint-disable-line
-        username: this.username,
-        email: this.email,
-        roles: _lodash2.default.map(this.roles, function (perRole) {
-          return perRole.name;
-        })
-      };
-      if (this.lastLoginAt) {
-        result.last_login_at = this.lastLoginAt.toJSON(); //eslint-disable-line
-      }
-      if (this.lastSeenAt) {
-        result.last_seen_at = this.lastSeenAt.toJSON(); //eslint-disable-line
-      }
-      return result;
-    }
-  }, {
-    key: 'addRole',
-    value: function addRole(role) {
-      this.roles = _role2.default.union(this.roles, role);
-    }
-  }, {
-    key: 'removeRole',
-    value: function removeRole(role) {
-      this.roles = _role2.default.subtract(this.roles, role);
-    }
-  }, {
-    key: 'hasRole',
-    value: function hasRole(role) {
-      return _role2.default.contain(this.roles, role);
-    }
-  }], [{
-    key: 'fromJSON',
-    value: function fromJSON(attrs) {
-      return new User(attrs);
-    }
-  }]);
-
-  return User;
-}();
-
-exports.default = User;
-module.exports = exports['default'];
-},{"./role":48,"lodash":53}],52:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.EventHandle = undefined;
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); /**
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Copyright 2015 Oursky Ltd.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Licensed under the Apache License, Version 2.0 (the "License");
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * you may not use this file except in compliance with the License.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * You may obtain a copy of the License at
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *     http://www.apache.org/licenses/LICENSE-2.0
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Unless required by applicable law or agreed to in writing, software
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * distributed under the License is distributed on an "AS IS" BASIS,
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * See the License for the specific language governing permissions and
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * limitations under the License.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      */
-
-
-exports.toJSON = toJSON;
-exports.fromJSON = fromJSON;
-exports.isLocalStorageValid = isLocalStorageValid;
-
-var _lodash = require('lodash');
-
-var _lodash2 = _interopRequireDefault(_lodash);
-
-var _asset = require('./asset');
-
-var _asset2 = _interopRequireDefault(_asset);
-
-var _reference = require('./reference');
-
-var _reference2 = _interopRequireDefault(_reference);
-
-var _geolocation = require('./geolocation');
-
-var _geolocation2 = _interopRequireDefault(_geolocation);
-
-var _type = require('./type');
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function toJSON(v) {
-  if (v === null) {
-    return null;
-  } else if (_lodash2.default.isArray(v)) {
-    return _lodash2.default.map(v, toJSON);
-  } else if (_lodash2.default.isDate(v)) {
-    return {
-      $type: 'date',
-      $date: v.toJSON()
-    };
-  } else if (v.toJSON) {
-    return v.toJSON();
-  } else if (_lodash2.default.isObject(v)) {
-    return _lodash2.default.chain(v).map(function (value, key) {
-      return [key, toJSON(value)];
-    }).fromPairs().value();
-  } else {
-    return v;
-  }
-}
-
-function fromJSON(attrs) {
-  if (!_lodash2.default.isObject(attrs)) {
-    return attrs;
-  }
-
-  switch (attrs.$type) {
-    case 'geo':
-      return _geolocation2.default.fromJSON(attrs);
-    case 'asset':
-      return _asset2.default.fromJSON(attrs);
-    case 'date':
-      return new Date(attrs.$date);
-    case 'ref':
-      return new _reference2.default(attrs);
-    case 'unknown':
-      return _type.UnknownValue.fromJSON(attrs);
-    default:
-      return attrs;
-  }
-}
-
-function isLocalStorageValid() {
-  /* global window: false */
-  try {
-    var testKey = '_skygear_test';
-    window.localStorage.setItem(testKey, 'test');
-    window.localStorage.removeItem(testKey);
-    return true;
-  } catch (e) {
-    return false;
-  }
-}
-
-var EventHandle = exports.EventHandle = function () {
-  function EventHandle(emitter, name, listener) {
-    _classCallCheck(this, EventHandle);
-
-    this.emitter = emitter;
-    this.name = name;
-    this.listener = listener;
-  }
-
-  _createClass(EventHandle, [{
-    key: 'cancel',
-    value: function cancel() {
-      this.emitter.off(this.name, this.listener);
-    }
-  }]);
-
-  return EventHandle;
-}();
-},{"./asset":35,"./geolocation":40,"./reference":46,"./type":50,"lodash":53}],53:[function(require,module,exports){
 (function (global){
 /**
  * @license
@@ -24912,7 +19310,6033 @@ var EventHandle = exports.EventHandle = function () {
 }.call(this));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],54:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
+(function(){
+  var crypt = require('crypt'),
+      utf8 = require('charenc').utf8,
+      isBuffer = require('is-buffer'),
+      bin = require('charenc').bin,
+
+  // The core
+  md5 = function (message, options) {
+    // Convert to byte array
+    if (message.constructor == String)
+      if (options && options.encoding === 'binary')
+        message = bin.stringToBytes(message);
+      else
+        message = utf8.stringToBytes(message);
+    else if (isBuffer(message))
+      message = Array.prototype.slice.call(message, 0);
+    else if (!Array.isArray(message))
+      message = message.toString();
+    // else, assume byte array already
+
+    var m = crypt.bytesToWords(message),
+        l = message.length * 8,
+        a =  1732584193,
+        b = -271733879,
+        c = -1732584194,
+        d =  271733878;
+
+    // Swap endian
+    for (var i = 0; i < m.length; i++) {
+      m[i] = ((m[i] <<  8) | (m[i] >>> 24)) & 0x00FF00FF |
+             ((m[i] << 24) | (m[i] >>>  8)) & 0xFF00FF00;
+    }
+
+    // Padding
+    m[l >>> 5] |= 0x80 << (l % 32);
+    m[(((l + 64) >>> 9) << 4) + 14] = l;
+
+    // Method shortcuts
+    var FF = md5._ff,
+        GG = md5._gg,
+        HH = md5._hh,
+        II = md5._ii;
+
+    for (var i = 0; i < m.length; i += 16) {
+
+      var aa = a,
+          bb = b,
+          cc = c,
+          dd = d;
+
+      a = FF(a, b, c, d, m[i+ 0],  7, -680876936);
+      d = FF(d, a, b, c, m[i+ 1], 12, -389564586);
+      c = FF(c, d, a, b, m[i+ 2], 17,  606105819);
+      b = FF(b, c, d, a, m[i+ 3], 22, -1044525330);
+      a = FF(a, b, c, d, m[i+ 4],  7, -176418897);
+      d = FF(d, a, b, c, m[i+ 5], 12,  1200080426);
+      c = FF(c, d, a, b, m[i+ 6], 17, -1473231341);
+      b = FF(b, c, d, a, m[i+ 7], 22, -45705983);
+      a = FF(a, b, c, d, m[i+ 8],  7,  1770035416);
+      d = FF(d, a, b, c, m[i+ 9], 12, -1958414417);
+      c = FF(c, d, a, b, m[i+10], 17, -42063);
+      b = FF(b, c, d, a, m[i+11], 22, -1990404162);
+      a = FF(a, b, c, d, m[i+12],  7,  1804603682);
+      d = FF(d, a, b, c, m[i+13], 12, -40341101);
+      c = FF(c, d, a, b, m[i+14], 17, -1502002290);
+      b = FF(b, c, d, a, m[i+15], 22,  1236535329);
+
+      a = GG(a, b, c, d, m[i+ 1],  5, -165796510);
+      d = GG(d, a, b, c, m[i+ 6],  9, -1069501632);
+      c = GG(c, d, a, b, m[i+11], 14,  643717713);
+      b = GG(b, c, d, a, m[i+ 0], 20, -373897302);
+      a = GG(a, b, c, d, m[i+ 5],  5, -701558691);
+      d = GG(d, a, b, c, m[i+10],  9,  38016083);
+      c = GG(c, d, a, b, m[i+15], 14, -660478335);
+      b = GG(b, c, d, a, m[i+ 4], 20, -405537848);
+      a = GG(a, b, c, d, m[i+ 9],  5,  568446438);
+      d = GG(d, a, b, c, m[i+14],  9, -1019803690);
+      c = GG(c, d, a, b, m[i+ 3], 14, -187363961);
+      b = GG(b, c, d, a, m[i+ 8], 20,  1163531501);
+      a = GG(a, b, c, d, m[i+13],  5, -1444681467);
+      d = GG(d, a, b, c, m[i+ 2],  9, -51403784);
+      c = GG(c, d, a, b, m[i+ 7], 14,  1735328473);
+      b = GG(b, c, d, a, m[i+12], 20, -1926607734);
+
+      a = HH(a, b, c, d, m[i+ 5],  4, -378558);
+      d = HH(d, a, b, c, m[i+ 8], 11, -2022574463);
+      c = HH(c, d, a, b, m[i+11], 16,  1839030562);
+      b = HH(b, c, d, a, m[i+14], 23, -35309556);
+      a = HH(a, b, c, d, m[i+ 1],  4, -1530992060);
+      d = HH(d, a, b, c, m[i+ 4], 11,  1272893353);
+      c = HH(c, d, a, b, m[i+ 7], 16, -155497632);
+      b = HH(b, c, d, a, m[i+10], 23, -1094730640);
+      a = HH(a, b, c, d, m[i+13],  4,  681279174);
+      d = HH(d, a, b, c, m[i+ 0], 11, -358537222);
+      c = HH(c, d, a, b, m[i+ 3], 16, -722521979);
+      b = HH(b, c, d, a, m[i+ 6], 23,  76029189);
+      a = HH(a, b, c, d, m[i+ 9],  4, -640364487);
+      d = HH(d, a, b, c, m[i+12], 11, -421815835);
+      c = HH(c, d, a, b, m[i+15], 16,  530742520);
+      b = HH(b, c, d, a, m[i+ 2], 23, -995338651);
+
+      a = II(a, b, c, d, m[i+ 0],  6, -198630844);
+      d = II(d, a, b, c, m[i+ 7], 10,  1126891415);
+      c = II(c, d, a, b, m[i+14], 15, -1416354905);
+      b = II(b, c, d, a, m[i+ 5], 21, -57434055);
+      a = II(a, b, c, d, m[i+12],  6,  1700485571);
+      d = II(d, a, b, c, m[i+ 3], 10, -1894986606);
+      c = II(c, d, a, b, m[i+10], 15, -1051523);
+      b = II(b, c, d, a, m[i+ 1], 21, -2054922799);
+      a = II(a, b, c, d, m[i+ 8],  6,  1873313359);
+      d = II(d, a, b, c, m[i+15], 10, -30611744);
+      c = II(c, d, a, b, m[i+ 6], 15, -1560198380);
+      b = II(b, c, d, a, m[i+13], 21,  1309151649);
+      a = II(a, b, c, d, m[i+ 4],  6, -145523070);
+      d = II(d, a, b, c, m[i+11], 10, -1120210379);
+      c = II(c, d, a, b, m[i+ 2], 15,  718787259);
+      b = II(b, c, d, a, m[i+ 9], 21, -343485551);
+
+      a = (a + aa) >>> 0;
+      b = (b + bb) >>> 0;
+      c = (c + cc) >>> 0;
+      d = (d + dd) >>> 0;
+    }
+
+    return crypt.endian([a, b, c, d]);
+  };
+
+  // Auxiliary functions
+  md5._ff  = function (a, b, c, d, x, s, t) {
+    var n = a + (b & c | ~b & d) + (x >>> 0) + t;
+    return ((n << s) | (n >>> (32 - s))) + b;
+  };
+  md5._gg  = function (a, b, c, d, x, s, t) {
+    var n = a + (b & d | c & ~d) + (x >>> 0) + t;
+    return ((n << s) | (n >>> (32 - s))) + b;
+  };
+  md5._hh  = function (a, b, c, d, x, s, t) {
+    var n = a + (b ^ c ^ d) + (x >>> 0) + t;
+    return ((n << s) | (n >>> (32 - s))) + b;
+  };
+  md5._ii  = function (a, b, c, d, x, s, t) {
+    var n = a + (c ^ (b | ~d)) + (x >>> 0) + t;
+    return ((n << s) | (n >>> (32 - s))) + b;
+  };
+
+  // Package private blocksize
+  md5._blocksize = 16;
+  md5._digestsize = 16;
+
+  module.exports = function (message, options) {
+    if (message === undefined || message === null)
+      throw new Error('Illegal argument ' + message);
+
+    var digestbytes = crypt.wordsToBytes(md5(message, options));
+    return options && options.asBytes ? digestbytes :
+        options && options.asString ? bin.bytesToString(digestbytes) :
+        crypt.bytesToHex(digestbytes);
+  };
+
+})();
+
+},{"charenc":8,"crypt":11,"is-buffer":29}],33:[function(require,module,exports){
+(function (global){
+/*! https://mths.be/punycode v1.4.1 by @mathias */
+;(function(root) {
+
+	/** Detect free variables */
+	var freeExports = typeof exports == 'object' && exports &&
+		!exports.nodeType && exports;
+	var freeModule = typeof module == 'object' && module &&
+		!module.nodeType && module;
+	var freeGlobal = typeof global == 'object' && global;
+	if (
+		freeGlobal.global === freeGlobal ||
+		freeGlobal.window === freeGlobal ||
+		freeGlobal.self === freeGlobal
+	) {
+		root = freeGlobal;
+	}
+
+	/**
+	 * The `punycode` object.
+	 * @name punycode
+	 * @type Object
+	 */
+	var punycode,
+
+	/** Highest positive signed 32-bit float value */
+	maxInt = 2147483647, // aka. 0x7FFFFFFF or 2^31-1
+
+	/** Bootstring parameters */
+	base = 36,
+	tMin = 1,
+	tMax = 26,
+	skew = 38,
+	damp = 700,
+	initialBias = 72,
+	initialN = 128, // 0x80
+	delimiter = '-', // '\x2D'
+
+	/** Regular expressions */
+	regexPunycode = /^xn--/,
+	regexNonASCII = /[^\x20-\x7E]/, // unprintable ASCII chars + non-ASCII chars
+	regexSeparators = /[\x2E\u3002\uFF0E\uFF61]/g, // RFC 3490 separators
+
+	/** Error messages */
+	errors = {
+		'overflow': 'Overflow: input needs wider integers to process',
+		'not-basic': 'Illegal input >= 0x80 (not a basic code point)',
+		'invalid-input': 'Invalid input'
+	},
+
+	/** Convenience shortcuts */
+	baseMinusTMin = base - tMin,
+	floor = Math.floor,
+	stringFromCharCode = String.fromCharCode,
+
+	/** Temporary variable */
+	key;
+
+	/*--------------------------------------------------------------------------*/
+
+	/**
+	 * A generic error utility function.
+	 * @private
+	 * @param {String} type The error type.
+	 * @returns {Error} Throws a `RangeError` with the applicable error message.
+	 */
+	function error(type) {
+		throw new RangeError(errors[type]);
+	}
+
+	/**
+	 * A generic `Array#map` utility function.
+	 * @private
+	 * @param {Array} array The array to iterate over.
+	 * @param {Function} callback The function that gets called for every array
+	 * item.
+	 * @returns {Array} A new array of values returned by the callback function.
+	 */
+	function map(array, fn) {
+		var length = array.length;
+		var result = [];
+		while (length--) {
+			result[length] = fn(array[length]);
+		}
+		return result;
+	}
+
+	/**
+	 * A simple `Array#map`-like wrapper to work with domain name strings or email
+	 * addresses.
+	 * @private
+	 * @param {String} domain The domain name or email address.
+	 * @param {Function} callback The function that gets called for every
+	 * character.
+	 * @returns {Array} A new string of characters returned by the callback
+	 * function.
+	 */
+	function mapDomain(string, fn) {
+		var parts = string.split('@');
+		var result = '';
+		if (parts.length > 1) {
+			// In email addresses, only the domain name should be punycoded. Leave
+			// the local part (i.e. everything up to `@`) intact.
+			result = parts[0] + '@';
+			string = parts[1];
+		}
+		// Avoid `split(regex)` for IE8 compatibility. See #17.
+		string = string.replace(regexSeparators, '\x2E');
+		var labels = string.split('.');
+		var encoded = map(labels, fn).join('.');
+		return result + encoded;
+	}
+
+	/**
+	 * Creates an array containing the numeric code points of each Unicode
+	 * character in the string. While JavaScript uses UCS-2 internally,
+	 * this function will convert a pair of surrogate halves (each of which
+	 * UCS-2 exposes as separate characters) into a single code point,
+	 * matching UTF-16.
+	 * @see `punycode.ucs2.encode`
+	 * @see <https://mathiasbynens.be/notes/javascript-encoding>
+	 * @memberOf punycode.ucs2
+	 * @name decode
+	 * @param {String} string The Unicode input string (UCS-2).
+	 * @returns {Array} The new array of code points.
+	 */
+	function ucs2decode(string) {
+		var output = [],
+		    counter = 0,
+		    length = string.length,
+		    value,
+		    extra;
+		while (counter < length) {
+			value = string.charCodeAt(counter++);
+			if (value >= 0xD800 && value <= 0xDBFF && counter < length) {
+				// high surrogate, and there is a next character
+				extra = string.charCodeAt(counter++);
+				if ((extra & 0xFC00) == 0xDC00) { // low surrogate
+					output.push(((value & 0x3FF) << 10) + (extra & 0x3FF) + 0x10000);
+				} else {
+					// unmatched surrogate; only append this code unit, in case the next
+					// code unit is the high surrogate of a surrogate pair
+					output.push(value);
+					counter--;
+				}
+			} else {
+				output.push(value);
+			}
+		}
+		return output;
+	}
+
+	/**
+	 * Creates a string based on an array of numeric code points.
+	 * @see `punycode.ucs2.decode`
+	 * @memberOf punycode.ucs2
+	 * @name encode
+	 * @param {Array} codePoints The array of numeric code points.
+	 * @returns {String} The new Unicode string (UCS-2).
+	 */
+	function ucs2encode(array) {
+		return map(array, function(value) {
+			var output = '';
+			if (value > 0xFFFF) {
+				value -= 0x10000;
+				output += stringFromCharCode(value >>> 10 & 0x3FF | 0xD800);
+				value = 0xDC00 | value & 0x3FF;
+			}
+			output += stringFromCharCode(value);
+			return output;
+		}).join('');
+	}
+
+	/**
+	 * Converts a basic code point into a digit/integer.
+	 * @see `digitToBasic()`
+	 * @private
+	 * @param {Number} codePoint The basic numeric code point value.
+	 * @returns {Number} The numeric value of a basic code point (for use in
+	 * representing integers) in the range `0` to `base - 1`, or `base` if
+	 * the code point does not represent a value.
+	 */
+	function basicToDigit(codePoint) {
+		if (codePoint - 48 < 10) {
+			return codePoint - 22;
+		}
+		if (codePoint - 65 < 26) {
+			return codePoint - 65;
+		}
+		if (codePoint - 97 < 26) {
+			return codePoint - 97;
+		}
+		return base;
+	}
+
+	/**
+	 * Converts a digit/integer into a basic code point.
+	 * @see `basicToDigit()`
+	 * @private
+	 * @param {Number} digit The numeric value of a basic code point.
+	 * @returns {Number} The basic code point whose value (when used for
+	 * representing integers) is `digit`, which needs to be in the range
+	 * `0` to `base - 1`. If `flag` is non-zero, the uppercase form is
+	 * used; else, the lowercase form is used. The behavior is undefined
+	 * if `flag` is non-zero and `digit` has no uppercase form.
+	 */
+	function digitToBasic(digit, flag) {
+		//  0..25 map to ASCII a..z or A..Z
+		// 26..35 map to ASCII 0..9
+		return digit + 22 + 75 * (digit < 26) - ((flag != 0) << 5);
+	}
+
+	/**
+	 * Bias adaptation function as per section 3.4 of RFC 3492.
+	 * https://tools.ietf.org/html/rfc3492#section-3.4
+	 * @private
+	 */
+	function adapt(delta, numPoints, firstTime) {
+		var k = 0;
+		delta = firstTime ? floor(delta / damp) : delta >> 1;
+		delta += floor(delta / numPoints);
+		for (/* no initialization */; delta > baseMinusTMin * tMax >> 1; k += base) {
+			delta = floor(delta / baseMinusTMin);
+		}
+		return floor(k + (baseMinusTMin + 1) * delta / (delta + skew));
+	}
+
+	/**
+	 * Converts a Punycode string of ASCII-only symbols to a string of Unicode
+	 * symbols.
+	 * @memberOf punycode
+	 * @param {String} input The Punycode string of ASCII-only symbols.
+	 * @returns {String} The resulting string of Unicode symbols.
+	 */
+	function decode(input) {
+		// Don't use UCS-2
+		var output = [],
+		    inputLength = input.length,
+		    out,
+		    i = 0,
+		    n = initialN,
+		    bias = initialBias,
+		    basic,
+		    j,
+		    index,
+		    oldi,
+		    w,
+		    k,
+		    digit,
+		    t,
+		    /** Cached calculation results */
+		    baseMinusT;
+
+		// Handle the basic code points: let `basic` be the number of input code
+		// points before the last delimiter, or `0` if there is none, then copy
+		// the first basic code points to the output.
+
+		basic = input.lastIndexOf(delimiter);
+		if (basic < 0) {
+			basic = 0;
+		}
+
+		for (j = 0; j < basic; ++j) {
+			// if it's not a basic code point
+			if (input.charCodeAt(j) >= 0x80) {
+				error('not-basic');
+			}
+			output.push(input.charCodeAt(j));
+		}
+
+		// Main decoding loop: start just after the last delimiter if any basic code
+		// points were copied; start at the beginning otherwise.
+
+		for (index = basic > 0 ? basic + 1 : 0; index < inputLength; /* no final expression */) {
+
+			// `index` is the index of the next character to be consumed.
+			// Decode a generalized variable-length integer into `delta`,
+			// which gets added to `i`. The overflow checking is easier
+			// if we increase `i` as we go, then subtract off its starting
+			// value at the end to obtain `delta`.
+			for (oldi = i, w = 1, k = base; /* no condition */; k += base) {
+
+				if (index >= inputLength) {
+					error('invalid-input');
+				}
+
+				digit = basicToDigit(input.charCodeAt(index++));
+
+				if (digit >= base || digit > floor((maxInt - i) / w)) {
+					error('overflow');
+				}
+
+				i += digit * w;
+				t = k <= bias ? tMin : (k >= bias + tMax ? tMax : k - bias);
+
+				if (digit < t) {
+					break;
+				}
+
+				baseMinusT = base - t;
+				if (w > floor(maxInt / baseMinusT)) {
+					error('overflow');
+				}
+
+				w *= baseMinusT;
+
+			}
+
+			out = output.length + 1;
+			bias = adapt(i - oldi, out, oldi == 0);
+
+			// `i` was supposed to wrap around from `out` to `0`,
+			// incrementing `n` each time, so we'll fix that now:
+			if (floor(i / out) > maxInt - n) {
+				error('overflow');
+			}
+
+			n += floor(i / out);
+			i %= out;
+
+			// Insert `n` at position `i` of the output
+			output.splice(i++, 0, n);
+
+		}
+
+		return ucs2encode(output);
+	}
+
+	/**
+	 * Converts a string of Unicode symbols (e.g. a domain name label) to a
+	 * Punycode string of ASCII-only symbols.
+	 * @memberOf punycode
+	 * @param {String} input The string of Unicode symbols.
+	 * @returns {String} The resulting Punycode string of ASCII-only symbols.
+	 */
+	function encode(input) {
+		var n,
+		    delta,
+		    handledCPCount,
+		    basicLength,
+		    bias,
+		    j,
+		    m,
+		    q,
+		    k,
+		    t,
+		    currentValue,
+		    output = [],
+		    /** `inputLength` will hold the number of code points in `input`. */
+		    inputLength,
+		    /** Cached calculation results */
+		    handledCPCountPlusOne,
+		    baseMinusT,
+		    qMinusT;
+
+		// Convert the input in UCS-2 to Unicode
+		input = ucs2decode(input);
+
+		// Cache the length
+		inputLength = input.length;
+
+		// Initialize the state
+		n = initialN;
+		delta = 0;
+		bias = initialBias;
+
+		// Handle the basic code points
+		for (j = 0; j < inputLength; ++j) {
+			currentValue = input[j];
+			if (currentValue < 0x80) {
+				output.push(stringFromCharCode(currentValue));
+			}
+		}
+
+		handledCPCount = basicLength = output.length;
+
+		// `handledCPCount` is the number of code points that have been handled;
+		// `basicLength` is the number of basic code points.
+
+		// Finish the basic string - if it is not empty - with a delimiter
+		if (basicLength) {
+			output.push(delimiter);
+		}
+
+		// Main encoding loop:
+		while (handledCPCount < inputLength) {
+
+			// All non-basic code points < n have been handled already. Find the next
+			// larger one:
+			for (m = maxInt, j = 0; j < inputLength; ++j) {
+				currentValue = input[j];
+				if (currentValue >= n && currentValue < m) {
+					m = currentValue;
+				}
+			}
+
+			// Increase `delta` enough to advance the decoder's <n,i> state to <m,0>,
+			// but guard against overflow
+			handledCPCountPlusOne = handledCPCount + 1;
+			if (m - n > floor((maxInt - delta) / handledCPCountPlusOne)) {
+				error('overflow');
+			}
+
+			delta += (m - n) * handledCPCountPlusOne;
+			n = m;
+
+			for (j = 0; j < inputLength; ++j) {
+				currentValue = input[j];
+
+				if (currentValue < n && ++delta > maxInt) {
+					error('overflow');
+				}
+
+				if (currentValue == n) {
+					// Represent delta as a generalized variable-length integer
+					for (q = delta, k = base; /* no condition */; k += base) {
+						t = k <= bias ? tMin : (k >= bias + tMax ? tMax : k - bias);
+						if (q < t) {
+							break;
+						}
+						qMinusT = q - t;
+						baseMinusT = base - t;
+						output.push(
+							stringFromCharCode(digitToBasic(t + qMinusT % baseMinusT, 0))
+						);
+						q = floor(qMinusT / baseMinusT);
+					}
+
+					output.push(stringFromCharCode(digitToBasic(q, 0)));
+					bias = adapt(delta, handledCPCountPlusOne, handledCPCount == basicLength);
+					delta = 0;
+					++handledCPCount;
+				}
+			}
+
+			++delta;
+			++n;
+
+		}
+		return output.join('');
+	}
+
+	/**
+	 * Converts a Punycode string representing a domain name or an email address
+	 * to Unicode. Only the Punycoded parts of the input will be converted, i.e.
+	 * it doesn't matter if you call it on a string that has already been
+	 * converted to Unicode.
+	 * @memberOf punycode
+	 * @param {String} input The Punycoded domain name or email address to
+	 * convert to Unicode.
+	 * @returns {String} The Unicode representation of the given Punycode
+	 * string.
+	 */
+	function toUnicode(input) {
+		return mapDomain(input, function(string) {
+			return regexPunycode.test(string)
+				? decode(string.slice(4).toLowerCase())
+				: string;
+		});
+	}
+
+	/**
+	 * Converts a Unicode string representing a domain name or an email address to
+	 * Punycode. Only the non-ASCII parts of the domain name will be converted,
+	 * i.e. it doesn't matter if you call it with a domain that's already in
+	 * ASCII.
+	 * @memberOf punycode
+	 * @param {String} input The domain name or email address to convert, as a
+	 * Unicode string.
+	 * @returns {String} The Punycode representation of the given domain name or
+	 * email address.
+	 */
+	function toASCII(input) {
+		return mapDomain(input, function(string) {
+			return regexNonASCII.test(string)
+				? 'xn--' + encode(string)
+				: string;
+		});
+	}
+
+	/*--------------------------------------------------------------------------*/
+
+	/** Define the public API */
+	punycode = {
+		/**
+		 * A string representing the current Punycode.js version number.
+		 * @memberOf punycode
+		 * @type String
+		 */
+		'version': '1.4.1',
+		/**
+		 * An object of methods to convert from JavaScript's internal character
+		 * representation (UCS-2) to Unicode code points, and back.
+		 * @see <https://mathiasbynens.be/notes/javascript-encoding>
+		 * @memberOf punycode
+		 * @type Object
+		 */
+		'ucs2': {
+			'decode': ucs2decode,
+			'encode': ucs2encode
+		},
+		'decode': decode,
+		'encode': encode,
+		'toASCII': toASCII,
+		'toUnicode': toUnicode
+	};
+
+	/** Expose `punycode` */
+	// Some AMD build optimizers, like r.js, check for specific condition patterns
+	// like the following:
+	if (
+		typeof define == 'function' &&
+		typeof define.amd == 'object' &&
+		define.amd
+	) {
+		define('punycode', function() {
+			return punycode;
+		});
+	} else if (freeExports && freeModule) {
+		if (module.exports == freeExports) {
+			// in Node.js, io.js, or RingoJS v0.8.0+
+			freeModule.exports = punycode;
+		} else {
+			// in Narwhal or RingoJS v0.7.0-
+			for (key in punycode) {
+				punycode.hasOwnProperty(key) && (freeExports[key] = punycode[key]);
+			}
+		}
+	} else {
+		// in Rhino or a web browser
+		root.punycode = punycode;
+	}
+
+}(this));
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],34:[function(require,module,exports){
+// Copyright Joyent, Inc. and other Node contributors.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a
+// copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to permit
+// persons to whom the Software is furnished to do so, subject to the
+// following conditions:
+//
+// The above copyright notice and this permission notice shall be included
+// in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+// USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+'use strict';
+
+// If obj.hasOwnProperty has been overridden, then calling
+// obj.hasOwnProperty(prop) will break.
+// See: https://github.com/joyent/node/issues/1707
+function hasOwnProperty(obj, prop) {
+  return Object.prototype.hasOwnProperty.call(obj, prop);
+}
+
+module.exports = function(qs, sep, eq, options) {
+  sep = sep || '&';
+  eq = eq || '=';
+  var obj = {};
+
+  if (typeof qs !== 'string' || qs.length === 0) {
+    return obj;
+  }
+
+  var regexp = /\+/g;
+  qs = qs.split(sep);
+
+  var maxKeys = 1000;
+  if (options && typeof options.maxKeys === 'number') {
+    maxKeys = options.maxKeys;
+  }
+
+  var len = qs.length;
+  // maxKeys <= 0 means that we should not limit keys count
+  if (maxKeys > 0 && len > maxKeys) {
+    len = maxKeys;
+  }
+
+  for (var i = 0; i < len; ++i) {
+    var x = qs[i].replace(regexp, '%20'),
+        idx = x.indexOf(eq),
+        kstr, vstr, k, v;
+
+    if (idx >= 0) {
+      kstr = x.substr(0, idx);
+      vstr = x.substr(idx + 1);
+    } else {
+      kstr = x;
+      vstr = '';
+    }
+
+    k = decodeURIComponent(kstr);
+    v = decodeURIComponent(vstr);
+
+    if (!hasOwnProperty(obj, k)) {
+      obj[k] = v;
+    } else if (isArray(obj[k])) {
+      obj[k].push(v);
+    } else {
+      obj[k] = [obj[k], v];
+    }
+  }
+
+  return obj;
+};
+
+var isArray = Array.isArray || function (xs) {
+  return Object.prototype.toString.call(xs) === '[object Array]';
+};
+
+},{}],35:[function(require,module,exports){
+// Copyright Joyent, Inc. and other Node contributors.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a
+// copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to permit
+// persons to whom the Software is furnished to do so, subject to the
+// following conditions:
+//
+// The above copyright notice and this permission notice shall be included
+// in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+// USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+'use strict';
+
+var stringifyPrimitive = function(v) {
+  switch (typeof v) {
+    case 'string':
+      return v;
+
+    case 'boolean':
+      return v ? 'true' : 'false';
+
+    case 'number':
+      return isFinite(v) ? v : '';
+
+    default:
+      return '';
+  }
+};
+
+module.exports = function(obj, sep, eq, name) {
+  sep = sep || '&';
+  eq = eq || '=';
+  if (obj === null) {
+    obj = undefined;
+  }
+
+  if (typeof obj === 'object') {
+    return map(objectKeys(obj), function(k) {
+      var ks = encodeURIComponent(stringifyPrimitive(k)) + eq;
+      if (isArray(obj[k])) {
+        return map(obj[k], function(v) {
+          return ks + encodeURIComponent(stringifyPrimitive(v));
+        }).join(sep);
+      } else {
+        return ks + encodeURIComponent(stringifyPrimitive(obj[k]));
+      }
+    }).join(sep);
+
+  }
+
+  if (!name) return '';
+  return encodeURIComponent(stringifyPrimitive(name)) + eq +
+         encodeURIComponent(stringifyPrimitive(obj));
+};
+
+var isArray = Array.isArray || function (xs) {
+  return Object.prototype.toString.call(xs) === '[object Array]';
+};
+
+function map (xs, f) {
+  if (xs.map) return xs.map(f);
+  var res = [];
+  for (var i = 0; i < xs.length; i++) {
+    res.push(f(xs[i], i));
+  }
+  return res;
+}
+
+var objectKeys = Object.keys || function (obj) {
+  var res = [];
+  for (var key in obj) {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) res.push(key);
+  }
+  return res;
+};
+
+},{}],36:[function(require,module,exports){
+'use strict';
+
+exports.decode = exports.parse = require('./decode');
+exports.encode = exports.stringify = require('./encode');
+
+},{"./decode":34,"./encode":35}],37:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.AccessLevel = undefined;
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _AccessLevelMap;
+
+var _lodash = require('lodash');
+
+var _lodash2 = _interopRequireDefault(_lodash);
+
+var _role = require('./role');
+
+var _role2 = _interopRequireDefault(_role);
+
+var _user = require('./user');
+
+var _user2 = _interopRequireDefault(_user);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; } /**
+                                                                                                                                                                                                                   * Copyright 2015 Oursky Ltd.
+                                                                                                                                                                                                                   *
+                                                                                                                                                                                                                   * Licensed under the Apache License, Version 2.0 (the "License");
+                                                                                                                                                                                                                   * you may not use this file except in compliance with the License.
+                                                                                                                                                                                                                   * You may obtain a copy of the License at
+                                                                                                                                                                                                                   *
+                                                                                                                                                                                                                   *     http://www.apache.org/licenses/LICENSE-2.0
+                                                                                                                                                                                                                   *
+                                                                                                                                                                                                                   * Unless required by applicable law or agreed to in writing, software
+                                                                                                                                                                                                                   * distributed under the License is distributed on an "AS IS" BASIS,
+                                                                                                                                                                                                                   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+                                                                                                                                                                                                                   * See the License for the specific language governing permissions and
+                                                                                                                                                                                                                   * limitations under the License.
+                                                                                                                                                                                                                   */
+
+
+var AccessLevel = exports.AccessLevel = {
+  NoAccessLevel: null,
+  ReadOnlyLevel: 'read',
+  ReadWriteLevel: 'write'
+};
+
+var AccessLevelMap = (_AccessLevelMap = {}, _defineProperty(_AccessLevelMap, AccessLevel.NoAccessLevel, 0), _defineProperty(_AccessLevelMap, AccessLevel.ReadOnlyLevel, 1), _defineProperty(_AccessLevelMap, AccessLevel.ReadWriteLevel, 2), _AccessLevelMap);
+
+function accessLevelNumber(level) {
+  return AccessLevelMap[level] || 0;
+}
+
+var ACL = function () {
+  function ACL(attrs) {
+    var _this = this;
+
+    _classCallCheck(this, ACL);
+
+    // default ACL: public read only
+    this.public = AccessLevel.ReadOnlyLevel;
+    this.roles = {};
+    this.users = {};
+
+    if (attrs) {
+      this.public = AccessLevel.NoAccessLevel;
+
+      _lodash2.default.forEach(attrs, function (perAttr) {
+        perAttr.level = perAttr.level || AccessLevel.ReadOnlyLevel;
+        if (perAttr.public) {
+          if (accessLevelNumber(perAttr.level) > accessLevelNumber(_this.public)) {
+            _this.public = perAttr.level;
+          }
+        } else if (perAttr.role) {
+          var theRole = _role2.default.define(perAttr.role);
+          var currentLevel = _this.roles[theRole.name];
+          if (accessLevelNumber(perAttr.level) > accessLevelNumber(currentLevel)) {
+            _this.roles[theRole.name] = perAttr.level;
+          }
+        } else if (perAttr.user_id) {
+          var theUser = new _user2.default({ user_id: perAttr.user_id }); //eslint-disable-line
+          var _currentLevel = _this.users[theUser.id];
+          if (accessLevelNumber(perAttr.level) > accessLevelNumber(_currentLevel)) {
+            _this.users[theUser.id] = perAttr.level;
+          }
+        } else {
+          throw new Error('Invalid ACL Entry: ' + JSON.stringify(perAttr));
+        }
+      });
+    }
+  }
+
+  _createClass(ACL, [{
+    key: 'toJSON',
+    value: function toJSON() {
+      var json = [];
+      if (this.public) {
+        json.push({
+          public: true,
+          level: this.public
+        });
+      }
+
+      _lodash2.default.each(this.roles, function (perRoleLevel, perRoleName) {
+        if (perRoleLevel) {
+          json.push({
+            role: perRoleName,
+            level: perRoleLevel
+          });
+        }
+      });
+
+      _lodash2.default.each(this.users, function (perUserLevel, perUserId) {
+        if (perUserLevel) {
+          json.push({
+            user_id: perUserId, //eslint-disable-line
+            level: perUserLevel
+          });
+        }
+      });
+
+      return json;
+    }
+  }, {
+    key: 'setPublicNoAccess',
+    value: function setPublicNoAccess() {
+      this.public = AccessLevel.NoAccessLevel;
+    }
+  }, {
+    key: 'setPublicReadOnly',
+    value: function setPublicReadOnly() {
+      this.public = AccessLevel.ReadOnlyLevel;
+    }
+  }, {
+    key: 'setPublicReadWriteAccess',
+    value: function setPublicReadWriteAccess() {
+      this.public = AccessLevel.ReadWriteLevel;
+    }
+  }, {
+    key: 'setNoAccessForRole',
+    value: function setNoAccessForRole(role) {
+      if (!role || !(role instanceof _role2.default)) {
+        throw new Error(role + ' is not a role.');
+      }
+
+      this.roles[role.name] = AccessLevel.NoAccessLevel;
+    }
+  }, {
+    key: 'setReadOnlyForRole',
+    value: function setReadOnlyForRole(role) {
+      if (!role || !(role instanceof _role2.default)) {
+        throw new Error(role + ' is not a role.');
+      }
+
+      this.roles[role.name] = AccessLevel.ReadOnlyLevel;
+    }
+  }, {
+    key: 'setReadWriteAccessForRole',
+    value: function setReadWriteAccessForRole(role) {
+      if (!role || !(role instanceof _role2.default)) {
+        throw new Error(role + ' is not a role.');
+      }
+
+      this.roles[role.name] = AccessLevel.ReadWriteLevel;
+    }
+  }, {
+    key: 'setNoAccessForUser',
+    value: function setNoAccessForUser(user) {
+      if (!user || !(user instanceof _user2.default)) {
+        throw new Error(user + ' is not a user.');
+      }
+
+      this.users[user.id] = AccessLevel.NoAccessLevel;
+    }
+  }, {
+    key: 'setReadOnlyForUser',
+    value: function setReadOnlyForUser(user) {
+      if (!user || !(user instanceof _user2.default)) {
+        throw new Error(user + ' is not a user.');
+      }
+
+      this.users[user.id] = AccessLevel.ReadOnlyLevel;
+    }
+  }, {
+    key: 'setReadWriteAccessForUser',
+    value: function setReadWriteAccessForUser(user) {
+      if (!user || !(user instanceof _user2.default)) {
+        throw new Error(user + ' is not a user.');
+      }
+
+      this.users[user.id] = AccessLevel.ReadWriteLevel;
+    }
+  }, {
+    key: 'hasPublicReadAccess',
+    value: function hasPublicReadAccess() {
+      return accessLevelNumber(this.public) >= accessLevelNumber(AccessLevel.ReadOnlyLevel);
+    }
+  }, {
+    key: 'hasPublicWriteAccess',
+    value: function hasPublicWriteAccess() {
+      return accessLevelNumber(this.public) === accessLevelNumber(AccessLevel.ReadWriteLevel);
+    }
+  }, {
+    key: 'hasReadAccess',
+    value: function hasReadAccess(role) {
+      return this.hasReadAccessForRole(role);
+    }
+  }, {
+    key: 'hasWriteAccess',
+    value: function hasWriteAccess(role) {
+      return this.hasWriteAccessForRole(role);
+    }
+  }, {
+    key: 'hasReadAccessForRole',
+    value: function hasReadAccessForRole(role) {
+      if (!role || !(role instanceof _role2.default)) {
+        throw new Error(role + ' is not a role.');
+      }
+
+      return this.hasPublicReadAccess() || accessLevelNumber(this.roles[role.name]) >= accessLevelNumber(AccessLevel.ReadOnlyLevel);
+    }
+  }, {
+    key: 'hasWriteAccessForRole',
+    value: function hasWriteAccessForRole(role) {
+      if (!role || !(role instanceof _role2.default)) {
+        throw new Error(role + ' is not a role.');
+      }
+
+      return this.hasPublicWriteAccess() || accessLevelNumber(this.roles[role.name]) >= accessLevelNumber(AccessLevel.ReadWriteLevel);
+    }
+  }, {
+    key: 'hasReadAccessForUser',
+    value: function hasReadAccessForUser(user) {
+      if (!user || !(user instanceof _user2.default)) {
+        throw new Error(user + ' is not a user.');
+      }
+
+      var roles = user.roles;
+
+      if (this.hasPublicReadAccess() || accessLevelNumber(this.users[user.id]) >= accessLevelNumber(AccessLevel.ReadOnlyLevel)) {
+        return true;
+      }
+
+      var _iteratorNormalCompletion = true;
+      var _didIteratorError = false;
+      var _iteratorError = undefined;
+
+      try {
+        for (var _iterator = roles[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+          var role = _step.value;
+
+          if (this.hasReadAccessForRole(role)) {
+            return true;
+          }
+        }
+      } catch (err) {
+        _didIteratorError = true;
+        _iteratorError = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion && _iterator.return) {
+            _iterator.return();
+          }
+        } finally {
+          if (_didIteratorError) {
+            throw _iteratorError;
+          }
+        }
+      }
+
+      return false;
+    }
+  }, {
+    key: 'hasWriteAccessForUser',
+    value: function hasWriteAccessForUser(user) {
+      if (!user || !(user instanceof _user2.default)) {
+        throw new Error(user + ' is not a user.');
+      }
+
+      var roles = user.roles;
+
+      if (this.hasPublicWriteAccess() || accessLevelNumber(this.users[user.id]) >= accessLevelNumber(AccessLevel.ReadWriteLevel)) {
+        return true;
+      }
+
+      var _iteratorNormalCompletion2 = true;
+      var _didIteratorError2 = false;
+      var _iteratorError2 = undefined;
+
+      try {
+        for (var _iterator2 = roles[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+          var role = _step2.value;
+
+          if (this.hasWriteAccessForRole(role)) {
+            return true;
+          }
+        }
+      } catch (err) {
+        _didIteratorError2 = true;
+        _iteratorError2 = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion2 && _iterator2.return) {
+            _iterator2.return();
+          }
+        } finally {
+          if (_didIteratorError2) {
+            throw _iteratorError2;
+          }
+        }
+      }
+
+      return false;
+    }
+  }], [{
+    key: 'fromJSON',
+    value: function fromJSON(attrs) {
+      return new ACL(attrs);
+    }
+  }]);
+
+  return ACL;
+}();
+
+exports.default = ACL;
+},{"./role":53,"./user":56,"lodash":31}],38:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); /**
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Copyright 2015 Oursky Ltd.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Licensed under the Apache License, Version 2.0 (the "License");
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * you may not use this file except in compliance with the License.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * You may obtain a copy of the License at
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *     http://www.apache.org/licenses/LICENSE-2.0
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Unless required by applicable law or agreed to in writing, software
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * distributed under the License is distributed on an "AS IS" BASIS,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * See the License for the specific language governing permissions and
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * limitations under the License.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      */
+
+
+var _Base = require('Base64');
+
+var _w3cBlob = require('w3c-blob');
+
+var _w3cBlob2 = _interopRequireDefault(_w3cBlob);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Asset = function () {
+  function Asset(attrs) {
+    _classCallCheck(this, Asset);
+
+    attrs = attrs || {};
+
+    var name = attrs.name;
+    var file = attrs.file;
+    var contentType = attrs.contentType;
+    var url = attrs.url;
+    var base64 = attrs.base64;
+
+    if (!name) {
+      throw new Error('Name should not be empty');
+    }
+    if (file) {
+      if (!contentType && file.type) {
+        contentType = file.type;
+      }
+      if (!contentType) {
+        throw new Error('ContentType cannot be inferred from file, ' + 'please provide a content type manually');
+      }
+    } else if (url) {
+      // do nothing
+    } else if (base64) {
+      file = base64StringtoBlob(base64);
+    } else {
+      throw new Error('Either file or url should present');
+    }
+
+    this.name = name;
+    this.file = file;
+    this.contentType = contentType;
+    this.url = url;
+  }
+
+  _createClass(Asset, [{
+    key: 'toJSON',
+    value: function toJSON() {
+      return {
+        $type: 'asset',
+        $name: this.name,
+        $url: this.url
+      };
+    }
+  }], [{
+    key: 'fromJSON',
+    value: function fromJSON(attrs) {
+      return new Asset({
+        name: attrs.$name,
+        url: attrs.$url,
+        contentType: attrs.$content_type
+      });
+    }
+  }]);
+
+  return Asset;
+}();
+
+// adapted from https://gist.github.com/fupslot/5015897
+
+
+exports.default = Asset;
+function base64StringtoBlob(base64) {
+  var byteString = (0, _Base.atob)(base64);
+
+  var ab = new ArrayBuffer(byteString.length);
+  var ia = new Uint8Array(ab);
+  for (var i = 0; i < byteString.length; i++) {
+    ia[i] = byteString.charCodeAt(i);
+  }
+
+  var bb = new _w3cBlob2.default([ab]);
+  return bb;
+}
+module.exports = exports['default'];
+},{"Base64":7,"w3c-blob":77}],39:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.AuthContainer = exports.USER_CHANGED = undefined;
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); /**
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Copyright 2015 Oursky Ltd.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Licensed under the Apache License, Version 2.0 (the "License");
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * you may not use this file except in compliance with the License.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * You may obtain a copy of the License at
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *     http://www.apache.org/licenses/LICENSE-2.0
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Unless required by applicable law or agreed to in writing, software
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * distributed under the License is distributed on an "AS IS" BASIS,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * See the License for the specific language governing permissions and
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * limitations under the License.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      */
+
+
+var _lodash = require('lodash');
+
+var _lodash2 = _interopRequireDefault(_lodash);
+
+var _util = require('./util');
+
+var _error = require('./error');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var USER_CHANGED = exports.USER_CHANGED = 'userChanged';
+
+var AuthContainer = exports.AuthContainer = function () {
+  function AuthContainer(container) {
+    _classCallCheck(this, AuthContainer);
+
+    this.container = container;
+
+    this._accessToken = null;
+    this._user = null;
+    this._getAccessToken();
+  }
+
+  _createClass(AuthContainer, [{
+    key: 'onUserChanged',
+    value: function onUserChanged(listener) {
+      this.container.ee.on(USER_CHANGED, listener);
+      return new _util.EventHandle(this.container.ee, USER_CHANGED, listener);
+    }
+  }, {
+    key: 'signupWithUsername',
+    value: function signupWithUsername(username, password) {
+      return this._signup(username, null, password);
+    }
+  }, {
+    key: 'signupWithEmail',
+    value: function signupWithEmail(email, password) {
+      return this._signup(null, email, password);
+    }
+  }, {
+    key: 'signupWithUsernameAndProfile',
+    value: function signupWithUsernameAndProfile(username, password) {
+      var _this = this;
+
+      var profile = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+
+      return this.signupWithUsername(username, password).then(function (user) {
+        return _this._createProfile(user, profile);
+      });
+    }
+  }, {
+    key: 'signupWithEmailAndProfile',
+    value: function signupWithEmailAndProfile(email, password) {
+      var _this2 = this;
+
+      var profile = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+
+      return this.signupWithEmail(email, password).then(function (user) {
+        return _this2._createProfile(user, profile);
+      });
+    }
+  }, {
+    key: 'signupAnonymously',
+    value: function signupAnonymously() {
+      return this._signup(null, null, null);
+    }
+  }, {
+    key: 'loginWithUsername',
+    value: function loginWithUsername(username, password) {
+      return this.container.makeRequest('auth:login', {
+        username: username,
+        password: password
+      }).then(this._authResolve.bind(this));
+    }
+  }, {
+    key: 'loginWithEmail',
+    value: function loginWithEmail(email, password) {
+      return this.container.makeRequest('auth:login', {
+        email: email,
+        password: password
+      }).then(this._authResolve.bind(this));
+    }
+  }, {
+    key: 'loginWithProvider',
+    value: function loginWithProvider(provider, authData) {
+      return this.container.makeRequest('auth:login', {
+        provider: provider,
+        auth_data: authData // eslint-disable-line camelcase
+      }).then(this._authResolve.bind(this));
+    }
+  }, {
+    key: 'logout',
+    value: function logout() {
+      var _this3 = this;
+
+      return this.container.push.unregisterDevice().then(function () {
+        _this3.container.clearCache();
+        return _this3.container.makeRequest('auth:logout', {});
+      }, function (error) {
+        if (error.code === _error.ErrorCodes.InvalidArgument && error.message === 'Missing device id') {
+          _this3.container.clearCache();
+          return _this3.container.makeRequest('auth:logout', {});
+        }
+        return Promise.reject(error);
+      }).then(function () {
+        return Promise.all([_this3._setAccessToken(null), _this3._setUser(null)]).then(function () {
+          return null;
+        });
+      }, function (err) {
+        return _this3._setAccessToken(null).then(function () {
+          return Promise.reject(err);
+        });
+      });
+    }
+  }, {
+    key: 'whoami',
+    value: function whoami() {
+      return this.container.makeRequest('me', {}).then(this._authResolve.bind(this));
+    }
+  }, {
+    key: 'changePassword',
+    value: function changePassword(oldPassword, newPassword) {
+      var invalidate = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+
+      if (invalidate) {
+        throw Error('Invalidate is not yet implemented');
+      }
+      return this.container.makeRequest('auth:password', {
+        old_password: oldPassword, // eslint-disable-line camelcase
+        password: newPassword
+      }).then(this._authResolve.bind(this));
+    }
+  }, {
+    key: 'saveUser',
+    value: function saveUser(user) {
+      var _this4 = this;
+
+      var payload = {
+        _id: user.id, // eslint-disable-line camelcase
+        email: user.email,
+        username: user.username
+      };
+      if (user.roles) {
+        payload.roles = _lodash2.default.map(user.roles, function (perRole) {
+          return perRole.name;
+        });
+      }
+      return this.container.makeRequest('user:update', payload).then(function (body) {
+        var newUser = _this4._User.fromJSON(body.result);
+        var currentUser = _this4.currentUser;
+
+        if (newUser && currentUser && newUser.id === currentUser.id) {
+          return _this4._setUser(body.result);
+        } else {
+          return newUser;
+        }
+      });
+    }
+  }, {
+    key: 'getUsersByEmail',
+    value: function getUsersByEmail(emails) {
+      return this._getUsersBy(emails, null);
+    }
+  }, {
+    key: 'getUsersByUsername',
+    value: function getUsersByUsername(usernames) {
+      return this._getUsersBy(null, usernames);
+    }
+  }, {
+    key: 'discoverUserByEmails',
+    value: function discoverUserByEmails(emails) {
+      return this.container.publicDB.query(new this._Query(this.container.UserRecord).havingEmails(emails));
+    }
+  }, {
+    key: 'discoverUserByUsernames',
+    value: function discoverUserByUsernames(usernames) {
+      return this.container.publicDB.query(new this._Query(this.container.UserRecord).havingUsernames(usernames));
+    }
+  }, {
+    key: '_getAccessToken',
+    value: function _getAccessToken() {
+      var _this5 = this;
+
+      return this.container.store.getItem('skygear-accesstoken').then(function (token) {
+        _this5._accessToken = token;
+        return token;
+      }, function (err) {
+        console.warn('Failed to get access', err);
+        _this5._accessToken = null;
+        return null;
+      });
+    }
+  }, {
+    key: '_setAccessToken',
+    value: function _setAccessToken(value) {
+      this._accessToken = value;
+      var setItem = value === null ? this.container.store.removeItem('skygear-accesstoken') : this.container.store.setItem('skygear-accesstoken', value);
+      return setItem.then(function () {
+        return value;
+      }, function (err) {
+        console.warn('Failed to persist accesstoken', err);
+        return value;
+      });
+    }
+  }, {
+    key: '_signup',
+    value: function _signup(username, email, password) {
+      return this.container.makeRequest('auth:signup', {
+        username: username,
+        email: email,
+        password: password
+      }).then(this._authResolve.bind(this));
+    }
+  }, {
+    key: '_authResolve',
+    value: function _authResolve(body) {
+      var _this6 = this;
+
+      return Promise.all([this._setUser(body.result), this._setAccessToken(body.result.access_token)]).then(function () {
+        _this6.container.pubsub._reconfigurePubsubIfNeeded();
+        return _this6.currentUser;
+      });
+    }
+  }, {
+    key: '_createProfile',
+    value: function _createProfile(user, profile) {
+      var record = new this.container.UserRecord(_extends({
+        _id: 'user/' + user.id
+      }, profile));
+      return this.container.publicDB.save(record);
+    }
+  }, {
+    key: '_getUsersBy',
+    value: function _getUsersBy(emails, usernames) {
+      var _this7 = this;
+
+      return this.container.makeRequest('user:query', {
+        emails: emails,
+        usernames: usernames
+      }).then(function (body) {
+        return body.result.map(function (r) {
+          return new _this7._User(r.data);
+        });
+      });
+    }
+  }, {
+    key: '_getUser',
+    value: function _getUser() {
+      var _this8 = this;
+
+      return this.container.store.getItem('skygear-user').then(function (userJSON) {
+        var attrs = JSON.parse(userJSON);
+        _this8._user = _this8._User.fromJSON(attrs);
+      }, function (err) {
+        console.warn('Failed to get user', err);
+        _this8._user = null;
+        return null;
+      });
+    }
+  }, {
+    key: '_setUser',
+    value: function _setUser(attrs) {
+      var _this9 = this;
+
+      var value = void 0;
+      if (attrs !== null) {
+        this._user = new this._User(attrs);
+        value = JSON.stringify(this._user.toJSON());
+      } else {
+        this._user = null;
+        value = null;
+      }
+
+      var setItem = value === null ? this.container.store.removeItem('skygear-user') : this.container.store.setItem('skygear-user', value);
+      return setItem.then(function () {
+        _this9.container.ee.emit(USER_CHANGED, _this9._user);
+        return value;
+      }, function (err) {
+        console.warn('Failed to persist user', err);
+        return value;
+      });
+    }
+  }, {
+    key: 'currentUser',
+    get: function get() {
+      return this._user;
+    }
+  }, {
+    key: 'accessToken',
+    get: function get() {
+      return this._accessToken;
+    }
+  }, {
+    key: '_User',
+    get: function get() {
+      return this.container.User;
+    }
+  }, {
+    key: '_Query',
+    get: function get() {
+      return this.container.Query;
+    }
+  }]);
+
+  return AuthContainer;
+}();
+},{"./error":43,"./util":57,"lodash":31}],40:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); /**
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Copyright 2015 Oursky Ltd.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Licensed under the Apache License, Version 2.0 (the "License");
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * you may not use this file except in compliance with the License.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * You may obtain a copy of the License at
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *     http://www.apache.org/licenses/LICENSE-2.0
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Unless required by applicable law or agreed to in writing, software
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * distributed under the License is distributed on an "AS IS" BASIS,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * See the License for the specific language governing permissions and
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * limitations under the License.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      */
+
+
+var _store = require('./store');
+
+var _store2 = _interopRequireDefault(_store);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Cache = function () {
+  function Cache(prefix) {
+    _classCallCheck(this, Cache);
+
+    this._maxRetryCount = 1;
+    this.prefix = prefix;
+    this.map = {};
+    this.store = (0, _store2.default)();
+  }
+
+  _createClass(Cache, [{
+    key: '_applyNamespaceOnKey',
+    value: function _applyNamespaceOnKey(key) {
+      return this.prefix + ':' + key;
+    }
+  }, {
+    key: 'set',
+    value: function set(key, value) {
+      var namespacedKey = this._applyNamespaceOnKey(key);
+      this.map[namespacedKey] = value;
+      var stringifiedValue = JSON.stringify(value);
+      return this._setWithRetry(namespacedKey, stringifiedValue);
+    }
+  }, {
+    key: '_setWithRetry',
+    value: function _setWithRetry(namespacedKey, stringifiedValue) {
+      var _this = this;
+
+      var attempt = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
+
+      return this.store.setPurgeableItem(namespacedKey, stringifiedValue).catch(function (error) {
+        // base case
+        if (attempt >= _this._maxRetryCount) {
+          return Promise.reject(error);
+        }
+        // recursive case
+        // It seems that there is no easy way to
+        // convert an asynchronous recursion into
+        // iterative style with for-loop.
+        return _this._setWithRetry(namespacedKey, stringifiedValue, attempt + 1);
+      });
+    }
+  }, {
+    key: 'get',
+    value: function get(key) {
+      var namespacedKey = this._applyNamespaceOnKey(key);
+      if (this.map[namespacedKey]) {
+        return Promise.resolve(this.map[namespacedKey]);
+      }
+      return this.store.getItem(namespacedKey).then(function (jsonStr) {
+        if (jsonStr) {
+          var cachedJSON = JSON.parse(jsonStr);
+          return cachedJSON;
+        }
+        return Promise.reject();
+      });
+    }
+  }]);
+
+  return Cache;
+}();
+
+exports.default = Cache;
+module.exports = exports['default'];
+},{"./store":54}],41:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.BaseContainer = undefined;
+
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _asset = require('./asset');
+
+var _asset2 = _interopRequireDefault(_asset);
+
+var _user = require('./user');
+
+var _user2 = _interopRequireDefault(_user);
+
+var _role = require('./role');
+
+var _role2 = _interopRequireDefault(_role);
+
+var _acl = require('./acl');
+
+var _acl2 = _interopRequireDefault(_acl);
+
+var _record = require('./record');
+
+var _record2 = _interopRequireDefault(_record);
+
+var _reference = require('./reference');
+
+var _reference2 = _interopRequireDefault(_reference);
+
+var _query = require('./query');
+
+var _query2 = _interopRequireDefault(_query);
+
+var _database = require('./database');
+
+var _geolocation = require('./geolocation');
+
+var _geolocation2 = _interopRequireDefault(_geolocation);
+
+var _store = require('./store');
+
+var _store2 = _interopRequireDefault(_store);
+
+var _type = require('./type');
+
+var _error = require('./error');
+
+var _auth = require('./auth');
+
+var _relation = require('./relation');
+
+var _pubsub = require('./pubsub');
+
+var _push = require('./push');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+/**
+ * Copyright 2015 Oursky Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/* eslint camelcase: 0 */
+var request = require('superagent');
+var _ = require('lodash');
+var ee = require('event-emitter');
+
+var BaseContainer = exports.BaseContainer = function () {
+  function BaseContainer() {
+    _classCallCheck(this, BaseContainer);
+
+    this.url = 'http://myapp.skygeario.com/';
+    this.apiKey = null;
+    this.request = request;
+    this.ee = ee({});
+  }
+
+  _createClass(BaseContainer, [{
+    key: 'config',
+    value: function config(options) {
+      if (options.apiKey) {
+        this.apiKey = options.apiKey;
+      }
+      if (options.endPoint) {
+        this.endPoint = options.endPoint;
+      }
+
+      return Promise.resolve(this);
+    }
+  }, {
+    key: 'configApiKey',
+    value: function configApiKey(ApiKey) {
+      this.apiKey = ApiKey;
+    }
+  }, {
+    key: 'makeRequest',
+    value: function makeRequest(action, data) {
+      var requestObject = this._prepareRequestObject(action, data);
+      var requestData = this._prepareRequestData(action, data);
+
+      return this._handleResponse(new Promise(function (resolve) {
+        requestObject.send(requestData).end(function (err, res) {
+          resolve({
+            err: err,
+            res: res
+          });
+        });
+      }));
+    }
+  }, {
+    key: 'lambda',
+    value: function lambda(name, data) {
+      return this.makeRequest(name, {
+        args: data
+      }).then(function (resp) {
+        return resp.result;
+      });
+    }
+  }, {
+    key: '_prepareRequestObject',
+    value: function _prepareRequestObject(action) {
+      if (this.apiKey === null) {
+        throw Error('Please config ApiKey');
+      }
+
+      var _action = action.replace(/:/g, '/');
+      return this.request.post(this.url + _action).set('X-Skygear-API-Key', this.apiKey).set('Accept', 'application/json');
+    }
+  }, {
+    key: '_prepareRequestData',
+    value: function _prepareRequestData(action, data) {
+      if (this.apiKey === null) {
+        throw Error('Please config ApiKey');
+      }
+
+      return _.assign({
+        action: action,
+        api_key: this.apiKey
+      }, data);
+    }
+  }, {
+    key: '_handleResponse',
+    value: function _handleResponse(responsePromise) {
+      return responsePromise.then(function (_ref) {
+        var err = _ref.err,
+            res = _ref.res;
+
+        // Do an application JSON parse because in some condition, the
+        // content-type header will got strip and it will not deserial
+        // the json for us.
+        var body = getRespJSON(res);
+
+        if (err) {
+          var skyErr = body.error || err;
+          return Promise.reject({
+            status: err.status,
+            error: skyErr
+          });
+        } else {
+          return Promise.resolve(body);
+        }
+      });
+    }
+
+    /**
+     * @type {Query}
+     */
+
+  }, {
+    key: 'clearCache',
+    value: function clearCache() {
+      return this.store.clearPurgeableItems();
+    }
+  }, {
+    key: 'Query',
+    get: function get() {
+      return _query2.default;
+    }
+
+    /**
+     * @type {User}
+     */
+
+  }, {
+    key: 'User',
+    get: function get() {
+      return _user2.default;
+    }
+
+    /**
+     * @type {Role}
+     */
+
+  }, {
+    key: 'Role',
+    get: function get() {
+      return _role2.default;
+    }
+
+    /**
+     * @type {ACL}
+     */
+
+  }, {
+    key: 'ACL',
+    get: function get() {
+      return _acl2.default;
+    }
+
+    /**
+     * @type {Record}
+     */
+
+  }, {
+    key: 'Record',
+    get: function get() {
+      return _record2.default;
+    }
+
+    /**
+     * @type {Record}
+     */
+
+  }, {
+    key: 'UserRecord',
+    get: function get() {
+      return _record2.default.extend('user');
+    }
+
+    /**
+     * @type {Sequence}
+     */
+
+  }, {
+    key: 'Sequence',
+    get: function get() {
+      return _type.Sequence;
+    }
+
+    /**
+     * @type {Asset}
+     */
+
+  }, {
+    key: 'Asset',
+    get: function get() {
+      return _asset2.default;
+    }
+
+    /**
+     * @type {Reference}
+     */
+
+  }, {
+    key: 'Reference',
+    get: function get() {
+      return _reference2.default;
+    }
+
+    /**
+     * @type {Geolocation}
+     */
+
+  }, {
+    key: 'Geolocation',
+    get: function get() {
+      return _geolocation2.default;
+    }
+
+    /**
+     * @type {Database}
+     */
+
+  }, {
+    key: 'Database',
+    get: function get() {
+      return _database.Database;
+    }
+
+    /**
+     * @type {Relation}
+     */
+
+  }, {
+    key: 'Friend',
+    get: function get() {
+      return this.relation.Friend;
+    }
+
+    /**
+     * @type {Relation}
+     */
+
+  }, {
+    key: 'Follower',
+    get: function get() {
+      return this.relation.Follower;
+    }
+
+    /**
+     * @type {Relation}
+     */
+
+  }, {
+    key: 'Following',
+    get: function get() {
+      return this.relation.Following;
+    }
+
+    /**
+     * @type {ErrorCodes}
+     */
+
+  }, {
+    key: 'ErrorCodes',
+    get: function get() {
+      return _error.ErrorCodes;
+    }
+  }, {
+    key: 'endPoint',
+    get: function get() {
+      return this.url;
+    },
+    set: function set(newEndPoint) {
+      // TODO: Check the format
+      if (newEndPoint) {
+        if (!_.endsWith(newEndPoint, '/')) {
+          newEndPoint = newEndPoint + '/';
+        }
+        this.url = newEndPoint;
+      }
+    }
+  }, {
+    key: 'store',
+    get: function get() {
+      if (!this._store) {
+        this._store = (0, _store2.default)();
+      }
+      return this._store;
+    }
+  }]);
+
+  return BaseContainer;
+}();
+
+var Container = function (_BaseContainer) {
+  _inherits(Container, _BaseContainer);
+
+  function Container() {
+    _classCallCheck(this, Container);
+
+    var _this = _possibleConstructorReturn(this, (Container.__proto__ || Object.getPrototypeOf(Container)).call(this));
+
+    _this._auth = new _auth.AuthContainer(_this);
+    _this._relation = new _relation.RelationContainer(_this);
+    _this._db = new _database.DatabaseContainer(_this);
+    _this._pubsub = new _pubsub.PubsubContainer(_this);
+    _this._push = new _push.PushContainer(_this);
+    /**
+     * Options for how much time to wait for client request to complete.
+     *
+     * @type {Object}
+     * @property {number} [timeoutOptions.deadline] - deadline for the request
+     * and response to complete (in milliseconds)
+     * @property {number} [timeoutOptions.response=60000] - maximum time to
+     * wait for an response (in milliseconds)
+     *
+     * @see http://visionmedia.github.io/superagent/#timeouts
+     */
+    _this.timeoutOptions = {
+      response: 60000
+    };
+    return _this;
+  }
+
+  /**
+   * @type {AuthContainer}
+   */
+
+
+  _createClass(Container, [{
+    key: 'config',
+    value: function config(options) {
+      var _this2 = this;
+
+      return _get(Container.prototype.__proto__ || Object.getPrototypeOf(Container.prototype), 'config', this).call(this, options).then(function () {
+        var promises = [_this2.auth._getUser(), _this2.auth._getAccessToken(), _this2.push._getDeviceID()];
+        return Promise.all(promises);
+      }).then(function () {
+        _this2.pubsub._reconfigurePubsubIfNeeded();
+        return _this2;
+      }, function () {
+        return _this2;
+      });
+    }
+  }, {
+    key: '_prepareRequestObject',
+    value: function _prepareRequestObject(action, data) {
+      var requestObject = _get(Container.prototype.__proto__ || Object.getPrototypeOf(Container.prototype), '_prepareRequestObject', this).call(this, action, data);
+
+      requestObject = requestObject.set('X-Skygear-Access-Token', this.auth.accessToken);
+
+      if (this.timeoutOptions !== undefined && this.timeoutOptions !== null) {
+        requestObject = requestObject.timeout(this.timeoutOptions);
+      }
+
+      return requestObject;
+    }
+  }, {
+    key: '_prepareRequestData',
+    value: function _prepareRequestData(action, data) {
+      var requestData = _get(Container.prototype.__proto__ || Object.getPrototypeOf(Container.prototype), '_prepareRequestData', this).call(this, action, data);
+
+      return _.assign({
+        access_token: this.auth.accessToken
+      }, requestData);
+    }
+  }, {
+    key: '_handleResponse',
+    value: function _handleResponse(responsePromise) {
+      var _this3 = this;
+
+      return _get(Container.prototype.__proto__ || Object.getPrototypeOf(Container.prototype), '_handleResponse', this).call(this, responsePromise).catch(function (err) {
+        // Logout user implicitly if
+        var errorCode = err.error.code;
+        if (errorCode === _this3.ErrorCodes.AccessTokenNotAccepted) {
+          return Promise.all([_this3.auth._setAccessToken(null), _this3.auth._setUser(null)]).then(function () {
+            return Promise.reject(err);
+          });
+        }
+
+        return Promise.reject(err);
+      });
+    }
+  }, {
+    key: 'auth',
+    get: function get() {
+      return this._auth;
+    }
+
+    /**
+     * @type {RelationContainer}
+     */
+
+  }, {
+    key: 'relation',
+    get: function get() {
+      return this._relation;
+    }
+
+    /**
+     * @type {PublicDatabase}
+     */
+
+  }, {
+    key: 'publicDB',
+    get: function get() {
+      return this._db.public;
+    }
+
+    /**
+     * @type {Database}
+     */
+
+  }, {
+    key: 'privateDB',
+    get: function get() {
+      return this._db.private;
+    }
+
+    /**
+     * @type {PubsubContainer}
+     */
+
+  }, {
+    key: 'pubsub',
+    get: function get() {
+      return this._pubsub;
+    }
+
+    /**
+     * @type {PushContainer}
+     */
+
+  }, {
+    key: 'push',
+    get: function get() {
+      return this._push;
+    }
+  }]);
+
+  return Container;
+}(BaseContainer);
+
+exports.default = Container;
+
+
+function getRespJSON(res) {
+  if (res && res.body) {
+    return res.body;
+  }
+  if (res && res.text) {
+    try {
+      return JSON.parse(res.text);
+    } catch (err) {
+      console.log('getRespJSON error. error: ', err);
+    }
+  }
+
+  return {};
+}
+},{"./acl":37,"./asset":38,"./auth":39,"./database":42,"./error":43,"./geolocation":44,"./pubsub":46,"./push":47,"./query":48,"./record":50,"./reference":51,"./relation":52,"./role":53,"./store":54,"./type":55,"./user":56,"event-emitter":28,"lodash":31,"superagent":62}],42:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.DatabaseContainer = exports.PublicDatabase = exports.Database = undefined;
+
+var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _cache = require('./cache');
+
+var _cache2 = _interopRequireDefault(_cache);
+
+var _asset = require('./asset');
+
+var _asset2 = _interopRequireDefault(_asset);
+
+var _query2 = require('./query');
+
+var _query3 = _interopRequireDefault(_query2);
+
+var _query_result = require('./query_result');
+
+var _query_result2 = _interopRequireDefault(_query_result);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+/**
+ * Copyright 2015 Oursky Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+var _ = require('lodash');
+
+var Database = function () {
+  function Database(dbID, container) {
+    _classCallCheck(this, Database);
+
+    if (dbID !== '_public' && dbID !== '_private' && dbID !== '_union') {
+      throw new Error('Invalid database_id');
+    }
+    this.dbID = dbID;
+    this.container = container;
+    this._cacheStore = new _cache2.default(this.dbID);
+    this._cacheResponse = true;
+  }
+
+  _createClass(Database, [{
+    key: 'getRecordByID',
+    value: function getRecordByID(id) {
+      var Record = this._Record;
+
+      var _Record$parseID = Record.parseID(id),
+          _Record$parseID2 = _slicedToArray(_Record$parseID, 2),
+          recordType = _Record$parseID2[0],
+          recordId = _Record$parseID2[1];
+
+      var query = new _query3.default(Record.extend(recordType)).equalTo('_id', recordId);
+      return this.query(query).then(function (users) {
+        if (users.length === 1) {
+          return users[0];
+        } else {
+          throw new Error(id + ' does not exist');
+        }
+      });
+    }
+  }, {
+    key: 'query',
+    value: function query(_query) {
+      var _this = this;
+
+      var cacheCallback = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+
+      var remoteReturned = false;
+      var cacheStore = this.cacheStore;
+      var Cls = _query.recordCls;
+      var queryJSON = _query.toJSON();
+
+      if (!queryJSON.offset && queryJSON.page > 0) {
+        queryJSON.offset = queryJSON.limit * (queryJSON.page - 1);
+      }
+
+      var payload = _.assign({
+        database_id: this.dbID //eslint-disable-line
+      }, queryJSON);
+
+      if (cacheCallback) {
+        cacheStore.get(_query.hash).then(function (body) {
+          if (remoteReturned) {
+            return;
+          }
+          var records = _.map(body.result, function (attrs) {
+            return new Cls(attrs);
+          });
+          var result = _query_result2.default.createFromResult(records, body.info);
+          cacheCallback(result, true);
+        }, function (err) {
+          console.log('No cache found', err);
+        });
+      }
+      return this.container.makeRequest('record:query', payload).then(function (body) {
+        var records = _.map(body.result, function (attrs) {
+          return new Cls(attrs);
+        });
+        var result = _query_result2.default.createFromResult(records, body.info);
+        remoteReturned = true;
+        if (_this.cacheResponse) {
+          cacheStore.set(_query.hash, body);
+        }
+        return result;
+      });
+    }
+  }, {
+    key: '_makeUploadAssetRequest',
+    value: function _makeUploadAssetRequest(asset) {
+      var _this2 = this;
+
+      return new Promise(function (resolve, reject) {
+        _this2.container.makeRequest('asset:put', {
+          filename: asset.name,
+          'content-type': asset.contentType,
+          'content-size': asset.file.size
+        }).then(function (res) {
+          var newAsset = _asset2.default.fromJSON(res.result.asset);
+          var postRequest = res.result['post-request'];
+
+          var postUrl = postRequest.action;
+          if (postUrl.indexOf('/') === 0) {
+            postUrl = postUrl.substring(1);
+          }
+          if (postUrl.indexOf('http') !== 0) {
+            postUrl = _this2.container.url + postUrl;
+          }
+
+          var _request = _this2.container.request.post(postUrl).set('X-Skygear-API-Key', _this2.container.apiKey);
+          if (postRequest['extra-fields']) {
+            _.forEach(postRequest['extra-fields'], function (value, key) {
+              _request = _request.field(key, value);
+            });
+          }
+
+          _request.attach('file', asset.file).end(function (err) {
+            if (err) {
+              reject(err);
+              return;
+            }
+
+            resolve(newAsset);
+          });
+        }, function (err) {
+          reject(err);
+        });
+      });
+    }
+  }, {
+    key: '_presaveAssetTask',
+    value: function _presaveAssetTask(key, asset) {
+      if (asset.file) {
+        return this._makeUploadAssetRequest(asset).then(function (a) {
+          return [key, a];
+        });
+      } else {
+        return Promise.resolve([key, asset]);
+      }
+    }
+  }, {
+    key: '_presave',
+    value: function _presave(record) {
+      var _this3 = this;
+
+      // for every (key, value) pair, process the pair in a Promise
+      // the Promise should be resolved by the transformed [key, value] pair
+      var tasks = _.map(record, function (value, key) {
+        if (value instanceof _asset2.default) {
+          return _this3._presaveAssetTask(key, value);
+        } else {
+          return Promise.resolve([key, value]);
+        }
+      });
+
+      return Promise.all(tasks).then(function (keyvalues) {
+        _.each(keyvalues, function (_ref) {
+          var _ref2 = _slicedToArray(_ref, 2),
+              key = _ref2[0],
+              value = _ref2[1];
+
+          record[key] = value;
+        });
+        return record;
+      });
+    }
+  }, {
+    key: 'del',
+    value: function del(record) {
+      return this.delete(record);
+    }
+  }, {
+    key: 'save',
+    value: function save(_records) {
+      var _this4 = this;
+
+      var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
+      var records = _records;
+      if (!_.isArray(records)) {
+        records = [records];
+      }
+
+      if (_.some(records, function (r) {
+        return r === undefined || r === null;
+      })) {
+        return Promise.reject('Invalid input, unable to save undefined and null');
+      }
+
+      var presaveTasks = _.map(records, this._presave.bind(this));
+      return Promise.all(presaveTasks).then(function (processedRecords) {
+        var payload = {
+          database_id: _this4.dbID //eslint-disable-line
+        };
+
+        if (options.atomic) {
+          payload.atomic = true;
+        }
+
+        payload.records = _.map(processedRecords, function (perRecord) {
+          return perRecord.toJSON();
+        });
+
+        return _this4.container.makeRequest('record:save', payload);
+      }).then(function (body) {
+        var results = body.result;
+        var savedRecords = [];
+        var errors = [];
+
+        _.forEach(results, function (perResult, idx) {
+          if (perResult._type === 'error') {
+            savedRecords[idx] = undefined;
+            errors[idx] = perResult;
+          } else {
+            records[idx].update(perResult);
+            records[idx].updateTransient(perResult._transient, true);
+
+            savedRecords[idx] = records[idx];
+            errors[idx] = undefined;
+          }
+        });
+
+        if (records.length === 1) {
+          if (errors[0]) {
+            return Promise.reject(errors[0]);
+          }
+          return savedRecords[0];
+        }
+        return { savedRecords: savedRecords, errors: errors };
+      });
+    }
+  }, {
+    key: 'delete',
+    value: function _delete(_records) {
+      var records = _records;
+      if (!_.isArray(records)) {
+        records = [records];
+      }
+
+      var ids = _.map(records, function (perRecord) {
+        return perRecord.id;
+      });
+      var payload = {
+        database_id: this.dbID, //eslint-disable-line
+        ids: ids
+      };
+
+      return this.container.makeRequest('record:delete', payload).then(function (body) {
+        var results = body.result;
+        var errors = [];
+
+        _.forEach(results, function (perResult, idx) {
+          if (perResult._type === 'error') {
+            errors[idx] = perResult;
+          } else {
+            errors[idx] = undefined;
+          }
+        });
+
+        if (records.length === 1) {
+          if (errors[0]) {
+            return Promise.reject(errors[0]);
+          }
+          return;
+        }
+        return errors;
+      });
+    }
+  }, {
+    key: 'cacheStore',
+    get: function get() {
+      return this._cacheStore;
+    }
+  }, {
+    key: 'cacheResponse',
+    get: function get() {
+      return this._cacheResponse;
+    },
+    set: function set(value) {
+      var b = !!value;
+      this._cacheResponse = b;
+    }
+  }, {
+    key: '_Record',
+    get: function get() {
+      return this.container.Record;
+    }
+  }]);
+
+  return Database;
+}();
+
+exports.Database = Database;
+
+var PublicDatabase = exports.PublicDatabase = function (_Database) {
+  _inherits(PublicDatabase, _Database);
+
+  function PublicDatabase() {
+    _classCallCheck(this, PublicDatabase);
+
+    return _possibleConstructorReturn(this, (PublicDatabase.__proto__ || Object.getPrototypeOf(PublicDatabase)).apply(this, arguments));
+  }
+
+  _createClass(PublicDatabase, [{
+    key: 'setAdminRole',
+    value: function setAdminRole(roles) {
+      var roleNames = _.map(roles, function (perRole) {
+        return perRole.name;
+      });
+
+      return this.container.makeRequest('role:admin', {
+        roles: roleNames
+      }).then(function (body) {
+        return body.result;
+      });
+    }
+  }, {
+    key: 'setDefaultRole',
+    value: function setDefaultRole(roles) {
+      var roleNames = _.map(roles, function (perRole) {
+        return perRole.name;
+      });
+
+      return this.container.makeRequest('role:default', {
+        roles: roleNames
+      }).then(function (body) {
+        return body.result;
+      });
+    }
+  }, {
+    key: 'setDefaultACL',
+    value: function setDefaultACL(acl) {
+      this._Record.defaultACL = acl;
+    }
+  }, {
+    key: 'setRecordCreateAccess',
+    value: function setRecordCreateAccess(recordClass, roles) {
+      var roleNames = _.map(roles, function (perRole) {
+        return perRole.name;
+      });
+
+      return this.container.makeRequest('schema:access', {
+        type: recordClass.recordType,
+        create_roles: roleNames //eslint-disable-line camelcase
+      }).then(function (body) {
+        return body.result;
+      });
+    }
+  }, {
+    key: 'setRecordDefaultAccess',
+    value: function setRecordDefaultAccess(recordClass, acl) {
+      return this.container.makeRequest('schema:default_access', {
+        type: recordClass.recordType,
+        default_access: acl.toJSON //eslint-disable-line camelcase
+        () }).then(function (body) {
+        return body.result;
+      });
+    }
+  }, {
+    key: 'defaultACL',
+    get: function get() {
+      return this._Record.defaultACL;
+    }
+  }]);
+
+  return PublicDatabase;
+}(Database);
+
+var DatabaseContainer = exports.DatabaseContainer = function () {
+  function DatabaseContainer(container) {
+    _classCallCheck(this, DatabaseContainer);
+
+    this.container = container;
+
+    this._public = null;
+    this._private = null;
+    this._cacheResponse = true;
+  }
+
+  _createClass(DatabaseContainer, [{
+    key: 'public',
+    get: function get() {
+      if (this._public === null) {
+        this._public = new PublicDatabase('_public', this.container);
+        this._public.cacheResponse = this._cacheResponse;
+      }
+      return this._public;
+    }
+  }, {
+    key: 'private',
+    get: function get() {
+      if (this.container.accessToken === null) {
+        throw new Error('You must login before access to privateDB');
+      }
+      if (this._private === null) {
+        this._private = new Database('_private', this.container);
+        this._private.cacheResponse = this._cacheResponse;
+      }
+      return this._private;
+    }
+  }, {
+    key: 'cacheResponse',
+    get: function get() {
+      return this._cacheResponse;
+    },
+    set: function set(value) {
+      var b = !!value;
+      this._cacheResponse = b;
+      if (this._public) {
+        this._public.cacheResponse = b;
+      }
+      if (this._private) {
+        this._private.cacheResponse = b;
+      }
+    }
+  }]);
+
+  return DatabaseContainer;
+}();
+},{"./asset":38,"./cache":40,"./query":48,"./query_result":49,"lodash":31}],43:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.SkygearError = exports.ErrorCodes = undefined;
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _lodash = require('lodash');
+
+var _lodash2 = _interopRequireDefault(_lodash);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+function _extendableBuiltin(cls) {
+  function ExtendableBuiltin() {
+    cls.apply(this, arguments);
+  }
+
+  ExtendableBuiltin.prototype = Object.create(cls.prototype, {
+    constructor: {
+      value: cls,
+      enumerable: false,
+      writable: true,
+      configurable: true
+    }
+  });
+
+  if (Object.setPrototypeOf) {
+    Object.setPrototypeOf(ExtendableBuiltin, cls);
+  } else {
+    ExtendableBuiltin.__proto__ = cls;
+  }
+
+  return ExtendableBuiltin;
+} /**
+   * Copyright 2015 Oursky Ltd.
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *     http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   */
+
+
+/**
+ * Enum for error codes
+ * @readonly
+ * @enum {number}
+ */
+var ErrorCodes = exports.ErrorCodes = {
+  NotAuthenticated: 101,
+  PermissionDenied: 102,
+  AccessKeyNotAccepted: 103,
+  AccessTokenNotAccepted: 104,
+  InvalidCredentials: 105,
+  InvalidSignature: 106,
+  BadRequest: 107,
+  InvalidArgument: 108,
+  Duplicated: 109,
+  ResourceNotFound: 110,
+  NotSupported: 111,
+  NotImplemented: 112,
+  ConstraintViolated: 113,
+  IncompatibleSchema: 114,
+  AtomicOperationFailure: 115,
+  PartialOperationFailure: 116,
+  UndefinedOperation: 117,
+  PluginUnavailable: 118,
+  PluginTimeout: 119,
+  RecordQueryInvalid: 120,
+  PluginInitializing: 121,
+  UnexpectedError: 10000
+};
+
+function codeToString(code) {
+  return _lodash2.default.findKey(ErrorCodes, function (value) {
+    return code === value;
+  });
+}
+
+/**
+ * SkygearError is an error object containing information of an error
+ * occurred.
+ *
+ * @example
+ * let err = new SkygearError(
+ *   'Unable to parse data',
+ *   UnexpectedError,
+ *   { content: 'BADDATA' }
+ * );
+ */
+
+var SkygearError = exports.SkygearError = function (_extendableBuiltin2) {
+  _inherits(SkygearError, _extendableBuiltin2);
+
+  /**
+   * Creates a SkygearError.
+   * @param {string} message - an error message
+   * @param {number} code - a code for the error condition
+   * @param {Object} info - more information about the error
+   */
+  function SkygearError(message, code, info) {
+    _classCallCheck(this, SkygearError);
+
+    var _this = _possibleConstructorReturn(this, (SkygearError.__proto__ || Object.getPrototypeOf(SkygearError)).call(this, message));
+
+    _this.message = message;
+    _this.code = code || ErrorCodes.UnexpectedError;
+    _this.info = info || null;
+    return _this;
+  }
+
+  _createClass(SkygearError, [{
+    key: 'toString',
+    value: function toString() {
+      return 'SkygearError: ' + this.message;
+    }
+
+    /* eslint-disable complexity */
+
+  }, {
+    key: 'toLocaleString',
+    value: function toLocaleString() {
+      switch (this.code) {
+        case ErrorCodes.NotAuthenticated:
+          return 'You have to be authenticated to perform this operation.';
+        case ErrorCodes.PermissionDenied:
+        case ErrorCodes.AccessKeyNotAccepted:
+        case ErrorCodes.AccessTokenNotAccepted:
+          return 'You are not allowed to perform this operation.';
+        case ErrorCodes.InvalidCredentials:
+          return 'You are not allowed to log in because ' + 'the credentials you provided are not valid.';
+        case ErrorCodes.InvalidSignature:
+        case ErrorCodes.BadRequest:
+          return 'The server is unable to process the request.';
+        case ErrorCodes.InvalidArgument:
+          return 'The server is unable to process the data.';
+        case ErrorCodes.Duplicated:
+          return 'This request contains duplicate of an existing ' + 'resource on the server.';
+        case ErrorCodes.ResourceNotFound:
+          return 'The requested resource is not found.';
+        case ErrorCodes.NotSupported:
+          return 'This operation is not supported.';
+        case ErrorCodes.NotImplemented:
+          return 'This operation is not implemented.';
+        case ErrorCodes.ConstraintViolated:
+        case ErrorCodes.IncompatibleSchema:
+        case ErrorCodes.AtomicOperationFailure:
+        case ErrorCodes.PartialOperationFailure:
+          return 'A problem occurred while processing this request.';
+        case ErrorCodes.UndefinedOperation:
+          return 'The requested operation is not available.';
+        case ErrorCodes.PluginInitializing:
+        case ErrorCodes.PluginUnavailable:
+          return 'The server is not ready yet.';
+        case ErrorCodes.PluginTimeout:
+          return 'The server took too long to process.';
+        case ErrorCodes.RecordQueryInvalid:
+          return 'A problem occurred while processing this request.';
+        default:
+          return 'An unexpected error has occurred.';
+      }
+    }
+    /* eslint-enable complexity */
+
+  }, {
+    key: 'toJSON',
+    value: function toJSON() {
+      var result = {
+        name: codeToString(this.code),
+        code: this.code,
+        message: this.message
+      };
+      if (this.info) {
+        result.info = this.info;
+      }
+      return result;
+    }
+  }], [{
+    key: 'fromJSON',
+    value: function fromJSON(attrs) {
+      return new SkygearError(attrs.message, attrs.code || ErrorCodes.UnexpectedError, attrs.info || null);
+    }
+  }]);
+
+  return SkygearError;
+}(_extendableBuiltin(Error));
+},{"lodash":31}],44:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); /**
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Copyright 2015 Oursky Ltd.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Licensed under the Apache License, Version 2.0 (the "License");
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * you may not use this file except in compliance with the License.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * You may obtain a copy of the License at
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *     http://www.apache.org/licenses/LICENSE-2.0
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Unless required by applicable law or agreed to in writing, software
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * distributed under the License is distributed on an "AS IS" BASIS,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * See the License for the specific language governing permissions and
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * limitations under the License.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      */
+
+
+var _lodash = require('lodash');
+
+var _lodash2 = _interopRequireDefault(_lodash);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Geolocation = function () {
+  function Geolocation(latitude, longitude) {
+    _classCallCheck(this, Geolocation);
+
+    if (!_lodash2.default.isNumber(latitude)) {
+      throw new Error('Latitude is not a number');
+    }
+    if (latitude < -90 || latitude > 90) {
+      throw new Error('Latitude is not in expected range (-90, 90)');
+    }
+    if (!_lodash2.default.isNumber(longitude)) {
+      throw new Error('Longitude is not a number');
+    }
+    if (longitude < -180 || longitude > 180) {
+      throw new Error('Longitude is not in expected range (-180, 180)');
+    }
+    this.latitude = latitude;
+    this.longitude = longitude;
+  }
+
+  _createClass(Geolocation, [{
+    key: 'toJSON',
+    value: function toJSON() {
+      return {
+        $lat: this.latitude,
+        $lng: this.longitude,
+        $type: 'geo'
+      };
+    }
+  }], [{
+    key: 'fromJSON',
+    value: function fromJSON(attrs) {
+      return new Geolocation(attrs.$lat, attrs.$lng);
+    }
+  }]);
+
+  return Geolocation;
+}();
+
+exports.default = Geolocation;
+module.exports = exports['default'];
+},{"lodash":31}],45:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _container = require('./container');
+
+var _container2 = _interopRequireDefault(_container);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var defaultContainer = new _container2.default(); /**
+                                                   * Copyright 2015 Oursky Ltd.
+                                                   *
+                                                   * Licensed under the Apache License, Version 2.0 (the "License");
+                                                   * you may not use this file except in compliance with the License.
+                                                   * You may obtain a copy of the License at
+                                                   *
+                                                   *     http://www.apache.org/licenses/LICENSE-2.0
+                                                   *
+                                                   * Unless required by applicable law or agreed to in writing, software
+                                                   * distributed under the License is distributed on an "AS IS" BASIS,
+                                                   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+                                                   * See the License for the specific language governing permissions and
+                                                   * limitations under the License.
+                                                   */
+exports.default = defaultContainer;
+module.exports = exports['default'];
+},{"./container":41}],46:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.PubsubContainer = exports.Pubsub = undefined;
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _util = require('./util');
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+/**
+ * Copyright 2015 Oursky Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+var _ = require('lodash');
+var _ws = require('websocket');
+var WebSocket = null;
+if (_ws) {
+  WebSocket = _ws.w3cwebsocket;
+} else {
+  WebSocket = window.WebSocket; //eslint-disable-line
+}
+var url = require('url');
+var ee = require('event-emitter');
+
+var ON_OPEN = 'onOpen';
+var ON_CLOSE = 'onClose';
+
+var Pubsub = exports.Pubsub = function () {
+  function Pubsub(container) {
+    var internal = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+
+    _classCallCheck(this, Pubsub);
+
+    this._container = container;
+    this._ws = null;
+    this._internal = internal;
+    this._queue = [];
+    this.ee = ee({});
+    this._handlers = {};
+    this._reconnectWait = 5000;
+    this._retryCount = 0;
+  }
+
+  _createClass(Pubsub, [{
+    key: 'onOpen',
+    value: function onOpen(listener) {
+      this.ee.on(ON_OPEN, listener);
+      return new _util.EventHandle(this.ee, ON_OPEN, listener);
+    }
+  }, {
+    key: 'onClose',
+    value: function onClose(listener) {
+      this.ee.on(ON_CLOSE, listener);
+      return new _util.EventHandle(this.ee, ON_CLOSE, listener);
+    }
+  }, {
+    key: '_pubsubUrl',
+    value: function _pubsubUrl() {
+      var internal = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+
+      var parsedUrl = url.parse(this._container.endPoint);
+      var protocol = parsedUrl.protocol === 'https:' ? 'wss:' : 'ws:';
+      var path = internal ? '/_/pubsub' : '/pubsub';
+      var queryString = '?api_key=' + this._container.apiKey;
+      return protocol + '//' + parsedUrl.host + path + queryString;
+    }
+  }, {
+    key: '_hasCredentials',
+    value: function _hasCredentials() {
+      return !!this._container.apiKey;
+    }
+  }, {
+    key: 'reconfigure',
+    value: function reconfigure() {
+      if (!this._hasCredentials()) {
+        this.close();
+        return;
+      }
+
+      this.connect();
+    }
+  }, {
+    key: '_onopen',
+    value: function _onopen() {
+      var _this = this;
+
+      // Trigger registed onOpen callback
+      this.ee.emit(ON_OPEN, true);
+
+      // Resubscribe previously subscribed channels
+      _.forEach(this._handlers, function (handlers, channel) {
+        _this._sendSubscription(channel);
+      });
+
+      // Flushed queued messages to the server
+      _.forEach(this._queue, function (data) {
+        _this._ws.send(JSON.stringify(data));
+      });
+      this._queue = [];
+    }
+  }, {
+    key: '_onmessage',
+    value: function _onmessage(data) {
+      _.forEach(this._handlers[data.channel], function (handler) {
+        handler(data.data);
+      });
+    }
+  }, {
+    key: 'on',
+    value: function on(channel, callback) {
+      return this.subscribe(channel, callback);
+    }
+
+    /**
+     * Subscribe the channel for just one message.
+     *
+     * This function takes one message off from a pubsub channel,
+     * returning a promise of that message. When a message
+     * is received from the channel, the channel will be unsubscribed.
+     *
+     * @param {string} channel Channel to listen on
+     * @return {Promise} Promise of next message in this channel
+     */
+
+  }, {
+    key: 'once',
+    value: function once(channel) {
+      var _this2 = this;
+
+      return new Promise(function (resolve) {
+        var handler = function handler(data) {
+          _this2.unsubscribe(channel, handler);
+          resolve(data);
+        };
+        _this2.subscribe(channel, handler);
+      });
+    }
+  }, {
+    key: 'publish',
+    value: function publish(channel, data) {
+      if (!channel) {
+        throw new Error('Missing channel to publish');
+      }
+
+      if (!data) {
+        throw new Error('Missing data to publish');
+      }
+
+      var publishData = {
+        action: 'pub',
+        channel: channel,
+        data: data
+      };
+      if (this.connected) {
+        this._ws.send(JSON.stringify(publishData));
+      } else {
+        this._queue.push(publishData);
+      }
+    }
+  }, {
+    key: '_sendSubscription',
+    value: function _sendSubscription(channel) {
+      if (this.connected) {
+        var data = {
+          action: 'sub',
+          channel: channel
+        };
+        this._ws.send(JSON.stringify(data));
+      }
+    }
+  }, {
+    key: '_sendRemoveSubscription',
+    value: function _sendRemoveSubscription(channel) {
+      if (this.connected) {
+        var data = {
+          action: 'unsub',
+          channel: channel
+        };
+        this._ws.send(JSON.stringify(data));
+      }
+    }
+  }, {
+    key: 'off',
+    value: function off(channel) {
+      var callback = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+
+      this.unsubscribe(channel, callback);
+    }
+  }, {
+    key: 'subscribe',
+    value: function subscribe(channel, handler) {
+      if (!channel) {
+        throw new Error('Missing channel to subscribe');
+      }
+
+      var alreadyExists = this.hasHandlers(channel);
+      this._register(channel, handler);
+      if (!alreadyExists) {
+        this._sendSubscription(channel);
+      }
+      return handler;
+    }
+  }, {
+    key: 'unsubscribe',
+    value: function unsubscribe(channel) {
+      var _this3 = this;
+
+      var handler = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+
+      if (!channel) {
+        throw new Error('Missing channel to unsubscribe');
+      }
+
+      if (!this.hasHandlers(channel)) {
+        return;
+      }
+
+      var handlersToRemove;
+      if (handler) {
+        handlersToRemove = [handler];
+      } else {
+        handlersToRemove = this._handlers[channel];
+      }
+
+      _.forEach(handlersToRemove, function (handlerToRemove) {
+        _this3._unregister(channel, handlerToRemove);
+      });
+
+      if (!this.hasHandlers(channel)) {
+        this._sendRemoveSubscription(channel);
+      }
+    }
+  }, {
+    key: 'hasHandlers',
+    value: function hasHandlers(channel) {
+      var handlers = this._handlers[channel];
+      return handlers ? handlers.length > 0 : false;
+    }
+  }, {
+    key: '_register',
+    value: function _register(channel, handler) {
+      if (!this._handlers[channel]) {
+        this._handlers[channel] = [];
+      }
+      this._handlers[channel].push(handler);
+    }
+  }, {
+    key: '_unregister',
+    value: function _unregister(channel, handler) {
+      var handlers = this._handlers[channel];
+      handlers = _.reject(handlers, function (item) {
+        return item === handler;
+      });
+      if (handlers.length > 0) {
+        this._handlers[channel] = handlers;
+      } else {
+        delete this._handlers[channel];
+      }
+    }
+  }, {
+    key: '_reconnect',
+    value: function _reconnect() {
+      var _this4 = this;
+
+      var interval = _.min([this._reconnectWait * this._retryCount, 60000]);
+      _.delay(function () {
+        _this4._retryCount += 1;
+        _this4.connect();
+      }, interval);
+    }
+  }, {
+    key: 'reset',
+    value: function reset() {
+      this.close();
+      this._handlers = {};
+    }
+  }, {
+    key: 'close',
+    value: function close() {
+      if (this._ws) {
+        this._ws.close();
+        this._ws = null;
+      }
+    }
+  }, {
+    key: '_setWebSocket',
+    value: function _setWebSocket(ws) {
+      var _this5 = this;
+
+      var emitter = this.ee;
+      this._ws = ws;
+
+      if (!this._ws) {
+        return;
+      }
+
+      this._ws.onopen = function () {
+        _this5._retryCount = 0;
+        _this5._onopen();
+      };
+      this._ws.onclose = function () {
+        emitter.emit(ON_CLOSE, false);
+        _this5._reconnect();
+      };
+      this._ws.onmessage = function (evt) {
+        var message;
+        try {
+          message = JSON.parse(evt.data);
+        } catch (e) {
+          console.log('Got malformed websocket data:', evt.data);
+          return;
+        }
+        _this5._onmessage(message);
+      };
+    }
+  }, {
+    key: 'connect',
+    value: function connect() {
+      if (!this._hasCredentials() || this.connected) {
+        return;
+      }
+
+      var pubsubUrl = this._pubsubUrl(this._internal);
+      var ws = new this.WebSocket(pubsubUrl);
+      this._setWebSocket(ws);
+    }
+  }, {
+    key: 'connected',
+    get: function get() {
+      return this._ws && this._ws.readyState === 1;
+    }
+  }, {
+    key: 'WebSocket',
+    get: function get() {
+      return WebSocket;
+    }
+  }]);
+
+  return Pubsub;
+}();
+
+var PubsubContainer = exports.PubsubContainer = function () {
+  function PubsubContainer(container) {
+    _classCallCheck(this, PubsubContainer);
+
+    this.container = container;
+
+    this._pubsub = new Pubsub(this.container, false);
+    this._internalPubsub = new Pubsub(this.container, true);
+    this.autoPubsub = true;
+  }
+
+  /**
+   * Subscribe a function callback on receiving message at the specified
+   * channel.
+   *
+   * @param {string} channel - Name of the channel to subscribe
+   * @param {function(object:*)} callback - function to be trigger with
+   * incoming data.
+   **/
+
+
+  _createClass(PubsubContainer, [{
+    key: 'on',
+    value: function on(channel, callback) {
+      return this._pubsub.on(channel, callback);
+    }
+
+    /**
+     * Unsubscribe a function callback on the specified channel.
+     *
+     * If pass in `callback` is null, all callbacks in the specified channel
+     * will be removed.
+     *
+     * @param {string} channel - Name of the channel to unsubscribe
+     * @param {function(object:*)=} callback - function to be trigger with
+     * incoming data.
+     **/
+
+  }, {
+    key: 'off',
+    value: function off(channel) {
+      var callback = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+
+      this._pubsub.off(channel, callback);
+    }
+  }, {
+    key: 'once',
+    value: function once(channel) {
+      this._pubsub.once(channel);
+    }
+  }, {
+    key: 'onOpen',
+    value: function onOpen(listener) {
+      this._pubsub.onOpen(listener);
+    }
+  }, {
+    key: 'onClose',
+    value: function onClose(listener) {
+      this._pubsub.onClose(listener);
+    }
+  }, {
+    key: 'publish',
+    value: function publish(channel, data) {
+      this._pubsub.publish(channel, data);
+    }
+  }, {
+    key: 'hasHandlers',
+    value: function hasHandlers(channel) {
+      this._pubsub.hasHandlers(channel);
+    }
+  }, {
+    key: '_reconfigurePubsubIfNeeded',
+    value: function _reconfigurePubsubIfNeeded() {
+      if (!this.autoPubsub) {
+        return;
+      }
+
+      this._internalPubsub.reset();
+      if (this.deviceID !== null) {
+        this._internalPubsub.subscribe('_sub_' + this.deviceID, function (data) {
+          console.log('Receivied data for subscription: ' + data);
+        });
+      }
+      this._internalPubsub.reconfigure();
+      this._pubsub.reconfigure();
+    }
+  }, {
+    key: 'deviceID',
+    get: function get() {
+      return this.container.push.deviceID;
+    }
+  }]);
+
+  return PubsubContainer;
+}();
+},{"./util":57,"event-emitter":28,"lodash":31,"url":70,"websocket":78}],47:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.PushContainer = undefined;
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); /**
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Copyright 2015 Oursky Ltd.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Licensed under the Apache License, Version 2.0 (the "License");
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * you may not use this file except in compliance with the License.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * You may obtain a copy of the License at
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *     http://www.apache.org/licenses/LICENSE-2.0
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Unless required by applicable law or agreed to in writing, software
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * distributed under the License is distributed on an "AS IS" BASIS,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * See the License for the specific language governing permissions and
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * limitations under the License.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      */
+
+
+var _error = require('./error');
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var PushContainer = exports.PushContainer = function () {
+  function PushContainer(container) {
+    _classCallCheck(this, PushContainer);
+
+    this.container = container;
+
+    this._deviceID = null;
+    this._getDeviceID();
+  }
+
+  _createClass(PushContainer, [{
+    key: 'inferDeviceType',
+    value: function inferDeviceType() {
+      // To be implmented by subclass
+      // TODO: probably web / node, handle it later
+      throw new Error('Failed to infer type, please supply a value');
+    }
+
+    /**
+     * You can register your device for receiving push notifications.
+     *
+     * @param {string} token - The device token
+     * @param {string} type - The device type (either 'ios' or 'android')
+     * @param {string} topic - The device topic, refer to application bundle
+     * identifier on iOS and application package name on Android.
+     **/
+
+  }, {
+    key: 'registerDevice',
+    value: function registerDevice(token, type, topic) {
+      var _this = this;
+
+      if (!token) {
+        throw new Error('Token cannot be empty');
+      }
+      if (!type) {
+        type = this.inferDeviceType();
+      }
+
+      var deviceID = void 0;
+      if (this.deviceID) {
+        deviceID = this.deviceID;
+      }
+
+      return this.container.makeRequest('device:register', {
+        type: type,
+        id: deviceID,
+        topic: topic,
+        device_token: token //eslint-disable-line camelcase
+      }).then(function (body) {
+        return _this._setDeviceID(body.result.id);
+      }, function (error) {
+        // Will set the deviceID to null and try again iff deviceID is not null.
+        // The deviceID can be deleted remotely, by apns feedback.
+        // If the current deviceID is already null, will regards as server fail.
+        var errorCode = null;
+        if (error.error) {
+          errorCode = error.error.code;
+        }
+        if (_this.deviceID && errorCode === _error.ErrorCodes.ResourceNotFound) {
+          return _this._setDeviceID(null).then(function () {
+            return _this.registerDevice(token, type);
+          });
+        } else {
+          return Promise.reject(error);
+        }
+      });
+    }
+  }, {
+    key: 'unregisterDevice',
+    value: function unregisterDevice() {
+      var _this2 = this;
+
+      if (!this.deviceID) {
+        return Promise.reject(new _error.SkygearError('Missing device id', _error.ErrorCodes.InvalidArgument));
+      }
+
+      return this.container.makeRequest('device:unregister', {
+        id: this.deviceID
+      }).then(function () {
+        // do nothing
+        return;
+      }, function (error) {
+        var errorCode = null;
+        if (error.error) {
+          errorCode = error.error.code;
+        }
+        if (errorCode === _error.ErrorCodes.ResourceNotFound) {
+          // regard it as success
+          return _this2._setDeviceID(null);
+        } else {
+          return Promise.reject(error);
+        }
+      });
+    }
+  }, {
+    key: '_getDeviceID',
+    value: function _getDeviceID() {
+      var _this3 = this;
+
+      return this.container.store.getItem('skygear-deviceid').then(function (deviceID) {
+        _this3._deviceID = deviceID;
+        return deviceID;
+      }, function (err) {
+        console.warn('Failed to get deviceid', err);
+        _this3._deviceID = null;
+        return null;
+      });
+    }
+  }, {
+    key: '_setDeviceID',
+    value: function _setDeviceID(value) {
+      var _this4 = this;
+
+      this._deviceID = value;
+      var store = this.container.store;
+      var setItem = value === null ? store.removeItem('skygear-deviceid') : store.setItem('skygear-deviceid', value);
+      return setItem.then(function () {
+        return value;
+      }, function (err) {
+        console.warn('Failed to persist deviceid', err);
+        return value;
+      }).then(function (deviceID) {
+        _this4.container.pubsub._reconfigurePubsubIfNeeded();
+        return deviceID;
+      });
+    }
+  }, {
+    key: 'deviceID',
+    get: function get() {
+      return this._deviceID;
+    }
+  }]);
+
+  return PushContainer;
+}();
+},{"./error":43}],48:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); /**
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Copyright 2015 Oursky Ltd.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Licensed under the Apache License, Version 2.0 (the "License");
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * you may not use this file except in compliance with the License.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * You may obtain a copy of the License at
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *     http://www.apache.org/licenses/LICENSE-2.0
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Unless required by applicable law or agreed to in writing, software
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * distributed under the License is distributed on an "AS IS" BASIS,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * See the License for the specific language governing permissions and
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * limitations under the License.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      */
+
+
+var _lodash = require('lodash');
+
+var _lodash2 = _interopRequireDefault(_lodash);
+
+var _md = require('md5');
+
+var _md2 = _interopRequireDefault(_md);
+
+var _util = require('./util');
+
+var _record = require('./record');
+
+var _record2 = _interopRequireDefault(_record);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+/**
+* Query object provides database query functions.
+* @example
+* const Note = skygear.Record.extend('note');
+* const query = new skygear.Query(Note);
+* query.equalTo('title', 'First note');
+* skygear.publicDB.query(query).then((notes) => {
+* }, (error) => {
+*   console.error(error)
+* });'
+*/
+
+var Query = function () {
+
+  /**
+   * constructor - Create Query object from a Record Class
+   * @param {Record} recordCls - Record Class
+   *
+   */
+  function Query(recordCls) {
+    _classCallCheck(this, Query);
+
+    if (!_record2.default.validType(recordCls.recordType)) {
+      throw new Error('RecordType is not valid. Please start with alphanumeric string.');
+    }
+    this.recordCls = recordCls;
+    this.recordType = recordCls.recordType;
+    this._predicate = [];
+    this._orPredicate = [];
+    this._sort = [];
+    this._include = {};
+    this._negation = false;
+    this.overallCount = false;
+    this.limit = 50;
+    this.offset = 0;
+    this.page = 0;
+  }
+
+  /**
+   * like - Set a like predicate
+   * @param  {string} key
+   * @param  {string} value
+   * @return {Query}  self
+   */
+
+  _createClass(Query, [{
+    key: 'like',
+    value: function like(key, value) {
+      this._predicate.push(['like', { $type: 'keypath', $val: key }, value]);
+      return this;
+    }
+
+    /**
+     * notLike - Set a negated like predicate
+     * @param  {string} key
+     * @param  {string} value
+     * @return {Query}  self
+     */
+
+  }, {
+    key: 'notLike',
+    value: function notLike(key, value) {
+      this._predicate.push(['not', ['like', { $type: 'keypath', $val: key }, value]]);
+
+      return this;
+    }
+
+    /**
+     * caseInsensitiveLike - Set a case-insensitive like predicate
+     * @param  {string} key
+     * @param  {string} value
+     * @return {Query}  self
+     */
+
+  }, {
+    key: 'caseInsensitiveLike',
+    value: function caseInsensitiveLike(key, value) {
+      this._predicate.push(['ilike', { $type: 'keypath', $val: key }, value]);
+      return this;
+    }
+
+    /**
+     * caseInsensitiveNotLike - Set a case-insensitive negated like predicate
+     * @param  {string} key
+     * @param  {string} value
+     * @return {Query}  self
+     */
+
+  }, {
+    key: 'caseInsensitiveNotLike',
+    value: function caseInsensitiveNotLike(key, value) {
+      this._predicate.push(['not', ['ilike', { $type: 'keypath', $val: key }, value]]);
+      return this;
+    }
+
+    /**
+     * equalTo - Set an equal predicate
+     * @param  {string} key
+     * @param  {string} value
+     * @return {Query}  self
+     */
+
+  }, {
+    key: 'equalTo',
+    value: function equalTo(key, value) {
+      this._predicate.push(['eq', { $type: 'keypath', $val: key }, value]);
+      return this;
+    }
+
+    /**
+     * notEqualTo - Set a not equal predicate
+     * @param  {string} key
+     * @param  {string} value
+     * @return {Query}  self
+     */
+
+  }, {
+    key: 'notEqualTo',
+    value: function notEqualTo(key, value) {
+      this._predicate.push(['neq', { $type: 'keypath', $val: key }, value]);
+      return this;
+    }
+
+    /**
+     * greaterThan - Set a greater than predicate
+     * @param  {string} key
+     * @param  {string} value
+     * @return {Query}  self
+     */
+
+  }, {
+    key: 'greaterThan',
+    value: function greaterThan(key, value) {
+      this._predicate.push(['gt', { $type: 'keypath', $val: key }, value]);
+      return this;
+    }
+
+    /**
+     * greaterThanOrEqualTo - Set a greater than or equal to predicate
+     * @param  {string} key
+     * @param  {string} value
+     * @return {Query}  self
+     */
+
+  }, {
+    key: 'greaterThanOrEqualTo',
+    value: function greaterThanOrEqualTo(key, value) {
+      this._predicate.push(['gte', { $type: 'keypath', $val: key }, value]);
+      return this;
+    }
+
+    /**
+     * lessThan - Set a less than predicate
+     * @param  {string} key
+     * @param  {string} value
+     * @return {Query}  self
+     */
+
+  }, {
+    key: 'lessThan',
+    value: function lessThan(key, value) {
+      this._predicate.push(['lt', { $type: 'keypath', $val: key }, value]);
+      return this;
+    }
+
+    /**
+     * lessThanOrEqualTo - Set a less than or equal to predicate
+     * @param  {string} key
+     * @param  {string} value
+     * @return {Query}  self
+     */
+
+  }, {
+    key: 'lessThanOrEqualTo',
+    value: function lessThanOrEqualTo(key, value) {
+      this._predicate.push(['lte', { $type: 'keypath', $val: key }, value]);
+      return this;
+    }
+
+    /**
+     * distanceLessThan - Set a distance less than query
+     * @param  {string} key
+     * @param  {Geolocation} loc
+     * @param  {Number}  distance
+     * @return {Query}  self
+     */
+
+  }, {
+    key: 'distanceLessThan',
+    value: function distanceLessThan(key, loc, distance) {
+      this._predicate.push(['lt', ['func', 'distance', { $type: 'keypath', $val: key }, { $type: 'geo', $lng: loc.longitude, $lat: loc.latitude }], distance]);
+      return this;
+    }
+
+    /**
+     * distanceGreaterThan - Set a distance greater than query
+     * @param  {string} key
+     * @param  {geolocation} loc
+     * @param  {Number}  distance
+     * @return {Query}  self
+     */
+
+  }, {
+    key: 'distanceGreaterThan',
+    value: function distanceGreaterThan(key, loc, distance) {
+      this._predicate.push(['gt', ['func', 'distance', { $type: 'keypath', $val: key }, { $type: 'geo', $lng: loc.longitude, $lat: loc.latitude }], distance]);
+      return this;
+    }
+
+    /**
+     * contains - Set a contains predicate
+     * @throws {Error}  Throws Error if lookupArray is not an array.
+     * @param  {string} key
+     * @param  {Array}   lookupArray - values
+     * @return {Query}  self
+     */
+
+  }, {
+    key: 'contains',
+    value: function contains(key, lookupArray) {
+      if (!_lodash2.default.isArray(lookupArray)) {
+        throw new Error('The second argument of contains must be an array.');
+      }
+
+      this._predicate.push(['in', { $type: 'keypath', $val: key }, lookupArray]);
+      return this;
+    }
+
+    /**
+     * notContains - Set a not contains predicate
+     * @throws {Error}  Throws Error if lookupArray is not an array.
+     * @param  {string} key
+     * @param  {Array}   lookupArray - values
+     * @return {Query}  self
+     */
+
+  }, {
+    key: 'notContains',
+    value: function notContains(key, lookupArray) {
+      if (!_lodash2.default.isArray(lookupArray)) {
+        throw new Error('The second argument of contains must be an array.');
+      }
+
+      this._predicate.push(['not', ['in', { $type: 'keypath', $val: key }, lookupArray]]);
+      return this;
+    }
+
+    /**
+     * containsValue - Set a contains value predicate
+     * @throws {Error}  Throws Error if needle is not a string.
+     * @param  {string} key
+     * @param  {string} needle
+     * @return {Query}  self
+     */
+
+  }, {
+    key: 'containsValue',
+    value: function containsValue(key, needle) {
+      if (!_lodash2.default.isString(needle)) {
+        throw new Error('The second argument of containsValue must be a string.');
+      }
+
+      this._predicate.push(['in', needle, { $type: 'keypath', $val: key }]);
+      return this;
+    }
+
+    /**
+     * notContainsValue - Set a not contains value predicate
+     * @throws {Error}  Throws Error if needle is not a string.
+     * @param  {string} key
+     * @param  {string} needle
+     * @return {Query}  self
+     */
+
+  }, {
+    key: 'notContainsValue',
+    value: function notContainsValue(key, needle) {
+      if (!_lodash2.default.isString(needle)) {
+        throw new Error('The second argument of containsValue must be a string.');
+      }
+
+      this._predicate.push(['not', ['in', needle, { $type: 'keypath', $val: key }]]);
+      return this;
+    }
+
+    /**
+     * havingRelation - Set a having relation predicate
+     * @param  {string} key
+     * @param  {string} rel - relationship, either 'friend' or 'follow'
+     * @return {Query}  self
+     */
+
+  }, {
+    key: 'havingRelation',
+    value: function havingRelation(key, rel) {
+      var name = rel.prototype.identifier;
+      if (name === 'friend') {
+        name = '_friend';
+      } else if (name === 'follow') {
+        name = '_follow';
+      }
+
+      this._predicate.push(['func', 'userRelation', { $type: 'keypath', $val: key }, { $type: 'relation', $name: name, $direction: rel.prototype.direction }]);
+      return this;
+    }
+
+    /**
+     * notHavingRelation - Set a not having relation predicate
+     * @param  {string} key
+     * @param  {string} rel - relationship, either 'friend' or 'follow'
+     * @return {Query}  self
+     */
+
+  }, {
+    key: 'notHavingRelation',
+    value: function notHavingRelation(key, rel) {
+      var name = rel.prototype.identifier;
+      if (name === 'friend') {
+        name = '_friend';
+      } else if (name === 'follow') {
+        name = '_follow';
+      }
+
+      this._predicate.push(['not', ['func', 'userRelation', { $type: 'keypath', $val: key }, { $type: 'relation', $name: name, $direction: rel.prototype.direction }]]);
+      return this;
+    }
+
+    /**
+     * havingEmails - Set a having email predicate, for {user} record only.
+     * @throw  {Error}  throw Error if record type is not 'user'
+     * @param  {Array}  emails - emails of users.
+     * @return {Query}  self
+     */
+
+  }, {
+    key: 'havingEmails',
+    value: function havingEmails(emails) {
+      if (this.recordType !== 'user') {
+        throw new Error('havingEmails predicate only works on user record');
+      }
+      if (!_lodash2.default.isArray(emails)) {
+        emails = [emails];
+      }
+
+      this._predicate.push(['func', 'userDiscover', { emails: emails }]);
+      return this;
+    }
+
+    /**
+     * havingUsernames - Set a having username predicate, for {user} record only.
+     * @throw  {Error}  throw Error if record type is not 'user'
+     * @param  {Array}  usernames - usernames of users.
+     * @return {Query}  self
+     */
+
+  }, {
+    key: 'havingUsernames',
+    value: function havingUsernames(usernames) {
+      if (this.recordType !== 'user') {
+        throw new Error('havingUsernames predicate only works on user record');
+      }
+      if (!_lodash2.default.isArray(usernames)) {
+        usernames = [usernames];
+      }
+
+      this._predicate.push(['func', 'userDiscover', { usernames: usernames }]);
+      return this;
+    }
+
+    /**
+     * addDescending -  Set descending predicate
+     * @param {string} key
+     * @return {Query} self
+     */
+
+  }, {
+    key: 'addDescending',
+    value: function addDescending(key) {
+      this._sort.push([{ $type: 'keypath', $val: key }, 'desc']);
+      return this;
+    }
+
+    /**
+     * addAscending -  Set ascending predicate
+     * @param {string} key
+     * @return {Query} self
+     */
+
+  }, {
+    key: 'addAscending',
+    value: function addAscending(key) {
+      this._sort.push([{ $type: 'keypath', $val: key }, 'asc']);
+      return this;
+    }
+
+    /**
+     * addDescendingByDistance -  Set descending by distance predicate
+     * @param {string} key
+     * @param {Geolocation} loc
+     * @return {Query} self
+     */
+
+  }, {
+    key: 'addDescendingByDistance',
+    value: function addDescendingByDistance(key, loc) {
+      this._sort.push([['func', 'distance', { $type: 'keypath', $val: key }, { $type: 'geo', $lng: loc.longitude, $lat: loc.latitude }], 'desc']);
+      return this;
+    }
+
+    /**
+     * addAscendingByDistance -  Set ascending by distance predicate
+     * @param {string} key
+     * @param {Geolocation} loc
+     * @return {Query} self
+     */
+
+  }, {
+    key: 'addAscendingByDistance',
+    value: function addAscendingByDistance(key, loc) {
+      this._sort.push([['func', 'distance', { $type: 'keypath', $val: key }, { $type: 'geo', $lng: loc.longitude, $lat: loc.latitude }], 'asc']);
+      return this;
+    }
+
+    /**
+     * transientInclude - transient include
+     * @param {string} key
+     * @param {string} mapToKey
+     * @return {Query} this
+     */
+
+  }, {
+    key: 'transientInclude',
+    value: function transientInclude(key, mapToKey) {
+      mapToKey = mapToKey || key;
+      this._include[mapToKey] = {
+        $type: 'keypath',
+        $val: key
+      };
+      return this;
+    }
+
+    /**
+     * transientIncludeDistance - transient include distance
+     * @param {string} key
+     * @param {string} mapToKey
+     * @param {Geolocation} loc
+     * @return {Query} this
+     */
+
+  }, {
+    key: 'transientIncludeDistance',
+    value: function transientIncludeDistance(key, mapToKey, loc) {
+      mapToKey = mapToKey || key;
+      this._include[mapToKey] = ['func', 'distance', { $type: 'keypath', $val: key }, { $type: 'geo', $lng: loc.longitude, $lat: loc.latitude }];
+      return this;
+    }
+  }, {
+    key: '_orQuery',
+    value: function _orQuery(queries) {
+      var _this = this;
+
+      _lodash2.default.forEach(queries, function (query) {
+        _this._orPredicate.push(query.predicate);
+      });
+    }
+  }, {
+    key: '_getOrPredicate',
+    value: function _getOrPredicate() {
+      var _orPredicate = _lodash2.default.clone(this._orPredicate);
+      if (_orPredicate.length === 0) {
+        return [];
+      } else if (_orPredicate.length === 1) {
+        return _orPredicate[0];
+      } else {
+        _orPredicate.unshift('or');
+        return _orPredicate;
+      }
+    }
+
+    /**
+     * predicate - Preicate Function
+     * @return {Array} Array of {precidate}
+     */
+
+  }, {
+    key: 'toJSON',
+
+
+    /**
+     * toJSON - Serialize Query object
+     * @return {object}
+     */
+
+    /* eslint camelcase: 0 */
+    value: function toJSON() {
+      var payload = {
+        record_type: this.recordType,
+        limit: this.limit,
+        sort: this._sort,
+        include: this._include,
+        count: this.overallCount
+      };
+      if (this.predicate.length > 1) {
+        payload.predicate = (0, _util.toJSON)(this.predicate);
+      }
+      if (this.offset) {
+        payload.offset = this.offset;
+      }
+      if (this.page) {
+        payload.page = this.page;
+      }
+      return payload;
+    }
+
+    /**
+     * clone — clone a Query object from a Query object.
+     * @param {Query} query - query to be cloned.
+     */
+
+  }, {
+    key: 'predicate',
+    get: function get() {
+      var _predicate = _lodash2.default.clone(this._predicate);
+      if (this._orPredicate.length > 0) {
+        _predicate.push(this._getOrPredicate());
+      }
+
+      var innerPredicate = [];
+      if (_predicate.length === 1) {
+        innerPredicate = _predicate[0];
+      } else if (_predicate.length > 0) {
+        _predicate.unshift('and');
+        innerPredicate = _predicate;
+      }
+
+      if (this._negation) {
+        return ['not', innerPredicate];
+      } else {
+        return innerPredicate;
+      }
+    }
+
+    /**
+     * hash - Compute Query object hash code
+     * @return {string} md5 digest of serialized JSON
+     */
+
+  }, {
+    key: 'hash',
+    get: function get() {
+      return (0, _md2.default)(JSON.stringify(this.toJSON()));
+    }
+  }], [{
+    key: 'clone',
+    value: function clone(query) {
+      return Query.fromJSON(query.toJSON());
+    }
+
+    /**
+     * fromJSON — clone a Query object from payload.
+     * @param payload - Payload
+     */
+
+  }, {
+    key: 'fromJSON',
+    value: function fromJSON(payload) {
+      var json = _lodash2.default.cloneDeep(payload);
+      var recordCls = _record2.default.extend(json.record_type);
+      var query = new Query(recordCls);
+
+      query.limit = json.limit;
+      query._sort = json.sort;
+      query.overallCount = json.count;
+
+      if (json.offset) {
+        query.offset = json.offset;
+      }
+
+      if (json.page) {
+        query.page = json.page;
+      }
+
+      if (json.predicate && json.predicate.length > 1) {
+        var innerPredicate = (0, _util.fromJSON)(json.predicate);
+
+        // unwrap 'not' operator
+        if (innerPredicate[0] === 'not') {
+          query._negation = true;
+          innerPredicate = innerPredicate[1];
+        }
+
+        // unwrap 'and' operator
+        if (innerPredicate.length > 1 && innerPredicate[0] === 'and') {
+          innerPredicate.shift();
+        }
+
+        var _predicate = [];
+        var _orPredicate = [];
+        _lodash2.default.each(innerPredicate, function (perPredicate) {
+          if (perPredicate.length > 1 && perPredicate[0] === 'or') {
+            _orPredicate = perPredicate;
+          } else {
+            _predicate.push(perPredicate);
+          }
+        });
+
+        // unwrap 'or' operator
+        if (_orPredicate.length > 1) {
+          _orPredicate.shift();
+        }
+
+        // handler for single predicate
+        if (_predicate.length > 1 && typeof _predicate[0] === 'string' && _predicate[0] !== 'and') {
+          _predicate = [_predicate];
+        }
+
+        query._predicate = _predicate;
+        query._orPredicate = _orPredicate;
+      }
+
+      return query;
+    }
+
+    /**
+     * or - Return a disjunctive query from queries.
+     * @param {Query} queries - Queries
+     */
+
+  }, {
+    key: 'or',
+    value: function or() {
+      var recordType = null;
+      var recordCls = null;
+
+      for (var _len = arguments.length, queries = Array(_len), _key = 0; _key < _len; _key++) {
+        queries[_key] = arguments[_key];
+      }
+
+      _lodash2.default.forEach(queries, function (query) {
+        if (!recordType) {
+          recordType = query.recordType;
+          recordCls = query.recordCls;
+        }
+
+        if (recordType !== query.recordType) {
+          throw new Error('All queries must be for the same recordType.');
+        }
+      });
+
+      var orQuery = new Query(recordCls);
+      orQuery._orQuery(queries);
+      return orQuery;
+    }
+
+    /**
+     * not - Return a negated query
+     * @param {Query} query - Query
+     */
+
+  }, {
+    key: 'not',
+    value: function not(query) {
+      var queryClone = Query.clone(query);
+      queryClone._negation = !queryClone._negation;
+
+      return queryClone;
+    }
+  }]);
+
+  return Query;
+}();
+
+exports.default = Query;
+module.exports = exports['default'];
+},{"./record":50,"./util":57,"lodash":31,"md5":32}],49:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+function _extendableBuiltin(cls) {
+  function ExtendableBuiltin() {
+    cls.apply(this, arguments);
+  }
+
+  ExtendableBuiltin.prototype = Object.create(cls.prototype, {
+    constructor: {
+      value: cls,
+      enumerable: false,
+      writable: true,
+      configurable: true
+    }
+  });
+
+  if (Object.setPrototypeOf) {
+    Object.setPrototypeOf(ExtendableBuiltin, cls);
+  } else {
+    ExtendableBuiltin.__proto__ = cls;
+  }
+
+  return ExtendableBuiltin;
+}
+
+/**
+ * Copyright 2015 Oursky Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+var QueryResult = function (_extendableBuiltin2) {
+  _inherits(QueryResult, _extendableBuiltin2);
+
+  function QueryResult() {
+    _classCallCheck(this, QueryResult);
+
+    return _possibleConstructorReturn(this, (QueryResult.__proto__ || Object.getPrototypeOf(QueryResult)).apply(this, arguments));
+  }
+
+  _createClass(QueryResult, [{
+    key: "overallCount",
+    get: function get() {
+      return this._overallCount;
+    }
+  }], [{
+    key: "createFromResult",
+    value: function createFromResult(records, info) {
+      var result = new QueryResult();
+      records.forEach(function (val) {
+        return result.push(val);
+      });
+      result._overallCount = info ? info.count : undefined;
+      return result;
+    }
+  }]);
+
+  return QueryResult;
+}(_extendableBuiltin(Array));
+
+exports.default = QueryResult;
+module.exports = exports["default"];
+},{}],50:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); /**
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Copyright 2015 Oursky Ltd.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Licensed under the Apache License, Version 2.0 (the "License");
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * you may not use this file except in compliance with the License.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * You may obtain a copy of the License at
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *     http://www.apache.org/licenses/LICENSE-2.0
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Unless required by applicable law or agreed to in writing, software
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * distributed under the License is distributed on an "AS IS" BASIS,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * See the License for the specific language governing permissions and
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * limitations under the License.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      */
+
+
+var _uuid = require('uuid');
+
+var _uuid2 = _interopRequireDefault(_uuid);
+
+var _lodash = require('lodash');
+
+var _lodash2 = _interopRequireDefault(_lodash);
+
+var _util = require('./util');
+
+var _acl = require('./acl');
+
+var _acl2 = _interopRequireDefault(_acl);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var defaultAttrs = {
+  _id: null,
+  _type: null
+};
+
+var _metaAttrs = {
+  _created_at: { //eslint-disable-line
+    parser: function parser(v) {
+      return new Date(v);
+    },
+    newKey: 'createdAt'
+  },
+  _updated_at: { //eslint-disable-line
+    parser: function parser(v) {
+      return new Date(v);
+    },
+    newKey: 'updatedAt'
+  },
+  _ownerID: {
+    parser: function parser(v) {
+      return v;
+    },
+    newKey: 'ownerID'
+  },
+  _created_by: { //eslint-disable-line
+    parser: function parser(v) {
+      return v;
+    },
+    newKey: 'createdBy'
+  },
+  _updated_by: { //eslint-disable-line
+    parser: function parser(v) {
+      return v;
+    },
+    newKey: 'updatedBy'
+  },
+  _access: {
+    parser: function parser(v) {
+      var acl = v;
+      if (v && v.toJSON) {
+        acl = v.toJSON();
+      }
+      return _acl2.default.fromJSON(acl);
+    },
+    newKey: '_access'
+  }
+};
+
+var _metaKey = _lodash2.default.map(_metaAttrs, function (obj) {
+  return obj.newKey;
+});
+
+var Record = function () {
+  function Record(recordType) {
+    var attrs = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : defaultAttrs;
+
+    _classCallCheck(this, Record);
+
+    if (!Record.validType(recordType)) {
+      throw new Error('RecordType is not valid. Please start with alphanumeric string.');
+    }
+    this._recordType = recordType;
+    // Favouring `id`, since `id` will always contains type information if
+    // exist.
+    var id = attrs.id || attrs._id;
+    if (id === null || id === undefined) {
+      id = _uuid2.default.v4();
+    } else {
+      var _Record$parseID = Record.parseID(id),
+          _Record$parseID2 = _slicedToArray(_Record$parseID, 2),
+          type = _Record$parseID2[0],
+          name = _Record$parseID2[1];
+
+      if (type !== this._recordType) {
+        throw new Error('_id is not valid. RecordType mismatch.');
+      }
+      id = name;
+    }
+    delete attrs.id; // because `id` is a readonly property
+    this._id = id;
+    this._access = null;
+    this.update(attrs);
+    this.updateTransient(attrs._transient);
+  }
+
+  _createClass(Record, [{
+    key: 'setAccess',
+    value: function setAccess(acl) {
+      this._access = acl;
+    }
+  }, {
+    key: 'update',
+    value: function update(attrs) {
+      var _this = this;
+
+      _lodash2.default.each(this.attributeKeys, function (key) {
+        delete _this[key];
+      });
+
+      _lodash2.default.each(attrs, function (value, key) {
+        if (key.indexOf('_') !== 0) {
+          if (_lodash2.default.isObject(value)) {
+            _this[key] = (0, _util.fromJSON)(value);
+          } else {
+            _this[key] = value;
+          }
+        } else if (key in _metaAttrs) {
+          var meta = _metaAttrs[key];
+          _this[meta.newKey] = meta.parser(value);
+        }
+      });
+    }
+  }, {
+    key: 'setPublicNoAccess',
+    value: function setPublicNoAccess() {
+      this.access.setPublicNoAccess();
+    }
+  }, {
+    key: 'setPublicReadOnly',
+    value: function setPublicReadOnly() {
+      this.access.setPublicReadOnly();
+    }
+  }, {
+    key: 'setPublicReadWriteAccess',
+    value: function setPublicReadWriteAccess() {
+      this.access.setPublicReadWriteAccess();
+    }
+  }, {
+    key: 'setNoAccessForRole',
+    value: function setNoAccessForRole(role) {
+      this.access.setNoAccessForRole(role);
+    }
+  }, {
+    key: 'setReadOnlyForRole',
+    value: function setReadOnlyForRole(role) {
+      this.access.setReadOnlyForRole(role);
+    }
+  }, {
+    key: 'setReadWriteAccessForRole',
+    value: function setReadWriteAccessForRole(role) {
+      this.access.setReadWriteAccessForRole(role);
+    }
+  }, {
+    key: 'setNoAccessForUser',
+    value: function setNoAccessForUser(user) {
+      this.access.setNoAccessForUser(user);
+    }
+  }, {
+    key: 'setReadOnlyForUser',
+    value: function setReadOnlyForUser(user) {
+      this.access.setReadOnlyForUser(user);
+    }
+  }, {
+    key: 'setReadWriteAccessForUser',
+    value: function setReadWriteAccessForUser(User) {
+      this.access.setReadWriteAccessForUser(User);
+    }
+  }, {
+    key: 'hasPublicReadAccess',
+    value: function hasPublicReadAccess() {
+      this.access.hasPublicReadAccess();
+    }
+  }, {
+    key: 'hasPublicWriteAccess',
+    value: function hasPublicWriteAccess() {
+      this.access.hasPublicWriteAccess();
+    }
+  }, {
+    key: 'hasReadAccess',
+    value: function hasReadAccess(role) {
+      this.access.hasReadAccess(role);
+    }
+  }, {
+    key: 'hasWriteAccess',
+    value: function hasWriteAccess(role) {
+      this.access.hasWriteAccess(role);
+    }
+  }, {
+    key: 'hasReadAccessForRole',
+    value: function hasReadAccessForRole(role) {
+      this.access.hasReadAccessForRole(role);
+    }
+  }, {
+    key: 'hasWriteAccessForRole',
+    value: function hasWriteAccessForRole(role) {
+      this.access.hasWriteAccessForRole(role);
+    }
+  }, {
+    key: 'hasReadAccessForUser',
+    value: function hasReadAccessForUser(user) {
+      this.access.hasReadAccessForUser(user);
+    }
+  }, {
+    key: 'hasWriteAccessForUser',
+    value: function hasWriteAccessForUser(user) {
+      this.access.hasWriteAccessForUser(user);
+    }
+  }, {
+    key: 'updateTransient',
+    value: function updateTransient(transient_) {
+      var merge = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+
+      var newTransient = merge ? _lodash2.default.clone(this._transient) : {};
+      _lodash2.default.each(transient_, function (value, key) {
+        // If value is an object and `_id` field exists, assume
+        // that it is a record.
+        if (_lodash2.default.isObject(value) && '_id' in value) {
+          newTransient[key] = recordDictToObj(value);
+        } else if (_lodash2.default.isObject(value)) {
+          newTransient[key] = (0, _util.fromJSON)(value);
+        } else {
+          newTransient[key] = value;
+        }
+      });
+      this._transient = newTransient;
+    }
+  }, {
+    key: 'toJSON',
+    value: function toJSON() {
+      var _this2 = this;
+
+      var payload = {
+        _id: this.id,
+        _access: this._access && this._access.toJSON()
+      };
+      _lodash2.default.each(this.attributeKeys, function (key) {
+        payload[key] = (0, _util.toJSON)(_this2[key]);
+      });
+
+      return payload;
+    }
+  }, {
+    key: 'recordType',
+    get: function get() {
+      return this._recordType;
+    }
+  }, {
+    key: 'id',
+    get: function get() {
+      return this._recordType + '/' + this._id;
+    }
+  }, {
+    key: 'access',
+    get: function get() {
+      if (this._access === null || this._access === undefined) {
+        this._access = new _acl2.default();
+      }
+      return this._access;
+    }
+  }, {
+    key: 'attributeKeys',
+    get: function get() {
+      var keys = Object.keys(this);
+      return _lodash2.default.filter(keys, function (value) {
+        return value.indexOf('_') !== 0 && !_lodash2.default.includes(_metaKey, value);
+      });
+    }
+  }, {
+    key: '$transient',
+    get: function get() {
+      return this._transient;
+    }
+  }], [{
+    key: 'validType',
+    value: function validType(recordType) {
+      return recordType && recordType.indexOf('_') !== 0;
+    }
+  }, {
+    key: 'parseID',
+    value: function parseID(id) {
+      var tuple = id.split('/');
+      if (tuple.length < 2) {
+        throw new Error('_id is not valid. _id has to be in the format `type/id`');
+      }
+      return [tuple[0], tuple.slice(1).join('/')];
+    }
+  }, {
+    key: 'extend',
+    value: function extend(recordType, instFunc) {
+      if (!Record.validType(recordType)) {
+        throw new Error('RecordType is not valid. Please start with alphanumeric string.');
+      }
+      var RecordProto = {};
+      function RecordCls() {
+        var attrs = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : defaultAttrs;
+
+        Record.call(this, recordType, attrs);
+      }
+      _lodash2.default.assign(RecordProto, instFunc, {
+        constructor: RecordCls
+      });
+      RecordCls.prototype = _lodash2.default.create(Record.prototype, RecordProto);
+      RecordCls.recordType = recordType;
+      return RecordCls;
+    }
+  }]);
+
+  return Record;
+}();
+
+exports.default = Record;
+
+
+function recordDictToObj(dict) {
+  var Cls = Record.extend(dict._id.split('/')[0]);
+  return new Cls(dict);
+}
+module.exports = exports['default'];
+},{"./acl":37,"./util":57,"lodash":31,"uuid":59}],51:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); /**
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Copyright 2015 Oursky Ltd.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Licensed under the Apache License, Version 2.0 (the "License");
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * you may not use this file except in compliance with the License.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * You may obtain a copy of the License at
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *     http://www.apache.org/licenses/LICENSE-2.0
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Unless required by applicable law or agreed to in writing, software
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * distributed under the License is distributed on an "AS IS" BASIS,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * See the License for the specific language governing permissions and
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * limitations under the License.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      */
+
+
+var _record = require('./record');
+
+var _record2 = _interopRequireDefault(_record);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Reference = function () {
+  function Reference(attrs) {
+    _classCallCheck(this, Reference);
+
+    var id;
+    if (typeof attrs === 'string') {
+      id = attrs;
+    } else {
+      id = attrs.$id;
+      if (!id) {
+        id = attrs.id;
+      }
+    }
+
+    if (!id) {
+      throw new Error('Empty record id');
+    }
+
+    // parse solely to test for string id validity
+    _record2.default.parseID(id);
+
+    this._id = id;
+  }
+
+  _createClass(Reference, [{
+    key: 'toJSON',
+    value: function toJSON() {
+      return {
+        $id: this._id,
+        $type: 'ref'
+      };
+    }
+  }, {
+    key: 'id',
+    get: function get() {
+      return this._id;
+    }
+  }]);
+
+  return Reference;
+}();
+
+exports.default = Reference;
+module.exports = exports['default'];
+},{"./record":50}],52:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.RelationContainer = exports.RelationQueryResult = exports.RelationRemoveResult = exports.RelationResult = exports.RelationQuery = exports.Relation = exports.Mutual = exports.Inward = exports.Outward = undefined;
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _user = require('./user');
+
+var _user2 = _interopRequireDefault(_user);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+function _extendableBuiltin(cls) {
+  function ExtendableBuiltin() {
+    cls.apply(this, arguments);
+  }
+
+  ExtendableBuiltin.prototype = Object.create(cls.prototype, {
+    constructor: {
+      value: cls,
+      enumerable: false,
+      writable: true,
+      configurable: true
+    }
+  });
+
+  if (Object.setPrototypeOf) {
+    Object.setPrototypeOf(ExtendableBuiltin, cls);
+  } else {
+    ExtendableBuiltin.__proto__ = cls;
+  }
+
+  return ExtendableBuiltin;
+}
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+/**
+ * Copyright 2015 Oursky Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+var _ = require('lodash');
+
+var Outward = exports.Outward = 'outward';
+var Inward = exports.Inward = 'inward';
+var Mutual = exports.Mutual = 'mutual';
+
+var format = /^[a-zA-Z]+$/;
+
+var Relation = exports.Relation = function () {
+  function Relation(identifier, direction) {
+    var targets = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
+
+    _classCallCheck(this, Relation);
+
+    if (!Relation.validName(identifier)) {
+      throw new Error('Relation identifier can only be [a-zA-Z]+');
+    }
+    this.identifier = identifier;
+    if (Relation.validDirection(direction)) {
+      this.direction = direction;
+    } else {
+      throw new Error('Relation direction not supported.');
+    }
+    this.targets = targets;
+    this.fails = [];
+  }
+
+  _createClass(Relation, [{
+    key: 'targetsID',
+    get: function get() {
+      return _.map(this.targets, function (user) {
+        return user.id;
+      });
+    }
+  }], [{
+    key: 'validDirection',
+    value: function validDirection(direction) {
+      return direction === Mutual || direction === Outward || direction === Inward;
+    }
+  }, {
+    key: 'validName',
+    value: function validName(identifier) {
+      return format.test(identifier);
+    }
+  }, {
+    key: 'extend',
+    value: function extend(identifier, direction) {
+      if (!Relation.validName(identifier)) {
+        throw new Error('Relation identifier can only be [a-zA-Z]+');
+      }
+      var RelationProto = {
+        identifier: identifier,
+        direction: direction
+      };
+      function RelationCls() {
+        var targets = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
+
+        Relation.call(this, identifier, direction);
+        this.targets = targets;
+      }
+      RelationCls.prototype = _.create(Relation.prototype, RelationProto);
+      return RelationCls;
+    }
+  }]);
+
+  return Relation;
+}();
+
+var RelationQuery = exports.RelationQuery = function () {
+  function RelationQuery(relationCls) {
+    _classCallCheck(this, RelationQuery);
+
+    this.identifier = relationCls.prototype.identifier;
+    this.direction = relationCls.prototype.direction;
+    this.limit = 50;
+    this.page = 0;
+  }
+
+  _createClass(RelationQuery, [{
+    key: 'toJSON',
+    value: function toJSON() {
+      return {
+        name: this.identifier,
+        direction: this.direction,
+        limit: this.limit,
+        page: this.page
+      };
+    }
+  }]);
+
+  return RelationQuery;
+}();
+
+var RelationResult = exports.RelationResult = function RelationResult(results) {
+  _classCallCheck(this, RelationResult);
+
+  this.success = [];
+  this.fails = [];
+  this.partialError = false;
+  var len = results.length;
+  for (var i = 0; i < len; i++) {
+    if (results[i].type === 'error') {
+      this.fails.push(results[i]);
+      this.partialError = true;
+    } else {
+      this.success.push(new _user2.default(results[i].data));
+    }
+  }
+};
+
+var RelationRemoveResult = exports.RelationRemoveResult = function RelationRemoveResult(results) {
+  _classCallCheck(this, RelationRemoveResult);
+
+  this.success = [];
+  this.fails = [];
+  this.partialError = false;
+  var len = results.length;
+  for (var i = 0; i < len; i++) {
+    if (results[i].type === 'error') {
+      this.fails.push(results[i]);
+      this.partialError = true;
+    } else {
+      this.success.push(results[i].id);
+    }
+  }
+};
+
+var RelationQueryResult = exports.RelationQueryResult = function (_extendableBuiltin2) {
+  _inherits(RelationQueryResult, _extendableBuiltin2);
+
+  function RelationQueryResult() {
+    _classCallCheck(this, RelationQueryResult);
+
+    return _possibleConstructorReturn(this, (RelationQueryResult.__proto__ || Object.getPrototypeOf(RelationQueryResult)).apply(this, arguments));
+  }
+
+  _createClass(RelationQueryResult, [{
+    key: 'overallCount',
+    get: function get() {
+      return this._overallCount;
+    }
+  }], [{
+    key: 'createFromBody',
+    value: function createFromBody(body) {
+      var users = _.map(body.result, function (attrs) {
+        return new _user2.default(attrs.data);
+      });
+      var result = new RelationQueryResult();
+      users.forEach(function (val) {
+        return result.push(val);
+      });
+      var info = body.info;
+      result._overallCount = info ? info.count : undefined;
+      return result;
+    }
+  }]);
+
+  return RelationQueryResult;
+}(_extendableBuiltin(Array));
+
+var RelationContainer = exports.RelationContainer = function () {
+  function RelationContainer(container) {
+    _classCallCheck(this, RelationContainer);
+
+    this.container = container;
+  }
+
+  _createClass(RelationContainer, [{
+    key: 'query',
+    value: function query(queryObj) {
+      return this.container.makeRequest('relation:query', queryObj.toJSON()).then(RelationQueryResult.createFromBody);
+    }
+  }, {
+    key: 'queryFriend',
+    value: function queryFriend(actor) {
+      if (actor === null) {
+        actor = this.container.currentUser;
+      }
+      var query = new RelationQuery(this.Friend);
+      query.user = actor;
+      return this.query(query);
+    }
+  }, {
+    key: 'queryFollower',
+    value: function queryFollower(actor) {
+      if (actor === null) {
+        actor = this.container.currentUser;
+      }
+      var query = new RelationQuery(this.Follower);
+      query.user = actor;
+      return this.query(query);
+    }
+  }, {
+    key: 'queryFollowing',
+    value: function queryFollowing(actor) {
+      if (actor === null) {
+        actor = this.container.currentUser;
+      }
+      var query = new RelationQuery(this.Following);
+      query.user = actor;
+      return this.query(query);
+    }
+  }, {
+    key: 'add',
+    value: function add(relation) {
+      return this.container.makeRequest('relation:add', {
+        name: relation.identifier,
+        direction: relation.direction,
+        targets: relation.targetsID
+      }).then(function (body) {
+        return new RelationResult(body.result);
+      });
+    }
+  }, {
+    key: 'remove',
+    value: function remove(relation) {
+      return this.container.makeRequest('relation:remove', {
+        name: relation.identifier,
+        direction: relation.direction,
+        targets: relation.targetsID
+      }).then(function (body) {
+        return new RelationRemoveResult(body.result);
+      });
+    }
+  }, {
+    key: 'Query',
+    get: function get() {
+      return RelationQuery;
+    }
+  }, {
+    key: 'Friend',
+    get: function get() {
+      return Relation.extend('friend', Mutual);
+    }
+  }, {
+    key: 'Follower',
+    get: function get() {
+      return Relation.extend('follow', Inward);
+    }
+  }, {
+    key: 'Following',
+    get: function get() {
+      return Relation.extend('follow', Outward);
+    }
+  }]);
+
+  return RelationContainer;
+}();
+},{"./user":56,"lodash":31}],53:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); /**
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Copyright 2015 Oursky Ltd.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Licensed under the Apache License, Version 2.0 (the "License");
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * you may not use this file except in compliance with the License.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * You may obtain a copy of the License at
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *     http://www.apache.org/licenses/LICENSE-2.0
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Unless required by applicable law or agreed to in writing, software
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * distributed under the License is distributed on an "AS IS" BASIS,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * See the License for the specific language governing permissions and
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * limitations under the License.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      */
+
+var _lodash = require('lodash');
+
+var _lodash2 = _interopRequireDefault(_lodash);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var definedRoles = {};
+
+var Role = function () {
+  function Role(name) {
+    _classCallCheck(this, Role);
+
+    if (!Role.isValidName(name)) {
+      throw new Error('Role name is not valid. Please start with alphanumeric string.');
+    }
+
+    this._name = name;
+  }
+
+  _createClass(Role, [{
+    key: 'name',
+    get: function get() {
+      return this._name;
+    }
+  }], [{
+    key: 'isValidName',
+    value: function isValidName(name) {
+      if (!name) {
+        return false;
+      }
+
+      return true;
+    }
+  }, {
+    key: 'define',
+    value: function define(name) {
+      var defined = definedRoles[name];
+      if (defined !== undefined) {
+        return defined;
+      }
+
+      defined = new Role(name);
+      definedRoles[name] = defined;
+
+      return defined;
+    }
+  }, {
+    key: 'union',
+    value: function union(roles, aRole) {
+      var duplicatedRole = _lodash2.default.find(roles, function (perRole) {
+        return perRole.name === aRole.name;
+      });
+
+      if (duplicatedRole === undefined) {
+        return _lodash2.default.union(roles, [aRole]);
+      } else {
+        return roles;
+      }
+    }
+  }, {
+    key: 'subtract',
+    value: function subtract(roles, aRole) {
+      return _lodash2.default.filter(roles, function (perRole) {
+        return perRole.name !== aRole.name;
+      });
+    }
+  }, {
+    key: 'contain',
+    value: function contain(roles, aRole) {
+      return _lodash2.default.find(roles, function (perRole) {
+        return perRole.name === aRole.name;
+      }) !== undefined;
+    }
+  }]);
+
+  return Role;
+}();
+
+exports.default = Role;
+module.exports = exports['default'];
+},{"lodash":31}],54:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.setStore = undefined;
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _cookieStorage = require('cookie-storage');
+
+var _util = require('./util');
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+/**
+ * Copyright 2015 Oursky Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+var cookieKeyWhiteList = ['skygear-deviceid', 'skygear-user', 'skygear-accesstoken'];
+var store;
+
+var PURGEABLE_KEYS_KEY = '_skygear_purgeable_keys_';
+
+var SyncStorageDriver = function () {
+  function SyncStorageDriver(syncImpl) {
+    _classCallCheck(this, SyncStorageDriver);
+
+    this._syncImpl = syncImpl;
+  }
+
+  _createClass(SyncStorageDriver, [{
+    key: 'clear',
+    value: function clear(callback) {
+      this._syncImpl.clear();
+      if (callback) {
+        callback(null);
+      }
+      return Promise.resolve();
+    }
+  }, {
+    key: 'getItem',
+    value: function getItem(key, callback) {
+      var value = this._syncImpl.getItem(key);
+      if (callback) {
+        callback(null, value);
+      }
+      return Promise.resolve(value);
+    }
+  }, {
+    key: 'setItem',
+    value: function setItem(key, value, callback) {
+      try {
+        this._syncImpl.setItem(key, value);
+        if (callback) {
+          callback(null);
+        }
+        return Promise.resolve();
+      } catch (e) {
+        if (callback) {
+          callback(e);
+        }
+        return Promise.reject(e);
+      }
+    }
+  }, {
+    key: 'removeItem',
+    value: function removeItem(key, callback) {
+      this._syncImpl.removeItem(key);
+      if (callback) {
+        callback(null);
+      }
+      return Promise.resolve();
+    }
+  }, {
+    key: 'multiGet',
+    value: function multiGet(keys, callback) {
+      var output = [];
+      for (var i = 0; i < keys.length; ++i) {
+        var key = keys[i];
+        var value = this._syncImpl.getItem(key);
+        output.push({
+          key: key,
+          value: value
+        });
+      }
+      if (callback) {
+        callback(null, output);
+      }
+      return Promise.resolve(output);
+    }
+  }, {
+    key: 'multiSet',
+    value: function multiSet(keyValuePairs, callback) {
+      try {
+        for (var i = 0; i < keyValuePairs.length; ++i) {
+          var pair = keyValuePairs[i];
+          var key = pair.key;
+          var value = pair.value;
+          this._syncImpl.setItem(key, value);
+        }
+        if (callback) {
+          callback(null);
+        }
+        return Promise.resolve();
+      } catch (e) {
+        if (callback) {
+          return Promise.callback(e);
+        }
+        return Promise.reject(e);
+      }
+    }
+  }, {
+    key: 'multiRemove',
+    value: function multiRemove(keys, callback) {
+      for (var i = 0; i < keys.length; ++i) {
+        var key = keys[i];
+        this._syncImpl.removeItem(key);
+      }
+      if (callback) {
+        callback(null);
+      }
+      return Promise.resolve();
+    }
+  }, {
+    key: 'key',
+    value: function key(n, callback) {
+      var result = this._syncImpl.key(n);
+      if (callback) {
+        callback(null, result);
+      }
+      return Promise.resolve(result);
+    }
+  }, {
+    key: 'keys',
+    value: function keys(callback) {
+      var length = this._syncImpl.length;
+      var output = [];
+      for (var i = 0; i < length; ++i) {
+        output.push(this._syncImpl.key(i));
+      }
+      if (callback) {
+        callback(null, output);
+      }
+      return Promise.resolve(output);
+    }
+  }, {
+    key: 'length',
+    value: function length(callback) {
+      var length = this._syncImpl.length;
+      if (callback) {
+        callback(null, length);
+      }
+      return Promise.resolve(length);
+    }
+  }]);
+
+  return SyncStorageDriver;
+}();
+
+var Store = function () {
+  function Store(driver, keyWhiteList) {
+    _classCallCheck(this, Store);
+
+    this._driver = driver;
+    this.keyWhiteList = keyWhiteList;
+    this._purgeableKeys = [];
+
+    this._driver.getItem(PURGEABLE_KEYS_KEY).then(function (value) {
+      if (value) {
+        try {
+          var originalKeys = JSON.parse(value);
+          var recentKeys = this._purgeableKeys;
+
+          this._purgeableKeys = this._maintainLRUOrder(originalKeys, recentKeys);
+        } catch (e) {
+          // ignore
+        }
+      }
+    }.bind(this));
+  }
+
+  /*
+   * @param originalKeys
+   * @param recentKeys
+   * @return newKeys with recentKeys come first, followed by deduped
+   *         originalKeys
+   */
+
+
+  _createClass(Store, [{
+    key: '_maintainLRUOrder',
+    value: function _maintainLRUOrder(originalKeys, recentKeys) {
+      var mapping = {};
+      for (var i = 0; i < recentKeys.length; ++i) {
+        mapping[recentKeys[i]] = true;
+      }
+
+      var output = recentKeys.slice();
+      for (var _i = 0; _i < originalKeys.length; ++_i) {
+        if (mapping[originalKeys[_i]]) {
+          continue;
+        }
+        output.push(originalKeys[_i]);
+      }
+      return output;
+    }
+
+    /*
+     * @param originalKeys
+     * @param keysToRemove
+     * @return newKeys without value contained in keysToRemove
+     */
+
+  }, {
+    key: '_removeKeysInLRUOrder',
+    value: function _removeKeysInLRUOrder(originalKeys, keysToRemove) {
+      var mapping = {};
+      for (var i = 0; i < keysToRemove.length; ++i) {
+        mapping[keysToRemove[i]] = true;
+      }
+
+      var output = [];
+      for (var _i2 = 0; _i2 < originalKeys.length; ++_i2) {
+        if (mapping[originalKeys[_i2]]) {
+          continue;
+        }
+        output.push(originalKeys[_i2]);
+      }
+      return output;
+    }
+  }, {
+    key: 'clear',
+    value: function clear(callback) {
+      return this._driver.clear(callback);
+    }
+  }, {
+    key: 'getItem',
+    value: function getItem(key, callback) {
+      return this._driver.getItem(key, callback);
+    }
+  }, {
+    key: 'setItem',
+    value: function setItem(key, value, callback) {
+      var _this = this;
+
+      if (this.keyWhiteList && this.keyWhiteList.indexOf(key) < 0) {
+        return Promise.reject(new Error('Saving key is not permitted'));
+      }
+      return this._driver.setItem(key, value).then(function () {
+        if (callback) {
+          callback(null);
+        }
+        return Promise.resolve();
+      }, function (error) {
+        return _this._purge().then(function () {
+          return Promise.reject(error);
+        });
+      }).catch(function (error) {
+        if (callback) {
+          callback(error);
+        }
+        return Promise.reject(error);
+      });
+    }
+  }, {
+    key: 'setPurgeableItem',
+    value: function setPurgeableItem(key, value, callback) {
+      var _this2 = this;
+
+      if (this.keyWhiteList && this.keyWhiteList.indexOf(key) < 0) {
+        return Promise.reject(new Error('Saving key is not permitted'));
+      }
+      this._purgeableKeys = this._maintainLRUOrder(this._purgeableKeys, [key]);
+
+      var keyValuePairs = [{
+        key: key,
+        value: value
+      }, {
+        key: PURGEABLE_KEYS_KEY,
+        value: JSON.stringify(this._purgeableKeys)
+      }];
+      return this.multiSetTransactionally(keyValuePairs).then(function () {
+        if (callback) {
+          callback(null);
+        }
+        return Promise.resolve();
+      }, function (error) {
+        return _this2._purge().then(function () {
+          return Promise.reject(error);
+        });
+      }).catch(function (error) {
+        if (callback) {
+          callback(error);
+        }
+        return Promise.reject(error);
+      });
+    }
+  }, {
+    key: '_selectKeysToPurge',
+    value: function _selectKeysToPurge(keys) {
+      var index = Math.floor(keys.length / 2);
+      var keysToPurge = keys.slice(index);
+      return keysToPurge;
+    }
+  }, {
+    key: '_purge',
+    value: function _purge() {
+      var keysToPurge = this._selectKeysToPurge(this._purgeableKeys);
+      if (keysToPurge.length <= 0) {
+        return Promise.reject(new Error('no more keys to purge'));
+      }
+
+      this._purgeableKeys = this._removeKeysInLRUOrder(this._purgeableKeys, keysToPurge);
+      return this._driver.multiRemove(keysToPurge).then(function () {
+        return this._driver.setItem(PURGEABLE_KEYS_KEY, JSON.stringify(this._purgeableKeys));
+      }.bind(this));
+    }
+  }, {
+    key: 'multiSetTransactionally',
+    value: function multiSetTransactionally(keyValuePairs, callback) {
+      var _this3 = this;
+
+      var keys = [];
+      for (var i = 0; i < keyValuePairs.length; ++i) {
+        var pair = keyValuePairs[i];
+        var key = pair.key;
+        if (this.keyWhiteList && this.keyWhiteList.indexOf(key) < 0) {
+          return Promise.reject(new Error('Saving key is not permitted'));
+        }
+        keys.push(key);
+      }
+
+      return this._driver.multiGet(keys).then(function (original) {
+        return _this3._driver.multiSet(keyValuePairs).then(function () {
+          if (callback) {
+            callback(null);
+          }
+          return Promise.resolve();
+        }, function (e) {
+          return _this3._driver.multiRemove(keys).then(function () {
+            return _this3._driver.multiSet(original).then(function () {
+              if (callback) {
+                callback(e);
+              }
+              return Promise.reject(e);
+            });
+          });
+        });
+      });
+    }
+  }, {
+    key: 'clearPurgeableItems',
+    value: function clearPurgeableItems(callback) {
+      var keys = this._purgeableKeys.slice();
+      this._purgeableKeys = [];
+      return this._driver.multiRemove(keys, callback);
+    }
+  }, {
+    key: 'removeItem',
+    value: function removeItem(key, callback) {
+      return this._driver.removeItem(key, callback);
+    }
+  }, {
+    key: 'key',
+    value: function key(n, callback) {
+      return this._driver.key(n, callback);
+    }
+  }, {
+    key: 'keys',
+    value: function keys(callback) {
+      return this._driver.keys(callback);
+    }
+  }, {
+    key: 'length',
+    value: function length(callback) {
+      return this._driver.length(callback);
+    }
+  }]);
+
+  return Store;
+}();
+
+var setStore = exports.setStore = function setStore(_store) {
+  store = _store;
+};
+
+exports.default = function () {
+  if (store) {
+    return store;
+  }
+  /* global window: false */
+  if (typeof window !== 'undefined') {
+    // env: browser-like
+    if ((0, _util.isLocalStorageValid)()) {
+      // env: Modern browsers
+      store = new Store(new SyncStorageDriver(window.localStorage));
+    } else {
+      // env: Legacy browsers
+      var cookieImpl = new _cookieStorage.CookieStorage();
+      store = new Store(new SyncStorageDriver(cookieImpl, cookieKeyWhiteList));
+    }
+  } else {
+    // env: node
+    var memoryImpl = require('localstorage-memory');
+    store = new Store(new SyncStorageDriver(memoryImpl));
+  }
+  return store;
+};
+},{"./util":57,"cookie-storage":10,"localstorage-memory":30}],55:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+/**
+ * Copyright 2015 Oursky Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+var Sequence = exports.Sequence = function () {
+  function Sequence() {
+    _classCallCheck(this, Sequence);
+  }
+
+  _createClass(Sequence, [{
+    key: 'toJSON',
+    value: function toJSON() {
+      return {
+        $type: 'seq'
+      };
+    }
+  }]);
+
+  return Sequence;
+}();
+
+var UnknownValue = exports.UnknownValue = function () {
+  function UnknownValue(underlyingType) {
+    _classCallCheck(this, UnknownValue);
+
+    this.underlyingType = underlyingType;
+  }
+
+  _createClass(UnknownValue, [{
+    key: 'toJSON',
+    value: function toJSON() {
+      return {
+        $type: 'unknown',
+        $underlying_type: this.underlyingType //eslint-disable-line camelcase
+      };
+    }
+  }], [{
+    key: 'fromJSON',
+    value: function fromJSON(attrs) {
+      return new UnknownValue(attrs.$underlying_type);
+    }
+  }]);
+
+  return UnknownValue;
+}();
+},{}],56:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); /**
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Copyright 2015 Oursky Ltd.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Licensed under the Apache License, Version 2.0 (the "License");
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * you may not use this file except in compliance with the License.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * You may obtain a copy of the License at
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *     http://www.apache.org/licenses/LICENSE-2.0
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Unless required by applicable law or agreed to in writing, software
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * distributed under the License is distributed on an "AS IS" BASIS,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * See the License for the specific language governing permissions and
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * limitations under the License.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      */
+
+
+var _lodash = require('lodash');
+
+var _lodash2 = _interopRequireDefault(_lodash);
+
+var _role = require('./role');
+
+var _role2 = _interopRequireDefault(_role);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var User = function () {
+  function User(attrs) {
+    _classCallCheck(this, User);
+
+    var id = attrs.user_id || attrs._id; //eslint-disable-line
+    if (!_lodash2.default.isString(id)) {
+      throw new Error('Missing user_id.');
+    }
+    this.email = attrs.email;
+    this.username = attrs.username;
+    this.id = id;
+    if (attrs.last_login_at) {
+      this.lastLoginAt = new Date(attrs.last_login_at); //eslint-disable-line
+    }
+    if (attrs.last_seen_at) {
+      this.lastSeenAt = new Date(attrs.last_seen_at); //eslint-disable-line
+    }
+
+    this.roles = [];
+    if (attrs.roles) {
+      this.roles = _lodash2.default.map(attrs.roles, _role2.default.define);
+    }
+  }
+
+  _createClass(User, [{
+    key: 'toJSON',
+    value: function toJSON() {
+      var result = {
+        user_id: this.id, //eslint-disable-line
+        username: this.username,
+        email: this.email,
+        roles: _lodash2.default.map(this.roles, function (perRole) {
+          return perRole.name;
+        })
+      };
+      if (this.lastLoginAt) {
+        result.last_login_at = this.lastLoginAt.toJSON(); //eslint-disable-line
+      }
+      if (this.lastSeenAt) {
+        result.last_seen_at = this.lastSeenAt.toJSON(); //eslint-disable-line
+      }
+      return result;
+    }
+  }, {
+    key: 'addRole',
+    value: function addRole(role) {
+      this.roles = _role2.default.union(this.roles, role);
+    }
+  }, {
+    key: 'removeRole',
+    value: function removeRole(role) {
+      this.roles = _role2.default.subtract(this.roles, role);
+    }
+  }, {
+    key: 'hasRole',
+    value: function hasRole(role) {
+      return _role2.default.contain(this.roles, role);
+    }
+  }], [{
+    key: 'fromJSON',
+    value: function fromJSON(attrs) {
+      return new User(attrs);
+    }
+  }]);
+
+  return User;
+}();
+
+exports.default = User;
+module.exports = exports['default'];
+},{"./role":53,"lodash":31}],57:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.EventHandle = undefined;
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); /**
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Copyright 2015 Oursky Ltd.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Licensed under the Apache License, Version 2.0 (the "License");
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * you may not use this file except in compliance with the License.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * You may obtain a copy of the License at
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *     http://www.apache.org/licenses/LICENSE-2.0
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Unless required by applicable law or agreed to in writing, software
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * distributed under the License is distributed on an "AS IS" BASIS,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * See the License for the specific language governing permissions and
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * limitations under the License.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      */
+
+
+exports.toJSON = toJSON;
+exports.fromJSON = fromJSON;
+exports.isLocalStorageValid = isLocalStorageValid;
+
+var _lodash = require('lodash');
+
+var _lodash2 = _interopRequireDefault(_lodash);
+
+var _asset = require('./asset');
+
+var _asset2 = _interopRequireDefault(_asset);
+
+var _reference = require('./reference');
+
+var _reference2 = _interopRequireDefault(_reference);
+
+var _geolocation = require('./geolocation');
+
+var _geolocation2 = _interopRequireDefault(_geolocation);
+
+var _type = require('./type');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function toJSON(v) {
+  if (v === null) {
+    return null;
+  } else if (_lodash2.default.isArray(v)) {
+    return _lodash2.default.map(v, toJSON);
+  } else if (_lodash2.default.isDate(v)) {
+    return {
+      $type: 'date',
+      $date: v.toJSON()
+    };
+  } else if (v.toJSON) {
+    return v.toJSON();
+  } else if (_lodash2.default.isObject(v)) {
+    return _lodash2.default.chain(v).map(function (value, key) {
+      return [key, toJSON(value)];
+    }).fromPairs().value();
+  } else {
+    return v;
+  }
+}
+
+function fromJSON(attrs) {
+  if (!_lodash2.default.isObject(attrs)) {
+    return attrs;
+  }
+
+  switch (attrs.$type) {
+    case 'geo':
+      return _geolocation2.default.fromJSON(attrs);
+    case 'asset':
+      return _asset2.default.fromJSON(attrs);
+    case 'date':
+      return new Date(attrs.$date);
+    case 'ref':
+      return new _reference2.default(attrs);
+    case 'unknown':
+      return _type.UnknownValue.fromJSON(attrs);
+    default:
+      return attrs;
+  }
+}
+
+function isLocalStorageValid() {
+  /* global window: false */
+  try {
+    var testKey = '_skygear_test';
+    window.localStorage.setItem(testKey, 'test');
+    window.localStorage.removeItem(testKey);
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+var EventHandle = exports.EventHandle = function () {
+  function EventHandle(emitter, name, listener) {
+    _classCallCheck(this, EventHandle);
+
+    this.emitter = emitter;
+    this.name = name;
+    this.listener = listener;
+  }
+
+  _createClass(EventHandle, [{
+    key: 'cancel',
+    value: function cancel() {
+      this.emitter.off(this.name, this.listener);
+    }
+  }]);
+
+  return EventHandle;
+}();
+},{"./asset":38,"./geolocation":44,"./reference":51,"./type":55,"lodash":31}],58:[function(require,module,exports){
 (function (global){
 
 var rng;
@@ -24948,7 +25372,7 @@ module.exports = rng;
 
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],55:[function(require,module,exports){
+},{}],59:[function(require,module,exports){
 //     uuid.js
 //
 //     Copyright (c) 2010-2012 Robert Kieffer
@@ -25133,11 +25557,84 @@ uuid.unparse = unparse;
 
 module.exports = uuid;
 
-},{"./rng":54}],56:[function(require,module,exports){
+},{"./rng":58}],60:[function(require,module,exports){
 'use strict';
 
-module.exports = require('skygear-core');
-},{"skygear-core":41}],57:[function(require,module,exports){
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.injectToContainer = exports.resetPassword = exports.forgotPassword = undefined;
+exports._forgotPassword = _forgotPassword;
+exports._resetPassword = _resetPassword;
+
+var _skygearCore = require('skygear-core');
+
+var _skygearCore2 = _interopRequireDefault(_skygearCore);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * @injectTo {AuthContainer} as forgotPassword
+ * @param  {String} email
+ *
+ * @example
+ * skygear.auth.forgotPassword(email).then(...);
+ */
+function _forgotPassword(email) {
+  return this.container.lambda('user:forgot-password', {
+    email: email
+  });
+}
+
+/**
+ * @injectTo {AuthContainer} as resetPassword
+ * @param  {String} userID
+ * @param  {String} code
+ * @param  {Number} expireAt utc timestamp
+ * @param  {String} newPassword
+ *
+ * @example
+ * skygear.auth.resetPassword(userID, code, expireAt, newPassword).then(...);
+ */
+function _resetPassword(userID, code, expireAt, newPassword) {
+  return this.container.lambda('user:reset-password', {
+    user_id: userID, /* eslint camelcase: 0 */
+    code: code, /* eslint camelcase: 0 */
+    expire_at: expireAt, /* eslint camelcase: 0 */
+    new_password: newPassword
+  });
+}
+
+/**
+ * @ignore
+ */
+var forgotPassword = exports.forgotPassword = _forgotPassword.bind(_skygearCore2.default.auth);
+
+/**
+ * @ignore
+ */
+var resetPassword = exports.resetPassword = _resetPassword.bind(_skygearCore2.default.auth);
+
+/**
+ * @private
+ */
+var injectToContainer = exports.injectToContainer = function injectToContainer() {
+  var container = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : _skygearCore2.default;
+
+  var authContainerPrototype = container.auth.constructor.prototype;
+  authContainerPrototype.forgotPassword = _forgotPassword;
+  authContainerPrototype.resetPassword = _resetPassword;
+};
+},{"skygear-core":45}],61:[function(require,module,exports){
+'use strict';
+
+var container = require('skygear-core');
+var forgotPassword = require('skygear-forgot-password');
+
+forgotPassword.injectToContainer(container);
+
+module.exports = container;
+},{"skygear-core":45,"skygear-forgot-password":60}],62:[function(require,module,exports){
 /**
  * Root reference for iframes.
  */
@@ -26072,7 +26569,7 @@ request.put = function(url, data, fn){
   return req;
 };
 
-},{"./is-function":58,"./is-object":59,"./request-base":60,"./response-base":61,"./should-retry":62,"component-emitter":9}],58:[function(require,module,exports){
+},{"./is-function":63,"./is-object":64,"./request-base":65,"./response-base":66,"./should-retry":67,"component-emitter":9}],63:[function(require,module,exports){
 /**
  * Check if `fn` is a function.
  *
@@ -26089,7 +26586,7 @@ function isFunction(fn) {
 
 module.exports = isFunction;
 
-},{"./is-object":59}],59:[function(require,module,exports){
+},{"./is-object":64}],64:[function(require,module,exports){
 /**
  * Check if `obj` is an object.
  *
@@ -26104,7 +26601,7 @@ function isObject(obj) {
 
 module.exports = isObject;
 
-},{}],60:[function(require,module,exports){
+},{}],65:[function(require,module,exports){
 /**
  * Module of mixed-in functions shared between node and client code
  */
@@ -26697,7 +27194,7 @@ RequestBase.prototype._setTimeouts = function() {
   }
 }
 
-},{"./is-object":59}],61:[function(require,module,exports){
+},{"./is-object":64}],66:[function(require,module,exports){
 
 /**
  * Module dependencies.
@@ -26832,7 +27329,7 @@ ResponseBase.prototype._setStatusProperties = function(status){
     this.notFound = 404 == status;
 };
 
-},{"./utils":63}],62:[function(require,module,exports){
+},{"./utils":68}],67:[function(require,module,exports){
 var ERROR_CODES = [
   'ECONNRESET',
   'ETIMEDOUT',
@@ -26857,7 +27354,7 @@ module.exports = function shouldRetry(err, res) {
   return false;
 };
 
-},{}],63:[function(require,module,exports){
+},{}],68:[function(require,module,exports){
 
 /**
  * Return the mime type for the given `str`.
@@ -26926,7 +27423,7 @@ exports.cleanHeader = function(header, shouldStripCookie){
   }
   return header;
 };
-},{}],64:[function(require,module,exports){
+},{}],69:[function(require,module,exports){
 //     Underscore.js 1.8.3
 //     http://underscorejs.org
 //     (c) 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
@@ -28476,7 +28973,7 @@ exports.cleanHeader = function(header, shouldStripCookie){
   }
 }.call(this));
 
-},{}],65:[function(require,module,exports){
+},{}],70:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -29210,7 +29707,7 @@ Url.prototype.parseHost = function() {
   if (host) this.hostname = host;
 };
 
-},{"./util":66,"punycode":30,"querystring":33}],66:[function(require,module,exports){
+},{"./util":71,"punycode":33,"querystring":36}],71:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -29228,7 +29725,7 @@ module.exports = {
   }
 };
 
-},{}],67:[function(require,module,exports){
+},{}],72:[function(require,module,exports){
 var v1 = require('./v1');
 var v4 = require('./v4');
 
@@ -29238,10 +29735,10 @@ uuid.v4 = v4;
 
 module.exports = uuid;
 
-},{"./v1":70,"./v4":71}],68:[function(require,module,exports){
+},{"./v1":75,"./v4":76}],73:[function(require,module,exports){
 /**
  * Convert array of 16 byte values to UUID string format of the form:
- * XXXXXXXX-XXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
+ * XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
  */
 var byteToHex = [];
 for (var i = 0; i < 256; ++i) {
@@ -29251,7 +29748,7 @@ for (var i = 0; i < 256; ++i) {
 function bytesToUuid(buf, offset) {
   var i = offset || 0;
   var bth = byteToHex;
-  return  bth[buf[i++]] + bth[buf[i++]] +
+  return bth[buf[i++]] + bth[buf[i++]] +
           bth[buf[i++]] + bth[buf[i++]] + '-' +
           bth[buf[i++]] + bth[buf[i++]] + '-' +
           bth[buf[i++]] + bth[buf[i++]] + '-' +
@@ -29263,7 +29760,7 @@ function bytesToUuid(buf, offset) {
 
 module.exports = bytesToUuid;
 
-},{}],69:[function(require,module,exports){
+},{}],74:[function(require,module,exports){
 (function (global){
 // Unique ID creation requires a high quality random # generator.  In the
 // browser this is a little complicated due to unknown quality of Math.random()
@@ -29274,7 +29771,7 @@ var rng;
 var crypto = global.crypto || global.msCrypto; // for IE 11
 if (crypto && crypto.getRandomValues) {
   // WHATWG crypto RNG - http://wiki.whatwg.org/wiki/Crypto
-  var rnds8 = new Uint8Array(16);
+  var rnds8 = new Uint8Array(16); // eslint-disable-line no-undef
   rng = function whatwgRNG() {
     crypto.getRandomValues(rnds8);
     return rnds8;
@@ -29286,7 +29783,7 @@ if (!rng) {
   //
   // If all else fails, use Math.random().  It's fast, but is of unspecified
   // quality.
-  var  rnds = new Array(16);
+  var rnds = new Array(16);
   rng = function() {
     for (var i = 0, r; i < 16; i++) {
       if ((i & 0x03) === 0) r = Math.random() * 0x100000000;
@@ -29300,10 +29797,7 @@ if (!rng) {
 module.exports = rng;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],70:[function(require,module,exports){
-// Unique ID creation requires a high quality random # generator.  We feature
-// detect to determine the best RNG source, normalizing to a function that
-// returns 128-bits of randomness, since that's what's usually required
+},{}],75:[function(require,module,exports){
 var rng = require('./lib/rng');
 var bytesToUuid = require('./lib/bytesToUuid');
 
@@ -29405,7 +29899,7 @@ function v1(options, buf, offset) {
 
 module.exports = v1;
 
-},{"./lib/bytesToUuid":68,"./lib/rng":69}],71:[function(require,module,exports){
+},{"./lib/bytesToUuid":73,"./lib/rng":74}],76:[function(require,module,exports){
 var rng = require('./lib/rng');
 var bytesToUuid = require('./lib/bytesToUuid');
 
@@ -29436,7 +29930,7 @@ function v4(options, buf, offset) {
 
 module.exports = v4;
 
-},{"./lib/bytesToUuid":68,"./lib/rng":69}],72:[function(require,module,exports){
+},{"./lib/bytesToUuid":73,"./lib/rng":74}],77:[function(require,module,exports){
 (function (global){
 module.exports = get_blob()
 
@@ -29468,7 +29962,7 @@ function get_blob() {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],73:[function(require,module,exports){
+},{}],78:[function(require,module,exports){
 var _global = (function() { return this; })();
 var NativeWebSocket = _global.WebSocket || _global.MozWebSocket;
 var websocket_version = require('./version');
@@ -29506,10 +30000,10 @@ module.exports = {
     'version'      : websocket_version
 };
 
-},{"./version":74}],74:[function(require,module,exports){
+},{"./version":79}],79:[function(require,module,exports){
 module.exports = require('../package.json').version;
 
-},{"../package.json":75}],75:[function(require,module,exports){
+},{"../package.json":80}],80:[function(require,module,exports){
 module.exports={
   "_args": [
     [
