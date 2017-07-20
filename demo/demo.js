@@ -139,7 +139,7 @@ class Demo {
     });
     return this.container.auth.discoverUserByUsernames(users).then(function (users) {
       return this.plugin.createConversation(
-          users,
+          Array.from(users),
           'From Demo'
         ).then(function (result) {
         console.log(result);
@@ -151,7 +151,7 @@ class Demo {
   addParticipant(conversationID, username, resultTo) {
     const resultEl = $(resultTo);
     return this.container.auth.discoverUserByUsernames([username]).then(function (users) {
-      return this.plugin.addParticipants(this.conversation, users).then(function (result) {
+      return this.plugin.addParticipants(this.conversation, Array.from(users)).then(function (result) {
         console.log(result);
         resultEl.textContent = JSON.stringify(result);
       });
@@ -161,7 +161,7 @@ class Demo {
   removeParticipant(conversationID, username, resultTo) {
     const resultEl = $(resultTo);
     return this.container.auth.discoverUserByUsernames([username]).then(function (users) {
-      return this.plugin.removeParticipants(this.conversation, users).then(function (result) {
+      return this.plugin.removeParticipants(this.conversation, Array.from(users)).then(function (result) {
         console.log(result);
         resultEl.textContent = JSON.stringify(result);
       });
@@ -171,7 +171,7 @@ class Demo {
   addAdmin(conversationID, username, resultTo) {
     const resultEl = $(resultTo);
     return this.container.auth.discoverUserByUsernames([username]).then(function (users) {
-      return this.plugin.addAdmins(this.conversation, users).then(function (result) {
+      return this.plugin.addAdmins(this.conversation, Array.from(users)).then(function (result) {
         console.log(result);
         resultEl.textContent = JSON.stringify(result);
       });
@@ -181,7 +181,7 @@ class Demo {
   removeAdmin(conversationID, username, resultTo) {
     const resultEl = $(resultTo);
     return this.container.auth.discoverUserByUsernames([username]).then(function (users) {
-      return this.plugin.removeAdmins(this.conversation, users).then(function (result) {
+      return this.plugin.removeAdmins(this.conversation, Array.from(users)).then(function (result) {
         console.log(result);
         resultEl.textContent = JSON.stringify(result);
       });
