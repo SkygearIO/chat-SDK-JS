@@ -30,6 +30,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
+var Conversation = _skygear2.default.Record.extend('conversation');
 var Message = _skygear2.default.Record.extend('message');
 var Receipt = _skygear2.default.Record.extend('receipt');
 var UserConversation = _skygear2.default.Record.extend('user_conversation');
@@ -83,7 +84,9 @@ var SkygearChatContainer = exports.SkygearChatContainer = function () {
       var meta = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
       var options = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
 
-      return _skygear2.default.lambda('chat:create_conversation', [participants, title, meta, options]);
+      return _skygear2.default.lambda('chat:create_conversation', [participants, title, meta, options]).then(function (result) {
+        return new Conversation(result.conversation);
+      });
     }
 
     /**
@@ -136,7 +139,7 @@ var SkygearChatContainer = exports.SkygearChatContainer = function () {
         if (data.conversation === null) {
           throw new Error('no conversation found');
         }
-        return data.conversation;
+        return new Conversation(data.conversation);
       });
     }
 
@@ -159,7 +162,9 @@ var SkygearChatContainer = exports.SkygearChatContainer = function () {
       var includeLastMessage = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
 
       return _skygear2.default.lambda('chat:get_conversations', [page, pageSize, includeLastMessage]).then(function (data) {
-        return data.result;
+        return data.result.map(function (record) {
+          return new Conversation(record);
+        });
       });
     }
 
@@ -247,7 +252,7 @@ var SkygearChatContainer = exports.SkygearChatContainer = function () {
       });
 
       return _skygear2.default.lambda('chat:add_participants', [conversation_id, participant_ids]).then(function (data) {
-        return data.conversation;
+        return new Conversation(data.conversation);
       });
     }
 
@@ -269,7 +274,7 @@ var SkygearChatContainer = exports.SkygearChatContainer = function () {
         return user._id;
       });
       return _skygear2.default.lambda('chat:remove_participants', [conversation_id, participant_ids]).then(function (data) {
-        return data.conversation;
+        return new Conversation(data.conversation);
       });
     }
 
@@ -291,7 +296,7 @@ var SkygearChatContainer = exports.SkygearChatContainer = function () {
         return user._id;
       });
       return _skygear2.default.lambda('chat:add_admins', [conversation_id, admin_ids]).then(function (data) {
-        return data.conversation;
+        return new Conversation(data.conversation);
       });
     }
 
@@ -312,7 +317,7 @@ var SkygearChatContainer = exports.SkygearChatContainer = function () {
         return user._id;
       });
       return _skygear2.default.lambda('chat:remove_admins', [conversation_id, admin_ids]).then(function (data) {
-        return data.conversation;
+        return new Conversation(data.conversation);
       });
     }
 
@@ -411,7 +416,7 @@ var SkygearChatContainer = exports.SkygearChatContainer = function () {
         });
         message.attachment = skyAsset;
       }
-      return _skygear2.default.privateDB.save(message);
+      return _skygear2.default.publicDB.save(message);
     }
 
     /**

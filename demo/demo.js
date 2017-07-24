@@ -260,7 +260,7 @@ class Demo {
     // object queried from getMessages
     const query = new skygear.Query(Message);
     query.equalTo('_id', messageID);
-    return skygear.privateDB.query(query).then(function (records) {
+    return skygear.publicDB.query(query).then(function (records) {
       if (records.length > 0) {
         var message = records[0];
         message.body = newBody;
