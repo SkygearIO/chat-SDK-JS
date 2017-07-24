@@ -246,7 +246,7 @@ var SkygearChatContainer = exports.SkygearChatContainer = function () {
   }, {
     key: 'addParticipants',
     value: function addParticipants(conversation, participants) {
-      var conversation_id = _skygear2.default.Record.parseID(conversation._id)[1];
+      var conversation_id = _skygear2.default.Record.parseID(conversation.id)[1];
       var participant_ids = _underscore2.default.map(participants, function (user) {
         return user._id;
       });
@@ -269,7 +269,7 @@ var SkygearChatContainer = exports.SkygearChatContainer = function () {
   }, {
     key: 'removeParticipants',
     value: function removeParticipants(conversation, participants) {
-      var conversation_id = _skygear2.default.Record.parseID(conversation._id)[1];
+      var conversation_id = _skygear2.default.Record.parseID(conversation.id)[1];
       var participant_ids = _underscore2.default.map(participants, function (user) {
         return user._id;
       });
@@ -291,7 +291,7 @@ var SkygearChatContainer = exports.SkygearChatContainer = function () {
   }, {
     key: 'addAdmins',
     value: function addAdmins(conversation, admins) {
-      var conversation_id = _skygear2.default.Record.parseID(conversation._id)[1];
+      var conversation_id = _skygear2.default.Record.parseID(conversation.id)[1];
       var admin_ids = _underscore2.default.map(admins, function (user) {
         return user._id;
       });
@@ -312,7 +312,7 @@ var SkygearChatContainer = exports.SkygearChatContainer = function () {
   }, {
     key: 'removeAdmins',
     value: function removeAdmins(conversation, admins) {
-      var conversation_id = _skygear2.default.Record.parseID(conversation._id)[1];
+      var conversation_id = _skygear2.default.Record.parseID(conversation.id)[1];
       var admin_ids = _underscore2.default.map(admins, function (user) {
         return user._id;
       });
