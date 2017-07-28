@@ -124,6 +124,18 @@
     <p><button
       onclick="window.location='message.html?conversation='+inputVal('goto-conversation');"
     >Go to conversation</button></p>
+    <hr/>
+    <h3>Delete a converation</h3>
+    <p>
+      <label>Conversation ID</label>
+      <input id="delete-conversation" type="text" />
+    </p>
+    <p id="delete-conversation-result">
+    </p>
+    <p><button
+      onclick="demo.deleteConversationTo(inputVal('delete-conversation'), 'delete-conversation-result')"
+    >Delete</button></p>
+
     <script>
       var demo = new Demo(skygear, skygear_chat.default);
       demo.restore();
