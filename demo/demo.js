@@ -104,6 +104,17 @@ class Demo {
     });
   }
 
+  deleteConversationTo(conversationID, el) {
+    return this.plugin.getConversation(conversationID).then(function (conversation) {
+      this.plugin.deleteConversation(conversation).then(function (result) {
+        var msg = "deleted conversation: " + conversationID;
+        var span = $(el);
+        span.textContent = msg;
+        console.log(msg);
+      }.bind(this));
+    }.bind(this));
+  }
+
   leaveConversation() {
     return this.plugin.leaveConversation(this.conversation);
   }
