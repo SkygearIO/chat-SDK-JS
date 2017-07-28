@@ -232,7 +232,24 @@ var SkygearChatContainer = exports.SkygearChatContainer = function () {
   }, {
     key: 'leaveConversation',
     value: function leaveConversation(conversation) {
-      return _skygear2.default.lambda('chat:leave_conversation', [conversation._id]);
+      return _skygear2.default.lambda('chat:leave_conversation', [conversation._id]).then(function () {
+        return true;
+      });
+    }
+
+    /**
+     * Delete a conversation.
+     *
+     * @param {Conversation} conversation - Conversation to be deleted
+     * @return {Promise<boolean>} - Promise of result
+     */
+
+  }, {
+    key: 'deleteConversation',
+    value: function deleteConversation(conversation) {
+      return _skygear2.default.lambda('chat:delete_conversation', [conversation._id]).then(function () {
+        return true;
+      });
     }
 
     /**
