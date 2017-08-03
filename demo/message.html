@@ -94,9 +94,15 @@
     </ul>
     <p><button
       onclick="demo.getMessagesTo(null, null,
-      'messages');"
+      inputVal('messages-order'), 'messages');"
     >Fetch messages
-    </button></p>
+    </button>
+	Order
+    <select id="messages-order">
+      <option value="_created_at">_created_at</option>
+      <option value="edited_at">edited_at</option>
+    </select>
+    </p>
     <hr/>
     <h3>Message Receipts</h3>
     <ul id="receipts">

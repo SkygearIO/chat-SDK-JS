@@ -208,8 +208,8 @@ class Demo {
     return this.plugin.markAsRead([message]);
   }
 
-  getMessagesTo(limit, beforeTime, el) {
-    return this.plugin.getMessages(this.conversation, limit, beforeTime).then(function (result) {
+  getMessagesTo(limit, beforeTime, order, el) {
+    return this.plugin.getMessages(this.conversation, limit, beforeTime, order).then(function (result) {
       var ul = $(el);
       ul.innerHTML = "";
       console.log(result);
