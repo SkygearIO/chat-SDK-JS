@@ -4,7 +4,7 @@ global.skygear = require('skygear');
 global.skygear_chat = require('../dist');
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../dist":3,"skygear":60}],2:[function(require,module,exports){
+},{"../dist":3,"skygear":59}],2:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -792,7 +792,7 @@ var SkygearChatContainer = exports.SkygearChatContainer = function () {
 
 var chatContainer = new SkygearChatContainer();
 exports.default = chatContainer;
-},{"./pubsub":4,"skygear":60,"underscore":68}],3:[function(require,module,exports){
+},{"./pubsub":4,"skygear":59,"underscore":67}],3:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -981,7 +981,7 @@ var SkygearChatPubsub = function () {
 }();
 
 exports.default = SkygearChatPubsub;
-},{"skygear":60,"underscore":68,"uuid":71}],5:[function(require,module,exports){
+},{"skygear":59,"underscore":67,"uuid":70}],5:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1042,7 +1042,7 @@ function createTypingDetector(conversation) {
     }
   };
 }
-},{"./container.js":2,"skygear":60}],6:[function(require,module,exports){
+},{"./container.js":2,"skygear":59}],6:[function(require,module,exports){
 ;(function () {
 
   var object = typeof exports != 'undefined' ? exports : this; // #8: web workers
@@ -20000,9 +20000,9 @@ var _role = require('./role');
 
 var _role2 = _interopRequireDefault(_role);
 
-var _user = require('./user');
+var _record = require('./record');
 
-var _user2 = _interopRequireDefault(_user);
+var _record2 = _interopRequireDefault(_record);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -20064,10 +20064,9 @@ var ACL = function () {
             _this.roles[theRole.name] = perAttr.level;
           }
         } else if (perAttr.user_id) {
-          var theUser = new _user2.default({ user_id: perAttr.user_id }); //eslint-disable-line
-          var _currentLevel = _this.users[theUser.id];
+          var _currentLevel = _this.users[perAttr.user_id];
           if (accessLevelNumber(perAttr.level) > accessLevelNumber(_currentLevel)) {
-            _this.users[theUser.id] = perAttr.level;
+            _this.users[perAttr.user_id] = perAttr.level;
           }
         } else {
           throw new Error('Invalid ACL Entry: ' + JSON.stringify(perAttr));
@@ -20152,29 +20151,29 @@ var ACL = function () {
   }, {
     key: 'setNoAccessForUser',
     value: function setNoAccessForUser(user) {
-      if (!user || !(user instanceof _user2.default)) {
+      if (!user || !(user instanceof _record2.default) || !(user.recordType === 'user')) {
         throw new Error(user + ' is not a user.');
       }
 
-      this.users[user.id] = AccessLevel.NoAccessLevel;
+      this.users[user._id] = AccessLevel.NoAccessLevel;
     }
   }, {
     key: 'setReadOnlyForUser',
     value: function setReadOnlyForUser(user) {
-      if (!user || !(user instanceof _user2.default)) {
+      if (!user || !(user instanceof _record2.default) || !(user.recordType === 'user')) {
         throw new Error(user + ' is not a user.');
       }
 
-      this.users[user.id] = AccessLevel.ReadOnlyLevel;
+      this.users[user._id] = AccessLevel.ReadOnlyLevel;
     }
   }, {
     key: 'setReadWriteAccessForUser',
     value: function setReadWriteAccessForUser(user) {
-      if (!user || !(user instanceof _user2.default)) {
+      if (!user || !(user instanceof _record2.default) || !(user.recordType === 'user')) {
         throw new Error(user + ' is not a user.');
       }
 
-      this.users[user.id] = AccessLevel.ReadWriteLevel;
+      this.users[user._id] = AccessLevel.ReadWriteLevel;
     }
   }, {
     key: 'hasPublicReadAccess',
@@ -20217,13 +20216,25 @@ var ACL = function () {
   }, {
     key: 'hasReadAccessForUser',
     value: function hasReadAccessForUser(user) {
-      if (!user || !(user instanceof _user2.default)) {
+      if (!user || !(user instanceof _record2.default) || !(user.recordType === 'user')) {
         throw new Error(user + ' is not a user.');
       }
 
-      var roles = user.roles;
+      return this.hasPublicReadAccess() || accessLevelNumber(this.users[user._id]) >= accessLevelNumber(AccessLevel.ReadOnlyLevel);
+    }
+  }, {
+    key: 'hasWriteAccessForUser',
+    value: function hasWriteAccessForUser(user) {
+      if (!user || !(user instanceof _record2.default) || !(user.recordType === 'user')) {
+        throw new Error(user + ' is not a user.');
+      }
 
-      if (this.hasPublicReadAccess() || accessLevelNumber(this.users[user.id]) >= accessLevelNumber(AccessLevel.ReadOnlyLevel)) {
+      return this.hasPublicWriteAccess() || accessLevelNumber(this.users[user._id]) >= accessLevelNumber(AccessLevel.ReadWriteLevel);
+    }
+  }, {
+    key: 'hasReadAccess',
+    value: function hasReadAccess(user, roles) {
+      if (this.hasReadAccessForUser(user)) {
         return true;
       }
 
@@ -20257,15 +20268,9 @@ var ACL = function () {
       return false;
     }
   }, {
-    key: 'hasWriteAccessForUser',
-    value: function hasWriteAccessForUser(user) {
-      if (!user || !(user instanceof _user2.default)) {
-        throw new Error(user + ' is not a user.');
-      }
-
-      var roles = user.roles;
-
-      if (this.hasPublicWriteAccess() || accessLevelNumber(this.users[user.id]) >= accessLevelNumber(AccessLevel.ReadWriteLevel)) {
+    key: 'hasWriteAccess',
+    value: function hasWriteAccess(user, roles) {
+      if (this.hasWriteAccessForUser(user)) {
         return true;
       }
 
@@ -20309,7 +20314,7 @@ var ACL = function () {
 }();
 
 exports.default = ACL;
-},{"./role":52,"./user":55,"lodash":30}],37:[function(require,module,exports){
+},{"./record":49,"./role":52,"lodash":30}],37:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -20419,7 +20424,7 @@ function base64StringtoBlob(base64) {
   return bb;
 }
 module.exports = exports['default'];
-},{"Base64":6,"w3c-blob":76}],38:[function(require,module,exports){
+},{"Base64":6,"w3c-blob":75}],38:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -20429,34 +20434,38 @@ exports.AuthContainer = exports.USER_CHANGED = undefined;
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); /**
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Copyright 2015 Oursky Ltd.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Licensed under the Apache License, Version 2.0 (the "License");
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * you may not use this file except in compliance with the License.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * You may obtain a copy of the License at
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *     http://www.apache.org/licenses/LICENSE-2.0
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Unless required by applicable law or agreed to in writing, software
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * distributed under the License is distributed on an "AS IS" BASIS,
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * See the License for the specific language governing permissions and
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * limitations under the License.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      */
-
-
-var _lodash = require('lodash');
-
-var _lodash2 = _interopRequireDefault(_lodash);
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _util = require('./util');
 
 var _error = require('./error');
 
+var _role = require('./role');
+
+var _role2 = _interopRequireDefault(_role);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+/**
+ * Copyright 2015 Oursky Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+var _ = require('lodash');
 
 var USER_CHANGED = exports.USER_CHANGED = 'userChanged';
 
@@ -20478,86 +20487,89 @@ var AuthContainer = exports.AuthContainer = function () {
       return new _util.EventHandle(this.container.ee, USER_CHANGED, listener);
     }
   }, {
+    key: 'signup',
+    value: function signup(authData, password) {
+      var profile = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+
+      return this.container.makeRequest('auth:signup', {
+        auth_data: authData, // eslint-disable-line camelcase
+        password: password,
+        profile: profile
+      }).then(this._authResolve.bind(this));
+    }
+  }, {
     key: 'signupWithUsername',
     value: function signupWithUsername(username, password) {
-      return this._signup(username, null, password);
+      var profile = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+
+      return this.signup({
+        username: username
+      }, password, profile);
     }
   }, {
     key: 'signupWithEmail',
     value: function signupWithEmail(email, password) {
-      return this._signup(null, email, password);
-    }
-  }, {
-    key: 'signupWithUsernameAndProfile',
-    value: function signupWithUsernameAndProfile(username, password) {
-      var _this = this;
-
       var profile = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
 
-      return this.signupWithUsername(username, password).then(function (user) {
-        return _this._createProfile(user, profile);
-      });
-    }
-  }, {
-    key: 'signupWithEmailAndProfile',
-    value: function signupWithEmailAndProfile(email, password) {
-      var _this2 = this;
-
-      var profile = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
-
-      return this.signupWithEmail(email, password).then(function (user) {
-        return _this2._createProfile(user, profile);
-      });
+      return this.signup({
+        email: email
+      }, password, profile);
     }
   }, {
     key: 'signupAnonymously',
     value: function signupAnonymously() {
-      return this._signup(null, null, null);
+      return this.signup(null, null, null);
+    }
+  }, {
+    key: 'login',
+    value: function login(authData, password) {
+      return this.container.makeRequest('auth:login', {
+        auth_data: authData, // eslint-disable-line camelcase
+        password: password
+      }).then(this._authResolve.bind(this));
     }
   }, {
     key: 'loginWithUsername',
     value: function loginWithUsername(username, password) {
-      return this.container.makeRequest('auth:login', {
-        username: username,
-        password: password
-      }).then(this._authResolve.bind(this));
+      return this.login({
+        username: username
+      }, password);
     }
   }, {
     key: 'loginWithEmail',
     value: function loginWithEmail(email, password) {
-      return this.container.makeRequest('auth:login', {
-        email: email,
-        password: password
-      }).then(this._authResolve.bind(this));
+      return this.login({
+        email: email
+      }, password);
     }
   }, {
     key: 'loginWithProvider',
     value: function loginWithProvider(provider, authData) {
       return this.container.makeRequest('auth:login', {
         provider: provider,
-        auth_data: authData // eslint-disable-line camelcase
+        provider_auth_data: authData // eslint-disable-line camelcase
       }).then(this._authResolve.bind(this));
     }
   }, {
     key: 'logout',
     value: function logout() {
-      var _this3 = this;
+      var _this = this;
 
-      return this.container.push.unregisterDevice().then(function () {
-        _this3.container.clearCache();
-        return _this3.container.makeRequest('auth:logout', {});
-      }, function (error) {
+      return this.container.push.unregisterDevice().catch(function (error) {
         if (error.code === _error.ErrorCodes.InvalidArgument && error.message === 'Missing device id') {
-          _this3.container.clearCache();
-          return _this3.container.makeRequest('auth:logout', {});
+          return Promise.resolve();
         }
+
         return Promise.reject(error);
       }).then(function () {
-        return Promise.all([_this3._setAccessToken(null), _this3._setUser(null)]).then(function () {
+        _this.container.clearCache();
+        return _this.container.makeRequest('auth:logout', {});
+      }).then(function () {
+        return Promise.all([_this._setAccessToken(null), _this._setUser(null)]).then(function () {
           return null;
         });
-      }, function (err) {
-        return _this3._setAccessToken(null).then(function () {
+      }).catch(function (err) {
+        return _this._setAccessToken(null).then(function () {
           return Promise.reject(err);
         });
       });
@@ -20581,62 +20593,102 @@ var AuthContainer = exports.AuthContainer = function () {
       }).then(this._authResolve.bind(this));
     }
   }, {
-    key: 'saveUser',
-    value: function saveUser(user) {
-      var _this4 = this;
+    key: 'setAdminRole',
+    value: function setAdminRole(roles) {
+      var roleNames = _.map(roles, function (perRole) {
+        return perRole.name;
+      });
 
-      var payload = {
-        _id: user.id, // eslint-disable-line camelcase
-        email: user.email,
-        username: user.username
-      };
-      if (user.roles) {
-        payload.roles = _lodash2.default.map(user.roles, function (perRole) {
-          return perRole.name;
-        });
-      }
-      return this.container.makeRequest('user:update', payload).then(function (body) {
-        var newUser = _this4._User.fromJSON(body.result);
-        var currentUser = _this4.currentUser;
-
-        if (newUser && currentUser && newUser.id === currentUser.id) {
-          return _this4._setUser(body.result);
-        } else {
-          return newUser;
-        }
+      return this.container.makeRequest('role:admin', {
+        roles: roleNames
+      }).then(function (body) {
+        return body.result;
       });
     }
   }, {
-    key: 'getUsersByEmail',
-    value: function getUsersByEmail(emails) {
-      return this._getUsersBy(emails, null);
+    key: 'setDefaultRole',
+    value: function setDefaultRole(roles) {
+      var roleNames = _.map(roles, function (perRole) {
+        return perRole.name;
+      });
+
+      return this.container.makeRequest('role:default', {
+        roles: roleNames
+      }).then(function (body) {
+        return body.result;
+      });
     }
   }, {
-    key: 'getUsersByUsername',
-    value: function getUsersByUsername(usernames) {
-      return this._getUsersBy(null, usernames);
+    key: 'fetchUserRole',
+    value: function fetchUserRole(users) {
+      var userIds = _.map(users, function (perUser) {
+        // accept either user record or user id
+        return perUser._id || perUser;
+      });
+
+      return this.container.makeRequest('role:get', {
+        users: userIds
+      }).then(function (body) {
+        return Object.keys(body.result).map(function (key) {
+          return [key, body.result[key]];
+        }).reduce(function (acc, pairs) {
+          return _extends({}, acc || {}, _defineProperty({}, pairs[0], pairs[1].map(function (name) {
+            return new _role2.default(name);
+          })));
+        }, null);
+      });
     }
   }, {
-    key: 'discoverUserByEmails',
-    value: function discoverUserByEmails(emails) {
-      return this.container.publicDB.query(new this._Query(this.container.UserRecord).havingEmails(emails));
+    key: 'assignUserRole',
+    value: function assignUserRole(users, roles) {
+      var userIds = _.map(users, function (perUser) {
+        // accept either user record or user id
+        return perUser._id || perUser;
+      });
+
+      var roleNames = _.map(roles, function (perRole) {
+        // accept either role object or role name
+        return perRole.name || perRole;
+      });
+
+      return this.container.makeRequest('role:assign', {
+        users: userIds,
+        roles: roleNames
+      }).then(function (body) {
+        return body.result;
+      });
     }
   }, {
-    key: 'discoverUserByUsernames',
-    value: function discoverUserByUsernames(usernames) {
-      return this.container.publicDB.query(new this._Query(this.container.UserRecord).havingUsernames(usernames));
+    key: 'revokeUserRole',
+    value: function revokeUserRole(users, roles) {
+      var userIds = _.map(users, function (perUser) {
+        // accept either user record or user id
+        return perUser._id || perUser;
+      });
+
+      var roleNames = _.map(roles, function (perRole) {
+        // accept either role object or role name
+        return perRole.name || perRole;
+      });
+
+      return this.container.makeRequest('role:revoke', {
+        users: userIds,
+        roles: roleNames
+      }).then(function (body) {
+        return body.result;
+      });
     }
   }, {
     key: '_getAccessToken',
     value: function _getAccessToken() {
-      var _this5 = this;
+      var _this2 = this;
 
       return this.container.store.getItem('skygear-accesstoken').then(function (token) {
-        _this5._accessToken = token;
+        _this2._accessToken = token;
         return token;
       }, function (err) {
         console.warn('Failed to get access', err);
-        _this5._accessToken = null;
+        _this2._accessToken = null;
         return null;
       });
     }
@@ -20653,64 +20705,33 @@ var AuthContainer = exports.AuthContainer = function () {
       });
     }
   }, {
-    key: '_signup',
-    value: function _signup(username, email, password) {
-      return this.container.makeRequest('auth:signup', {
-        username: username,
-        email: email,
-        password: password
-      }).then(this._authResolve.bind(this));
-    }
-  }, {
     key: '_authResolve',
     value: function _authResolve(body) {
-      var _this6 = this;
+      var _this3 = this;
 
-      return Promise.all([this._setUser(body.result), this._setAccessToken(body.result.access_token)]).then(function () {
-        _this6.container.pubsub._reconfigurePubsubIfNeeded();
-        return _this6.currentUser;
-      });
-    }
-  }, {
-    key: '_createProfile',
-    value: function _createProfile(user, profile) {
-      var record = new this.container.UserRecord(_extends({
-        _id: 'user/' + user.id
-      }, profile));
-      return this.container.publicDB.save(record);
-    }
-  }, {
-    key: '_getUsersBy',
-    value: function _getUsersBy(emails, usernames) {
-      var _this7 = this;
-
-      return this.container.makeRequest('user:query', {
-        emails: emails,
-        usernames: usernames
-      }).then(function (body) {
-        return body.result.map(function (r) {
-          return new _this7._User(r.data);
-        });
+      return Promise.all([this._setUser(body.result.profile), this._setAccessToken(body.result.access_token)]).then(function () {
+        _this3.container.pubsub._reconfigurePubsubIfNeeded();
+        return _this3.currentUser;
       });
     }
   }, {
     key: '_getUser',
     value: function _getUser() {
-      var _this8 = this;
+      var _this4 = this;
 
       return this.container.store.getItem('skygear-user').then(function (userJSON) {
         var attrs = JSON.parse(userJSON);
-        _this8._user = _this8._User.fromJSON(attrs);
+        _this4._user = new _this4._User(attrs);
       }, function (err) {
         console.warn('Failed to get user', err);
-        _this8._user = null;
+        _this4._user = null;
         return null;
       });
     }
   }, {
     key: '_setUser',
     value: function _setUser(attrs) {
-      var _this9 = this;
+      var _this5 = this;
 
       var value = void 0;
       if (attrs !== null) {
@@ -20723,7 +20744,7 @@ var AuthContainer = exports.AuthContainer = function () {
 
       var setItem = value === null ? this.container.store.removeItem('skygear-user') : this.container.store.setItem('skygear-user', value);
       return setItem.then(function () {
-        _this9.container.ee.emit(USER_CHANGED, _this9._user);
+        _this5.container.ee.emit(USER_CHANGED, _this5._user);
         return value;
       }, function (err) {
         console.warn('Failed to persist user', err);
@@ -20743,7 +20764,7 @@ var AuthContainer = exports.AuthContainer = function () {
   }, {
     key: '_User',
     get: function get() {
-      return this.container.User;
+      return this.container.UserRecord;
     }
   }, {
     key: '_Query',
@@ -20754,7 +20775,7 @@ var AuthContainer = exports.AuthContainer = function () {
 
   return AuthContainer;
 }();
-},{"./error":42,"./util":56,"lodash":30}],39:[function(require,module,exports){
+},{"./error":42,"./role":52,"./util":55,"lodash":30}],39:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -20856,7 +20877,7 @@ module.exports = exports['default'];
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.BaseContainer = undefined;
+exports.BaseContainer = exports.UserRecord = undefined;
 
 var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
@@ -20865,10 +20886,6 @@ var _createClass = function () { function defineProperties(target, props) { for 
 var _asset = require('./asset');
 
 var _asset2 = _interopRequireDefault(_asset);
-
-var _user = require('./user');
-
-var _user2 = _interopRequireDefault(_user);
 
 var _role = require('./role');
 
@@ -20939,6 +20956,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 var request = require('superagent');
 var _ = require('lodash');
 var ee = require('event-emitter');
+
+var UserRecord = exports.UserRecord = _record2.default.extend('user');
 
 var BaseContainer = exports.BaseContainer = function () {
   function BaseContainer() {
@@ -21053,16 +21072,6 @@ var BaseContainer = exports.BaseContainer = function () {
     }
 
     /**
-     * @type {User}
-     */
-
-  }, {
-    key: 'User',
-    get: function get() {
-      return _user2.default;
-    }
-
-    /**
      * @type {Role}
      */
 
@@ -21099,7 +21108,7 @@ var BaseContainer = exports.BaseContainer = function () {
   }, {
     key: 'UserRecord',
     get: function get() {
-      return _record2.default.extend('user');
+      return UserRecord;
     }
 
     /**
@@ -21190,6 +21199,56 @@ var BaseContainer = exports.BaseContainer = function () {
     key: 'ErrorCodes',
     get: function get() {
       return _error.ErrorCodes;
+    }
+
+    /**
+     * @type {AuthContainer}
+     */
+
+  }, {
+    key: 'AuthContainer',
+    get: function get() {
+      return _auth.AuthContainer;
+    }
+
+    /**
+     * @type {RelationContainer}
+     */
+
+  }, {
+    key: 'RelationContainer',
+    get: function get() {
+      return _relation.RelationContainer;
+    }
+
+    /**
+     * @type {DatabaseContainer}
+     */
+
+  }, {
+    key: 'DatabaseContainer',
+    get: function get() {
+      return _database.DatabaseContainer;
+    }
+
+    /**
+     * @type {PubsubContainer}
+     */
+
+  }, {
+    key: 'PubsubContainer',
+    get: function get() {
+      return _pubsub.PubsubContainer;
+    }
+
+    /**
+     * @type {PushContainer}
+     */
+
+  }, {
+    key: 'PushContainer',
+    get: function get() {
+      return _push.PushContainer;
     }
   }, {
     key: 'endPoint',
@@ -21384,7 +21443,7 @@ function getRespJSON(res) {
 
   return {};
 }
-},{"./acl":36,"./asset":37,"./auth":38,"./database":41,"./error":42,"./geolocation":43,"./pubsub":45,"./push":46,"./query":47,"./record":49,"./reference":50,"./relation":51,"./role":52,"./store":53,"./type":54,"./user":55,"event-emitter":27,"lodash":30,"superagent":61}],41:[function(require,module,exports){
+},{"./acl":36,"./asset":37,"./auth":38,"./database":41,"./error":42,"./geolocation":43,"./pubsub":45,"./push":46,"./query":47,"./record":49,"./reference":50,"./relation":51,"./role":52,"./store":53,"./type":54,"event-emitter":27,"lodash":30,"superagent":60}],41:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -21516,52 +21575,10 @@ var Database = function () {
       });
     }
   }, {
-    key: '_makeUploadAssetRequest',
-    value: function _makeUploadAssetRequest(asset) {
-      var _this2 = this;
-
-      return new Promise(function (resolve, reject) {
-        _this2.container.makeRequest('asset:put', {
-          filename: asset.name,
-          'content-type': asset.contentType,
-          'content-size': asset.file.size
-        }).then(function (res) {
-          var newAsset = _asset2.default.fromJSON(res.result.asset);
-          var postRequest = res.result['post-request'];
-
-          var postUrl = postRequest.action;
-          if (postUrl.indexOf('/') === 0) {
-            postUrl = postUrl.substring(1);
-          }
-          if (postUrl.indexOf('http') !== 0) {
-            postUrl = _this2.container.url + postUrl;
-          }
-
-          var _request = _this2.container.request.post(postUrl).set('X-Skygear-API-Key', _this2.container.apiKey);
-          if (postRequest['extra-fields']) {
-            _.forEach(postRequest['extra-fields'], function (value, key) {
-              _request = _request.field(key, value);
-            });
-          }
-
-          _request.attach('file', asset.file).end(function (err) {
-            if (err) {
-              reject(err);
-              return;
-            }
-
-            resolve(newAsset);
-          });
-        }, function (err) {
-          reject(err);
-        });
-      });
-    }
-  }, {
     key: '_presaveAssetTask',
     value: function _presaveAssetTask(key, asset) {
       if (asset.file) {
-        return this._makeUploadAssetRequest(asset).then(function (a) {
+        return makeUploadAssetRequest(this.container, asset).then(function (a) {
           return [key, a];
         });
       } else {
@@ -21571,13 +21588,13 @@ var Database = function () {
   }, {
     key: '_presave',
     value: function _presave(record) {
-      var _this3 = this;
+      var _this2 = this;
 
       // for every (key, value) pair, process the pair in a Promise
       // the Promise should be resolved by the transformed [key, value] pair
       var tasks = _.map(record, function (value, key) {
         if (value instanceof _asset2.default) {
-          return _this3._presaveAssetTask(key, value);
+          return _this2._presaveAssetTask(key, value);
         } else {
           return Promise.resolve([key, value]);
         }
@@ -21602,7 +21619,7 @@ var Database = function () {
   }, {
     key: 'save',
     value: function save(_records) {
-      var _this4 = this;
+      var _this3 = this;
 
       var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
@@ -21620,7 +21637,7 @@ var Database = function () {
       var presaveTasks = _.map(records, this._presave.bind(this));
       return Promise.all(presaveTasks).then(function (processedRecords) {
         var payload = {
-          database_id: _this4.dbID //eslint-disable-line
+          database_id: _this3.dbID //eslint-disable-line
         };
 
         if (options.atomic) {
@@ -21631,7 +21648,7 @@ var Database = function () {
           return perRecord.toJSON();
         });
 
-        return _this4.container.makeRequest('record:save', payload);
+        return _this3.container.makeRequest('record:save', payload);
       }).then(function (body) {
         var results = body.result;
         var savedRecords = [];
@@ -21663,7 +21680,8 @@ var Database = function () {
     key: 'delete',
     value: function _delete(_records) {
       var records = _records;
-      if (!_.isArray(records)) {
+      var isQueryResult = records instanceof _query_result2.default;
+      if (!_.isArray(records) && !isQueryResult) {
         records = [records];
       }
 
@@ -21732,32 +21750,6 @@ var PublicDatabase = exports.PublicDatabase = function (_Database) {
   }
 
   _createClass(PublicDatabase, [{
-    key: 'setAdminRole',
-    value: function setAdminRole(roles) {
-      var roleNames = _.map(roles, function (perRole) {
-        return perRole.name;
-      });
-
-      return this.container.makeRequest('role:admin', {
-        roles: roleNames
-      }).then(function (body) {
-        return body.result;
-      });
-    }
-  }, {
-    key: 'setDefaultRole',
-    value: function setDefaultRole(roles) {
-      var roleNames = _.map(roles, function (perRole) {
-        return perRole.name;
-      });
-
-      return this.container.makeRequest('role:default', {
-        roles: roleNames
-      }).then(function (body) {
-        return body.result;
-      });
-    }
-  }, {
     key: 'setDefaultACL',
     value: function setDefaultACL(acl) {
       this._Record.defaultACL = acl;
@@ -21781,8 +21773,8 @@ var PublicDatabase = exports.PublicDatabase = function (_Database) {
     value: function setRecordDefaultAccess(recordClass, acl) {
       return this.container.makeRequest('schema:default_access', {
         type: recordClass.recordType,
-        default_access: acl.toJSON //eslint-disable-line camelcase
-        () }).then(function (body) {
+        default_access: acl.toJSON() //eslint-disable-line camelcase
+      }).then(function (body) {
         return body.result;
       });
     }
@@ -21808,6 +21800,11 @@ var DatabaseContainer = exports.DatabaseContainer = function () {
   }
 
   _createClass(DatabaseContainer, [{
+    key: 'uploadAsset',
+    value: function uploadAsset(asset) {
+      return makeUploadAssetRequest(asset);
+    }
+  }, {
     key: 'public',
     get: function get() {
       if (this._public === null) {
@@ -21847,6 +21844,45 @@ var DatabaseContainer = exports.DatabaseContainer = function () {
 
   return DatabaseContainer;
 }();
+
+function makeUploadAssetRequest(container, asset) {
+  return new Promise(function (resolve, reject) {
+    container.makeRequest('asset:put', {
+      filename: asset.name,
+      'content-type': asset.contentType,
+      'content-size': asset.file.size
+    }).then(function (res) {
+      var newAsset = _asset2.default.fromJSON(res.result.asset);
+      var postRequest = res.result['post-request'];
+
+      var postUrl = postRequest.action;
+      if (postUrl.indexOf('/') === 0) {
+        postUrl = postUrl.substring(1);
+      }
+      if (postUrl.indexOf('http') !== 0) {
+        postUrl = container.url + postUrl;
+      }
+
+      var _request = container.request.post(postUrl).set('X-Skygear-API-Key', container.apiKey);
+      if (postRequest['extra-fields']) {
+        _.forEach(postRequest['extra-fields'], function (value, key) {
+          _request = _request.field(key, value);
+        });
+      }
+
+      _request.attach('file', asset.file).end(function (err) {
+        if (err) {
+          reject(err);
+          return;
+        }
+
+        resolve(newAsset);
+      });
+    }, function (err) {
+      reject(err);
+    });
+  });
+}
 },{"./asset":37,"./cache":39,"./query":47,"./query_result":48,"lodash":30}],42:[function(require,module,exports){
 'use strict';
 
@@ -22587,6 +22623,11 @@ var PubsubContainer = exports.PubsubContainer = function () {
         return;
       }
 
+      this.reconfigure();
+    }
+  }, {
+    key: 'reconfigure',
+    value: function reconfigure() {
       this._internalPubsub.reset();
       if (this.deviceID !== null) {
         this._internalPubsub.subscribe('_sub_' + this.deviceID, function (data) {
@@ -22605,7 +22646,7 @@ var PubsubContainer = exports.PubsubContainer = function () {
 
   return PubsubContainer;
 }();
-},{"./util":56,"event-emitter":27,"lodash":30,"url":69,"websocket":77}],46:[function(require,module,exports){
+},{"./util":55,"event-emitter":27,"lodash":30,"url":68,"websocket":76}],46:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -23140,48 +23181,6 @@ var Query = function () {
     }
 
     /**
-     * havingEmails - Set a having email predicate, for {user} record only.
-     * @throw  {Error}  throw Error if record type is not 'user'
-     * @param  {Array}  emails - emails of users.
-     * @return {Query}  self
-     */
-
-  }, {
-    key: 'havingEmails',
-    value: function havingEmails(emails) {
-      if (this.recordType !== 'user') {
-        throw new Error('havingEmails predicate only works on user record');
-      }
-      if (!_lodash2.default.isArray(emails)) {
-        emails = [emails];
-      }
-
-      this._predicate.push(['func', 'userDiscover', { emails: emails }]);
-      return this;
-    }
-
-    /**
-     * havingUsernames - Set a having username predicate, for {user} record only.
-     * @throw  {Error}  throw Error if record type is not 'user'
-     * @param  {Array}  usernames - usernames of users.
-     * @return {Query}  self
-     */
-
-  }, {
-    key: 'havingUsernames',
-    value: function havingUsernames(usernames) {
-      if (this.recordType !== 'user') {
-        throw new Error('havingUsernames predicate only works on user record');
-      }
-      if (!_lodash2.default.isArray(usernames)) {
-        usernames = [usernames];
-      }
-
-      this._predicate.push(['func', 'userDiscover', { usernames: usernames }]);
-      return this;
-    }
-
-    /**
      * addDescending -  Set descending predicate
      * @param {string} key
      * @return {Query} self
@@ -23486,7 +23485,7 @@ var Query = function () {
 
 exports.default = Query;
 module.exports = exports['default'];
-},{"./record":49,"./util":56,"lodash":30,"md5":31}],48:[function(require,module,exports){
+},{"./record":49,"./util":55,"lodash":30,"md5":31}],48:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -23922,7 +23921,7 @@ function recordDictToObj(dict) {
   return new Cls(dict);
 }
 module.exports = exports['default'];
-},{"./acl":36,"./util":56,"lodash":30,"uuid":58}],50:[function(require,module,exports){
+},{"./acl":36,"./util":55,"lodash":30,"uuid":57}],50:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -24008,11 +24007,7 @@ exports.RelationContainer = exports.RelationQueryResult = exports.RelationRemove
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _user = require('./user');
-
-var _user2 = _interopRequireDefault(_user);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+var _container = require('./container');
 
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
@@ -24089,7 +24084,7 @@ var Relation = exports.Relation = function () {
     key: 'targetsID',
     get: function get() {
       return _.map(this.targets, function (user) {
-        return user.id;
+        return user._id;
       });
     }
   }], [{
@@ -24163,7 +24158,7 @@ var RelationResult = exports.RelationResult = function RelationResult(results) {
       this.fails.push(results[i]);
       this.partialError = true;
     } else {
-      this.success.push(new _user2.default(results[i].data));
+      this.success.push(new _container.UserRecord(results[i].data));
     }
   }
 };
@@ -24203,7 +24198,7 @@ var RelationQueryResult = exports.RelationQueryResult = function (_extendableBui
     key: 'createFromBody',
     value: function createFromBody(body) {
       var users = _.map(body.result, function (attrs) {
-        return new _user2.default(attrs.data);
+        return new _container.UserRecord(attrs.data);
       });
       var result = new RelationQueryResult();
       users.forEach(function (val) {
@@ -24232,32 +24227,20 @@ var RelationContainer = exports.RelationContainer = function () {
     }
   }, {
     key: 'queryFriend',
-    value: function queryFriend(actor) {
-      if (actor === null) {
-        actor = this.container.currentUser;
-      }
+    value: function queryFriend() {
       var query = new RelationQuery(this.Friend);
-      query.user = actor;
       return this.query(query);
     }
   }, {
     key: 'queryFollower',
-    value: function queryFollower(actor) {
-      if (actor === null) {
-        actor = this.container.currentUser;
-      }
+    value: function queryFollower() {
       var query = new RelationQuery(this.Follower);
-      query.user = actor;
       return this.query(query);
     }
   }, {
     key: 'queryFollowing',
-    value: function queryFollowing(actor) {
-      if (actor === null) {
-        actor = this.container.currentUser;
-      }
+    value: function queryFollowing() {
       var query = new RelationQuery(this.Following);
-      query.user = actor;
       return this.query(query);
     }
   }, {
@@ -24306,7 +24289,7 @@ var RelationContainer = exports.RelationContainer = function () {
 
   return RelationContainer;
 }();
-},{"./user":55,"lodash":30}],52:[function(require,module,exports){
+},{"./container":40,"lodash":30}],52:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -24832,7 +24815,7 @@ exports.default = function () {
   }
   return store;
 };
-},{"./util":56,"cookie-storage":9,"localstorage-memory":29}],54:[function(require,module,exports){
+},{"./util":55,"cookie-storage":9,"localstorage-memory":29}],54:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -24900,112 +24883,6 @@ var UnknownValue = exports.UnknownValue = function () {
   return UnknownValue;
 }();
 },{}],55:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); /**
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Copyright 2015 Oursky Ltd.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Licensed under the Apache License, Version 2.0 (the "License");
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * you may not use this file except in compliance with the License.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * You may obtain a copy of the License at
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *     http://www.apache.org/licenses/LICENSE-2.0
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Unless required by applicable law or agreed to in writing, software
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * distributed under the License is distributed on an "AS IS" BASIS,
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * See the License for the specific language governing permissions and
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * limitations under the License.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      */
-
-
-var _lodash = require('lodash');
-
-var _lodash2 = _interopRequireDefault(_lodash);
-
-var _role = require('./role');
-
-var _role2 = _interopRequireDefault(_role);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var User = function () {
-  function User(attrs) {
-    _classCallCheck(this, User);
-
-    var id = attrs.user_id || attrs._id; //eslint-disable-line
-    if (!_lodash2.default.isString(id)) {
-      throw new Error('Missing user_id.');
-    }
-    this.email = attrs.email;
-    this.username = attrs.username;
-    this.id = id;
-    if (attrs.last_login_at) {
-      this.lastLoginAt = new Date(attrs.last_login_at); //eslint-disable-line
-    }
-    if (attrs.last_seen_at) {
-      this.lastSeenAt = new Date(attrs.last_seen_at); //eslint-disable-line
-    }
-
-    this.roles = [];
-    if (attrs.roles) {
-      this.roles = _lodash2.default.map(attrs.roles, _role2.default.define);
-    }
-  }
-
-  _createClass(User, [{
-    key: 'toJSON',
-    value: function toJSON() {
-      var result = {
-        user_id: this.id, //eslint-disable-line
-        username: this.username,
-        email: this.email,
-        roles: _lodash2.default.map(this.roles, function (perRole) {
-          return perRole.name;
-        })
-      };
-      if (this.lastLoginAt) {
-        result.last_login_at = this.lastLoginAt.toJSON(); //eslint-disable-line
-      }
-      if (this.lastSeenAt) {
-        result.last_seen_at = this.lastSeenAt.toJSON(); //eslint-disable-line
-      }
-      return result;
-    }
-  }, {
-    key: 'addRole',
-    value: function addRole(role) {
-      this.roles = _role2.default.union(this.roles, role);
-    }
-  }, {
-    key: 'removeRole',
-    value: function removeRole(role) {
-      this.roles = _role2.default.subtract(this.roles, role);
-    }
-  }, {
-    key: 'hasRole',
-    value: function hasRole(role) {
-      return _role2.default.contain(this.roles, role);
-    }
-  }], [{
-    key: 'fromJSON',
-    value: function fromJSON(attrs) {
-      return new User(attrs);
-    }
-  }]);
-
-  return User;
-}();
-
-exports.default = User;
-module.exports = exports['default'];
-},{"./role":52,"lodash":30}],56:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -25128,7 +25005,7 @@ var EventHandle = exports.EventHandle = function () {
 
   return EventHandle;
 }();
-},{"./asset":37,"./geolocation":43,"./reference":50,"./type":54,"lodash":30}],57:[function(require,module,exports){
+},{"./asset":37,"./geolocation":43,"./reference":50,"./type":54,"lodash":30}],56:[function(require,module,exports){
 (function (global){
 
 var rng;
@@ -25164,7 +25041,7 @@ module.exports = rng;
 
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],58:[function(require,module,exports){
+},{}],57:[function(require,module,exports){
 //     uuid.js
 //
 //     Copyright (c) 2010-2012 Robert Kieffer
@@ -25349,7 +25226,7 @@ uuid.unparse = unparse;
 
 module.exports = uuid;
 
-},{"./rng":57}],59:[function(require,module,exports){
+},{"./rng":56}],58:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -25417,7 +25294,7 @@ var injectToContainer = exports.injectToContainer = function injectToContainer()
   authContainerPrototype.forgotPassword = _forgotPassword;
   authContainerPrototype.resetPassword = _resetPassword;
 };
-},{"skygear-core":44}],60:[function(require,module,exports){
+},{"skygear-core":44}],59:[function(require,module,exports){
 'use strict';
 
 var container = require('skygear-core');
@@ -25426,7 +25303,7 @@ var forgotPassword = require('skygear-forgot-password');
 forgotPassword.injectToContainer(container);
 
 module.exports = container;
-},{"skygear-core":44,"skygear-forgot-password":59}],61:[function(require,module,exports){
+},{"skygear-core":44,"skygear-forgot-password":58}],60:[function(require,module,exports){
 /**
  * Root reference for iframes.
  */
@@ -26361,7 +26238,7 @@ request.put = function(url, data, fn){
   return req;
 };
 
-},{"./is-function":62,"./is-object":63,"./request-base":64,"./response-base":65,"./should-retry":66,"component-emitter":8}],62:[function(require,module,exports){
+},{"./is-function":61,"./is-object":62,"./request-base":63,"./response-base":64,"./should-retry":65,"component-emitter":8}],61:[function(require,module,exports){
 /**
  * Check if `fn` is a function.
  *
@@ -26378,7 +26255,7 @@ function isFunction(fn) {
 
 module.exports = isFunction;
 
-},{"./is-object":63}],63:[function(require,module,exports){
+},{"./is-object":62}],62:[function(require,module,exports){
 /**
  * Check if `obj` is an object.
  *
@@ -26393,7 +26270,7 @@ function isObject(obj) {
 
 module.exports = isObject;
 
-},{}],64:[function(require,module,exports){
+},{}],63:[function(require,module,exports){
 /**
  * Module of mixed-in functions shared between node and client code
  */
@@ -26986,7 +26863,7 @@ RequestBase.prototype._setTimeouts = function() {
   }
 }
 
-},{"./is-object":63}],65:[function(require,module,exports){
+},{"./is-object":62}],64:[function(require,module,exports){
 
 /**
  * Module dependencies.
@@ -27121,7 +26998,7 @@ ResponseBase.prototype._setStatusProperties = function(status){
     this.notFound = 404 == status;
 };
 
-},{"./utils":67}],66:[function(require,module,exports){
+},{"./utils":66}],65:[function(require,module,exports){
 var ERROR_CODES = [
   'ECONNRESET',
   'ETIMEDOUT',
@@ -27146,7 +27023,7 @@ module.exports = function shouldRetry(err, res) {
   return false;
 };
 
-},{}],67:[function(require,module,exports){
+},{}],66:[function(require,module,exports){
 
 /**
  * Return the mime type for the given `str`.
@@ -27215,7 +27092,7 @@ exports.cleanHeader = function(header, shouldStripCookie){
   }
   return header;
 };
-},{}],68:[function(require,module,exports){
+},{}],67:[function(require,module,exports){
 //     Underscore.js 1.8.3
 //     http://underscorejs.org
 //     (c) 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
@@ -28765,7 +28642,7 @@ exports.cleanHeader = function(header, shouldStripCookie){
   }
 }.call(this));
 
-},{}],69:[function(require,module,exports){
+},{}],68:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -29499,7 +29376,7 @@ Url.prototype.parseHost = function() {
   if (host) this.hostname = host;
 };
 
-},{"./util":70,"punycode":32,"querystring":35}],70:[function(require,module,exports){
+},{"./util":69,"punycode":32,"querystring":35}],69:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -29517,7 +29394,7 @@ module.exports = {
   }
 };
 
-},{}],71:[function(require,module,exports){
+},{}],70:[function(require,module,exports){
 var v1 = require('./v1');
 var v4 = require('./v4');
 
@@ -29527,7 +29404,7 @@ uuid.v4 = v4;
 
 module.exports = uuid;
 
-},{"./v1":74,"./v4":75}],72:[function(require,module,exports){
+},{"./v1":73,"./v4":74}],71:[function(require,module,exports){
 /**
  * Convert array of 16 byte values to UUID string format of the form:
  * XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
@@ -29552,7 +29429,7 @@ function bytesToUuid(buf, offset) {
 
 module.exports = bytesToUuid;
 
-},{}],73:[function(require,module,exports){
+},{}],72:[function(require,module,exports){
 (function (global){
 // Unique ID creation requires a high quality random # generator.  In the
 // browser this is a little complicated due to unknown quality of Math.random()
@@ -29589,7 +29466,7 @@ if (!rng) {
 module.exports = rng;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],74:[function(require,module,exports){
+},{}],73:[function(require,module,exports){
 var rng = require('./lib/rng');
 var bytesToUuid = require('./lib/bytesToUuid');
 
@@ -29691,7 +29568,7 @@ function v1(options, buf, offset) {
 
 module.exports = v1;
 
-},{"./lib/bytesToUuid":72,"./lib/rng":73}],75:[function(require,module,exports){
+},{"./lib/bytesToUuid":71,"./lib/rng":72}],74:[function(require,module,exports){
 var rng = require('./lib/rng');
 var bytesToUuid = require('./lib/bytesToUuid');
 
@@ -29722,7 +29599,7 @@ function v4(options, buf, offset) {
 
 module.exports = v4;
 
-},{"./lib/bytesToUuid":72,"./lib/rng":73}],76:[function(require,module,exports){
+},{"./lib/bytesToUuid":71,"./lib/rng":72}],75:[function(require,module,exports){
 (function (global){
 module.exports = get_blob()
 
@@ -29754,7 +29631,7 @@ function get_blob() {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],77:[function(require,module,exports){
+},{}],76:[function(require,module,exports){
 var _global = (function() { return this; })();
 var NativeWebSocket = _global.WebSocket || _global.MozWebSocket;
 var websocket_version = require('./version');
@@ -29792,10 +29669,10 @@ module.exports = {
     'version'      : websocket_version
 };
 
-},{"./version":78}],78:[function(require,module,exports){
+},{"./version":77}],77:[function(require,module,exports){
 module.exports = require('../package.json').version;
 
-},{"../package.json":79}],79:[function(require,module,exports){
+},{"../package.json":78}],78:[function(require,module,exports){
 module.exports={
   "_args": [
     [
