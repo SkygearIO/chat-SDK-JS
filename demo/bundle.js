@@ -527,6 +527,7 @@ var SkygearChatContainer = exports.SkygearChatContainer = function () {
      * @param {number} [limit=50] - limit the result set, if it is set to too large, may
      * result in timeout.
      * @param {Date} beforeTime - specific from which time
+     * @param {string} order - order of the message, '_edited_at' or '_created_at'
      * @return {Promise<[]Message>} - array of Message records
      */
 
@@ -535,9 +536,10 @@ var SkygearChatContainer = exports.SkygearChatContainer = function () {
     value: function getMessages(conversation) {
       var limit = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 50;
       var beforeTime = arguments[2];
+      var order = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
 
       var conversationID = conversation._id;
-      return _skygear2.default.lambda('chat:get_messages', [conversationID, limit, beforeTime]).then(function (data) {
+      return _skygear2.default.lambda('chat:get_messages', [conversationID, limit, beforeTime, order]).then(function (data) {
         data.results = data.results.map(function (message_data) {
           return new Message(message_data);
         });
