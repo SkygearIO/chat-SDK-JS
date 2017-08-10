@@ -213,13 +213,15 @@ var SkygearChatContainer = exports.SkygearChatContainer = function () {
   }, {
     key: 'updateConversation',
     value: function updateConversation(conversation, title, meta) {
+      var newConversation = new Conversation();
+      newConversation._id = conversation._id;
       if (title) {
-        conversation.title = title;
+        newConversation.title = title;
       }
       if (meta) {
-        conversation.meta = meta;
+        newConversation.meta = meta;
       }
-      return _skygear2.default.publicDB.save(conversation);
+      return _skygear2.default.publicDB.save(newConversation);
     }
 
     /**
@@ -527,7 +529,7 @@ var SkygearChatContainer = exports.SkygearChatContainer = function () {
      * @param {number} [limit=50] - limit the result set, if it is set to too large, may
      * result in timeout.
      * @param {Date} beforeTime - specific from which time
-     * @param {string} order - order of the message, '_edited_at' or '_created_at'
+     * @param {string} order - order of the message, 'edited_at' or '_created_at'
      * @return {Promise<[]Message>} - array of Message records
      */
 
