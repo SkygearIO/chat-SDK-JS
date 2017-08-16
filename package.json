@@ -78,7 +78,7 @@
     }
   },
   "peerDependencies": {
-    "skygear": "^1.1.0-alpha.2"
+    "skygear": "^1.1.0"
   },
   "dependencies": {
     "underscore": "^1.8.3",
