@@ -4,6 +4,7 @@ if [ -n "$TRAVIS_TAG" ]; then
 fi
 
 if [ "$TRAVIS_BRANCH" == "latest" ]; then
+  /tmp/publish-doc.sh . 'docs.skygear.io'  '/chat-js/reference' E31J8XF8IPV2V
   npm run deploy-latest
 fi
 
