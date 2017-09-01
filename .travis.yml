@@ -22,7 +22,7 @@ deploy:
     skip_cleanup: true
     on:
       repo: SkygearIO/chat-SDK-JS
-      branch: master
+      branch: update-doc
       node_js: 7
 
 notifications:

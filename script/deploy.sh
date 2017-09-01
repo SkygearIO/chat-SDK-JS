@@ -19,5 +19,3 @@ if [ "$TRAVIS_BRANCH" == "update-doc" ]; then
   echo "update-doc"
   /tmp/publish-doc.sh . 'docs.skygear.io'  '/chat-js/reference' E31J8XF8IPV2V
 fi
-
-
