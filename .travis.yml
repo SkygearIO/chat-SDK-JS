@@ -23,7 +23,7 @@ deploy:
     on:
       repo: SkygearIO/chat-SDK-JS
       branch: update-doc
-      node_js: 7
+      node_js: v7
 
 notifications:
   slack:
