@@ -18,7 +18,7 @@
     "test": "gulp",
     "dev": "gulp --type dev dev",
     "babel": "gulp babel",
-    "demo": "browserify demo/main.js -o demo/bundle.js -i react-native",
+    "demo": "cp dist/bundle.js demo/bundle.js",
     "prepublish": "gulp prepublish",
     "deploy": "gulp deploy",
     "deploy-latest": "gulp deploy --latest"
