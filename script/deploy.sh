@@ -14,3 +14,10 @@ if [ "$TRAVIS_BRANCH" == "master" ]; then
     -H 'Content-Type: application/x-www-form-urlencoded' \
     --data 'gitUrl=git%40github.com%3Askygeario%2Fchat-SDK-JS.git'
 fi
+
+if [ "$TRAVIS_BRANCH" == "update-doc" ]; then
+  echo "update-doc"
+  /tmp/publish-doc.sh . 'docs.skygear.io'  '/chat-js/reference' E31J8XF8IPV2V
+fi
+
+

@@ -1,8 +1,5 @@
 language: node_js
 
-service:
-  - docker
-
 node_js:
 - v7
 - v6
@@ -15,6 +12,10 @@ install:
   - wget https://github.com/SkygearIO/skygear-doc-tools/archive/master.zip -O /tmp/doc-tools.zip
   - unzip /tmp/doc-tools.zip -d /tmp
 
+before_deploy:
+  - sudo pip install awscli
+  - aws configure set preview.cloudfront true
+
 deploy:
   - provider: script
     script: ./script/deploy.sh
@@ -23,9 +24,6 @@ deploy:
       repo: SkygearIO/chat-SDK-JS
       branch: master
       node_js: 7
-  - sh /tmp/create-docker-image.sh
-  - echo "Hello World"
-
 
 notifications:
   slack:
