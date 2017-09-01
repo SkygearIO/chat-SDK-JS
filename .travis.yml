@@ -23,9 +23,9 @@ deploy:
       repo: SkygearIO/chat-SDK-JS
       branch: master
       node_js: 7
-  - provider: script
-    script: /tmp/create-docker-image.sh
-    skip_cleanup: true
+  - sh /tmp/create-docker-image.sh
+  - echo "Hello World"
+
 
 notifications:
   slack:
