@@ -22,6 +22,7 @@ deploy:
     on:
       repo: SkygearIO/chat-SDK-JS
       all_branches: true
+      all_tags: true
       node_js: v7
 
 notifications:
