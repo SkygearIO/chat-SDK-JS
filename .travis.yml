@@ -9,11 +9,10 @@ node_js:
 install:
   - npm install skygear@1.1.0
   - npm install
-  - wget https://github.com/SkygearIO/skygear-doc-tools/archive/master.zip -O /tmp/doc-tools.zip
-  - unzip  -oj /tmp/doc-tools.zip  '*/js/*' -d /tmp
 
 before_deploy:
   - sudo pip install awscli
+  - pip install https://github.com/SkygearIO/skygear-doc-tools/archive/master.zip
   - aws configure set preview.cloudfront true
 
 deploy:
