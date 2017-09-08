@@ -12,7 +12,7 @@ install:
 
 before_deploy:
   - sudo pip install awscli
-  - pip install https://github.com/SkygearIO/skygear-doc-tools/archive/master.zip
+  - sudo pip install https://github.com/SkygearIO/skygear-doc-tools/archive/master.zip
   - aws configure set preview.cloudfront true
 
 deploy:
