@@ -18,7 +18,7 @@
     "test": "gulp",
     "dev": "gulp --type dev dev",
     "babel": "gulp babel",
-    "demo": "cp dist/bundle.js demo/bundle.js",
+    "demo": "gulp browserify && cp dist/bundle.js demo/bundle.js",
     "prepublish": "gulp prepublish",
     "deploy": "gulp deploy",
     "deploy-latest": "gulp deploy --latest"
@@ -89,6 +89,8 @@
     "skygear": "global:skygear"
   },
   "browserify": {
-    "transform": [ "browserify-shim" ]
+    "transform": [
+      "browserify-shim"
+    ]
   }
 }
