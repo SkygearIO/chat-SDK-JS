@@ -58,7 +58,7 @@ var SkygearChatContainer = exports.SkygearChatContainer = function () {
      * All participant will be admin unless specific in options.admins
      *
      * @example
-     * const skygearChat = require('skygear-chat');¬
+     * const skygearChat = require('skygear-chat');
      *
      * skygearChat.createConversation([userBen], 'Greeting')
      *   .then(function (conversation) {
@@ -89,7 +89,7 @@ var SkygearChatContainer = exports.SkygearChatContainer = function () {
      * with distinctByParticipants set to true
      *
      * @example
-     * const skygearChat = require('skygear-chat');¬
+     * const skygearChat = require('skygear-chat');
      *
      * skygearChat.createDirectConversation(userBen, 'Greeting')
      *   .then(function (conversation) {
@@ -167,16 +167,7 @@ var SkygearChatContainer = exports.SkygearChatContainer = function () {
      * _getUserConversation query a UserConversation record of current logged
      * in user by conversation.id
      *
-     * The UserConversation will transientInclude Conversion and User object
-     * for ease of use.
-     *
-     * For transientInclude of `last_read_message`, we provided an boolean flag
-     * to include or not. This function will transientInclude the it unless
-     * specified otherwise.
-     *
      * @param {Conversation} conversation - Conversation
-     * @param {boolean} includeLastMessage - Transient include the
-     * `last_read_message`, default is true.
      * @return {Promise<UserConversation>} - A promise to UserConversation Recrod
      * @private
      */
@@ -185,7 +176,7 @@ var SkygearChatContainer = exports.SkygearChatContainer = function () {
     key: '_getUserConversation',
     value: function _getUserConversation(conversation) {
       var query = new _skygear2.default.Query(UserConversation);
-      query.equalTo('user', _skygear2.default.auth.currentUser.id);
+      query.equalTo('user', new _skygear2.default.Reference(_skygear2.default.auth.currentUser.id));
       query.equalTo('conversation', new _skygear2.default.Reference(conversation.id));
       return _skygear2.default.publicDB.query(query).then(function (records) {
         if (records.length > 0) {
@@ -360,8 +351,8 @@ var SkygearChatContainer = exports.SkygearChatContainer = function () {
      * @param {string} body - body text of the message
      * @param {object} metadata - application specific meta data for display
      * purpose
-     * @param {File} asset - File object to be saves as attachment of this
-     * message
+     * @param {File|skygear.Asset} asset - Browser file object to be saves as
+     * attachment of this message, also accept skygear.Asset instance
      * @return {Promise<Message>} - A promise to save result
      */
 
@@ -379,11 +370,15 @@ var SkygearChatContainer = exports.SkygearChatContainer = function () {
         message.metadata = metadata;
       }
       if (asset) {
-        var skyAsset = new _skygear2.default.Asset({
-          file: asset,
-          name: asset.name
-        });
-        message.attachment = skyAsset;
+        if (asset instanceof _skygear2.default.Asset) {
+          message.attachment = asset;
+        } else {
+          var skyAsset = new _skygear2.default.Asset({
+            file: asset,
+            name: asset.name
+          });
+          message.attachment = skyAsset;
+        }
       }
 
       return _skygear2.default.publicDB.save(message);
@@ -2605,7 +2600,7 @@ module.exports = uuid;
 },{"./v1":9,"./v4":10}],7:[function(require,module,exports){
 /**
  * Convert array of 16 byte values to UUID string format of the form:
- * XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
+ * XXXXXXXX-XXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
  */
 var byteToHex = [];
 for (var i = 0; i < 256; ++i) {
@@ -2615,7 +2610,7 @@ for (var i = 0; i < 256; ++i) {
 function bytesToUuid(buf, offset) {
   var i = offset || 0;
   var bth = byteToHex;
-  return bth[buf[i++]] + bth[buf[i++]] +
+  return  bth[buf[i++]] + bth[buf[i++]] +
           bth[buf[i++]] + bth[buf[i++]] + '-' +
           bth[buf[i++]] + bth[buf[i++]] + '-' +
           bth[buf[i++]] + bth[buf[i++]] + '-' +
@@ -2638,7 +2633,7 @@ var rng;
 var crypto = global.crypto || global.msCrypto; // for IE 11
 if (crypto && crypto.getRandomValues) {
   // WHATWG crypto RNG - http://wiki.whatwg.org/wiki/Crypto
-  var rnds8 = new Uint8Array(16); // eslint-disable-line no-undef
+  var rnds8 = new Uint8Array(16);
   rng = function whatwgRNG() {
     crypto.getRandomValues(rnds8);
     return rnds8;
@@ -2650,7 +2645,7 @@ if (!rng) {
   //
   // If all else fails, use Math.random().  It's fast, but is of unspecified
   // quality.
-  var rnds = new Array(16);
+  var  rnds = new Array(16);
   rng = function() {
     for (var i = 0, r; i < 16; i++) {
       if ((i & 0x03) === 0) r = Math.random() * 0x100000000;
@@ -2665,6 +2660,9 @@ module.exports = rng;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}],9:[function(require,module,exports){
+// Unique ID creation requires a high quality random # generator.  We feature
+// detect to determine the best RNG source, normalizing to a function that
+// returns 128-bits of randomness, since that's what's usually required
 var rng = require('./lib/rng');
 var bytesToUuid = require('./lib/bytesToUuid');
 

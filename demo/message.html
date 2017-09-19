@@ -204,6 +204,16 @@
       >Send message
       </button>
     </p>
+    <hr/>
+    <h3>Testing skygear.Asset</h3>
+    <p id="message-skygear-asset"></p>
+    <p>
+      <button
+        onclick="demo.createMessageWithSkygearAsset('message-skygear-asset');"
+      >Send test message with skygear.Asset
+      </button>
+    </p>
+
     <script>
       var u = new URL(window.location);
       var cid = u.searchParams.get("conversation");
