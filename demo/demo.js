@@ -240,12 +240,29 @@ class Demo {
     }.bind(this));
   }
 
-
   createMessage(content, metadata, asset, el) {
     return this.plugin.createMessage(
       this.conversation,
       content,
       metadata,
+      asset
+     ).then(function (result) {
+      var ul = $(el);
+      console.log(result);
+      ul.textContent = JSON.stringify(result);
+    }.bind(this));
+  }
+
+  createMessageWithSkygearAsset(el) {
+    const asset = new skygear.Asset({
+      name: "1x1png",
+      base64: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+P+/HgAFhAJ/wlseKgAAAABJRU5ErkJggg==",
+      contentType: 'image/png'
+    });
+    return this.plugin.createMessage(
+      this.conversation,
+      'Message with skygear.Asset',
+      {},
       asset
      ).then(function (result) {
       var ul = $(el);
