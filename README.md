@@ -14,7 +14,7 @@ This SDK helps you work with Skygear Chat Plugin in JS environment..
 
 # Reference
 
-[API doc](https://doc.esdoc.org/github.com/skygeario/chat-SDK-JS/)
+[API doc](https://docs.skygear.io/js/chat/reference/latest/)
 
 
 ## Development
