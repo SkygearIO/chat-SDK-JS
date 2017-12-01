@@ -78,10 +78,12 @@
       "mocha": true
     }
   },
+  "peerDependencies": {
+    "skygear": "^1.1.0"
+  },
   "dependencies": {
     "underscore": "^1.8.3",
-    "uuid": "^3.0.1",
-    "skygear": "^1.1.0"
+    "uuid": "^3.0.1"
   },
   "browserify-shim": {
     "skygear": "global:skygear"
