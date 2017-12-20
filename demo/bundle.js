@@ -527,11 +527,22 @@ var SkygearChatContainer = exports.SkygearChatContainer = function () {
     key: 'getMessages',
     value: function getMessages(conversation) {
       var limit = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 50;
-      var beforeTime = arguments[2];
+      var beforeTime = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
       var order = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
 
       var conversationID = conversation._id;
-      return _skygear2.default.lambda('chat:get_messages', [conversationID, limit, beforeTime, order]).then(function (data) {
+      var params = {
+        conversation_id: conversationID,
+        limit: limit
+      };
+      if (beforeTime) {
+        params.before_time = beforeTime;
+      }
+      if (order) {
+        params.order = order;
+      }
+
+      return _skygear2.default.lambda('chat:get_messages', params).then(function (data) {
         data.results = data.results.map(function (message_data) {
           return new Message(message_data);
         });
@@ -2600,7 +2611,7 @@ module.exports = uuid;
 },{"./v1":9,"./v4":10}],7:[function(require,module,exports){
 /**
  * Convert array of 16 byte values to UUID string format of the form:
- * XXXXXXXX-XXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
+ * XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
  */
 var byteToHex = [];
 for (var i = 0; i < 256; ++i) {
@@ -2610,7 +2621,7 @@ for (var i = 0; i < 256; ++i) {
 function bytesToUuid(buf, offset) {
   var i = offset || 0;
   var bth = byteToHex;
-  return  bth[buf[i++]] + bth[buf[i++]] +
+  return bth[buf[i++]] + bth[buf[i++]] +
           bth[buf[i++]] + bth[buf[i++]] + '-' +
           bth[buf[i++]] + bth[buf[i++]] + '-' +
           bth[buf[i++]] + bth[buf[i++]] + '-' +
@@ -2633,7 +2644,7 @@ var rng;
 var crypto = global.crypto || global.msCrypto; // for IE 11
 if (crypto && crypto.getRandomValues) {
   // WHATWG crypto RNG - http://wiki.whatwg.org/wiki/Crypto
-  var rnds8 = new Uint8Array(16);
+  var rnds8 = new Uint8Array(16); // eslint-disable-line no-undef
   rng = function whatwgRNG() {
     crypto.getRandomValues(rnds8);
     return rnds8;
@@ -2645,7 +2656,7 @@ if (!rng) {
   //
   // If all else fails, use Math.random().  It's fast, but is of unspecified
   // quality.
-  var  rnds = new Array(16);
+  var rnds = new Array(16);
   rng = function() {
     for (var i = 0, r; i < 16; i++) {
       if ((i & 0x03) === 0) r = Math.random() * 0x100000000;
@@ -2660,9 +2671,6 @@ module.exports = rng;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}],9:[function(require,module,exports){
-// Unique ID creation requires a high quality random # generator.  We feature
-// detect to determine the best RNG source, normalizing to a function that
-// returns 128-bits of randomness, since that's what's usually required
 var rng = require('./lib/rng');
 var bytesToUuid = require('./lib/bytesToUuid');
 
