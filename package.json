@@ -5,6 +5,7 @@
   "homepage": "https://github.com/SkygearIO/chat-SDK-JS#readme",
   "author": "Rick Mak",
   "files": [
+    "cloud.js",
     "dist"
   ],
   "main": "dist/index.js",
