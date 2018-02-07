@@ -1,6 +1,6 @@
 {
   "name": "skygear-chat",
-  "version": "1.3.1",
+  "version": "1.3.2",
   "description": "JS SDK for skyegar chat plugin",
   "homepage": "https://github.com/SkygearIO/chat-SDK-JS#readme",
   "author": "Rick Mak",
@@ -79,7 +79,7 @@
     }
   },
   "peerDependencies": {
-    "skygear": "^1.1.0"
+    "skygear": "^1.3.0"
   },
   "dependencies": {
     "underscore": "^1.8.3",
