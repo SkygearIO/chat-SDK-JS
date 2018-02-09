@@ -1,1 +1,1 @@
-module.exports = require('skygear-chat/dist/cloud.js');
+module.exports = require('skygear-chat/dist/cloud.js').default;
