@@ -9,7 +9,9 @@ const Conversation = skygear.Record.extend('conversation');
 describe('skygear-chat', function() {
   before(function() {
     sinon.stub(SkygearChatPubsub.prototype, 'getUserChannel')
-      .returns(Promise.resolve('user-channel'));
+      .returns(Promise.resolve({
+        name: 'user-channel'
+      }));
   });
   after(function() {
     SkygearChatPubsub.prototype.getUserChannel.restore();
