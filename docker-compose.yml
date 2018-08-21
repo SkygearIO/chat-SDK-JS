@@ -1,0 +1,10 @@
+version: '2'
+
+services:
+  demo:
+    build:
+      dockerfile: Dockerfile
+      context: .
+    ports:
+      - 8080
+    command: npm run demo

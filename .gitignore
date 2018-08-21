@@ -39,3 +39,9 @@ coverage
 dist
 
 esdoc
+
+# Docker
+docker-compose.override.yml
+
+# Project Related
+demo/bundle.js
