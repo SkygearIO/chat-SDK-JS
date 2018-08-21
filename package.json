@@ -19,7 +19,8 @@
     "test": "gulp",
     "dev": "gulp --type dev dev",
     "babel": "gulp babel",
-    "demo": "gulp browserify && cp dist/bundle.js demo/bundle.js",
+    "build-demo": "gulp browserify && cp dist/bundle.js demo/bundle.js",
+    "demo": "npm run build-demo && http-server demo",
     "prepublish": "gulp prepublish",
     "deploy": "gulp deploy",
     "deploy-latest": "gulp deploy --latest"
@@ -67,6 +68,7 @@
     "gulp-uglify": "^2.0.1",
     "gulp-util": "^3.0.8",
     "hoek": "^4.2.1",
+    "http-server": "^0.11.1",
     "isparta": "^4.0.0",
     "marked": "^0.3.9",
     "nock": "^9.0.2",
