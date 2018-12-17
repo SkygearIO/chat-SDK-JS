@@ -33,12 +33,12 @@
     "url": "https://github.com/SkygearIO/chat-SDK-JS/issues"
   },
   "devDependencies": {
-    "babel-core": "^6.11.4",
+    "babel-core": "^6.26.3",
     "babel-eslint": "^6.1.2",
     "babel-plugin-transform-runtime": "^6.23.0",
-    "babel-preset-es2015": "6.9.0",
+    "babel-preset-es2015": "^6.24.1",
     "babel-preset-stage-2": "^6.24.1",
-    "babel-register": "^6.9.0",
+    "babel-register": "^6.26.0",
     "babelify": "^7.3.0",
     "browserify": "^13.1.1",
     "browserify-shim": "^3.8.14",
@@ -52,19 +52,19 @@
     "eslint-plugin-promise": "^3.8.0",
     "growl": "^1.10.0",
     "gulp": "^3.9.0",
-    "gulp-awspublish": "^3.3.0",
+    "gulp-awspublish": "^3.4.0",
     "gulp-babel": "^6.1.2",
     "gulp-cloudfront-invalidate-aws-publish": "^0.2.1",
     "gulp-concat": "^2.6.1",
-    "gulp-connect": "^5.0.0",
+    "gulp-connect": "^5.7.0",
     "gulp-eslint": "^3.0.1",
     "gulp-exclude-gitignore": "^1.0.0",
-    "gulp-istanbul": "^1.0.0",
+    "gulp-istanbul": "^1.1.3",
     "gulp-line-ending-corrector": "^1.0.1",
     "gulp-mocha": "^3.0.1",
     "gulp-plumber": "^1.0.0",
     "gulp-rename": "^1.2.2",
-    "gulp-sourcemaps": "^2.4.1",
+    "gulp-sourcemaps": "^2.6.4",
     "gulp-uglify": "^2.0.1",
     "gulp-util": "^3.0.8",
     "hoek": "^4.2.1",
@@ -75,7 +75,7 @@
     "sinon": "^1.17.7",
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.1.0",
-    "watchify": "^3.9.0"
+    "watchify": "^3.11.0"
   },
   "eslintConfig": {
     "extends": "xo-space",
@@ -90,7 +90,7 @@
     "skygear": "^1.3.0"
   },
   "dependencies": {
-    "skygear": "^1.6.0",
+    "skygear": "^1.6.4",
     "underscore": "^1.8.3",
     "uuid": "^3.0.1"
   },
