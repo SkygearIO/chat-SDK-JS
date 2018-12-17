@@ -38,7 +38,10 @@ gulp.task('test', ['pre-test'], function (cb) {
 
   gulp.src(config.testSrc)
     .pipe(plumber())
-    .pipe(mocha({reporter: 'spec'}))
+    .pipe(mocha({
+      reporter: 'spec',
+      compilers: 'js:babel-core/register'
+    }))
     .on('error', function (err) {
       console.log(err);
       mochaErr = err;
