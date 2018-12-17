@@ -44,7 +44,7 @@ class Demo {
       this.endpointEl.value = skygear.endPoint;
       this.apiKeyEl.value = skygear.apiKey;
       this.displayCurrentUser();
-      this.plugin.subscribe(this._handler.bind(this));
+      this._currentUserChanged();
     }.bind(this));
   }
 
@@ -60,6 +60,10 @@ class Demo {
       this.usernameEl.textContent = skygear.auth.currentUser.username;
       this.emailEl.textContent = skygear.auth.currentUser.email;
       this.tokenEl.textContent = this.container.auth.accessToken;
+    } else {
+      this.usernameEl.textContent = null;
+      this.emailEl.textContent = null;
+      this.tokenEl.textContent = null;
     }
   }
 
@@ -67,6 +71,7 @@ class Demo {
     return this.container.auth.loginWithUsername(username, pw).then(function (result) {
       console.log(result);
       this.displayCurrentUser();
+      this._currentUserChanged();
     }.bind(this));
   }
 
@@ -74,7 +79,25 @@ class Demo {
     return this.container.auth.signupWithUsername(username, pw).then(function (result) {
       console.log(result);
       this.displayCurrentUser();
+      this._currentUserChanged();
     }.bind(this));
+  }
+
+  logoutSkygear(username, pw) {
+    return this.container.auth.logout().then(function (result) {
+      this.displayCurrentUser();
+      this._currentUserChanged();
+    }.bind(this));
+  }
+
+  _currentUserChanged() {
+    if (skygear.auth.currentUser) {
+      console.log('demo subscribe user channel');
+      this.plugin.subscribe(this._handler.bind(this));
+    } else {
+      console.log('demo unsubscribe user channel');
+      this.plugin.pubsub.unsubscribeUserChannel();
+    }
   }
 
   fetchUserTo(el) {
