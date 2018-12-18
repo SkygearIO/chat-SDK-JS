@@ -38,17 +38,18 @@ describe('skygear-chat', function() {
         });
         done();
       }
-      pubsub.subscribeAllTyping(handler);
-      pubsub.dispatch({
-        event: 'typing',
-        data: {
-          'conversation/id1': {
-            'user/id': {
-              event: "begin",
-              at: "20161116T78:44:00Z"
+      pubsub.subscribeAllTyping(handler).then(function() {
+        pubsub.dispatch({
+          event: 'typing',
+          data: {
+            'conversation/id1': {
+              'user/id': {
+                event: "begin",
+                at: "20161116T78:44:00Z"
+              }
             }
           }
-        }
+        });
       });
     });
 
@@ -66,23 +67,24 @@ describe('skygear-chat', function() {
       const conversation = new Conversation({
         id: 'conversation/id1'
       });
-      pubsub.subscribeTyping(conversation, handler);
-      pubsub.dispatch({
-        event: 'typing',
-        data: {
-          'conversation/id1': {
-            'user/id': {
-              event: "begin",
-              at: "20161116T18:44:00Z"
-            }
-          },
-          'conversation/id2': {
-            'user/id2': {
-              event: "begin",
-              at: "20171116T18:44:00Z"
+      pubsub.subscribeTyping(conversation, handler).then(function() {
+        pubsub.dispatch({
+          event: 'typing',
+          data: {
+            'conversation/id1': {
+              'user/id': {
+                event: "begin",
+                at: "20161116T18:44:00Z"
+              }
+            },
+            'conversation/id2': {
+              'user/id2': {
+                event: "begin",
+                at: "20171116T18:44:00Z"
+              }
             }
           }
-        }
+        });
       });
     });
 
@@ -94,18 +96,19 @@ describe('skygear-chat', function() {
       const conversation = new Conversation({
         id: 'conversation/id1'
       });
-      pubsub.subscribeTyping(conversation, handler);
-      pubsub.unsubscribeTyping(conversation, handler);
-      pubsub.dispatch({
-        event: 'typing',
-        data: {
-          'conversation/id1': {
-            'user/id': {
-              event: "begin",
-              at: "20161116T18:44:00Z"
+      pubsub.subscribeTyping(conversation, handler).then(function() {
+        pubsub.unsubscribeTyping(conversation, handler);
+        pubsub.dispatch({
+          event: 'typing',
+          data: {
+            'conversation/id1': {
+              'user/id': {
+                event: "begin",
+                at: "20161116T18:44:00Z"
+              }
             }
           }
-        }
+        });
       });
     });
 
