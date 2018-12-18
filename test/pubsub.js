@@ -5,15 +5,22 @@ import skygear from 'skygear';
 import SkygearChatPubsub from '../lib/pubsub';
 
 const Conversation = skygear.Record.extend('conversation');
+const User = skygear.Record.extend('user');
 
 describe('skygear-chat', function() {
+  var currentUser;
   before(function() {
+    currentUser = skygear.auth._user;
+    skygear.auth._user = new User({
+      id: 'user/id1'
+    })
     sinon.stub(SkygearChatPubsub.prototype, 'getUserChannel')
       .returns(Promise.resolve({
         name: 'user-channel'
       }));
   });
   after(function() {
+    skygear.auth._user = currentUser;
     SkygearChatPubsub.prototype.getUserChannel.restore();
   });
 
