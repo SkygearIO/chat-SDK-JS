@@ -8,7 +8,7 @@ var rename = require('gulp-rename');
 var config = require('../config');
 var packagejson = require('../../package.json')
 
-gulp.task('deploy', ['minify'], function() {
+gulp.task('deploy', gulp.series('minify', function() {
   var publisher = awspublish.create({
     region: config.cdn.region,
     params: {
@@ -30,5 +30,5 @@ gulp.task('deploy', ['minify'], function() {
     .pipe(awsinvalidate({
       distribution: config.cdn.distribution
     }));
-});
+}));
 
