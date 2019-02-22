@@ -50,6 +50,7 @@
     "eslint-config-xo-space": "^0.15.0",
     "eslint-plugin-babel": "^3.3.0",
     "eslint-plugin-promise": "^3.8.0",
+    "extend": "^3.0.2",
     "gulp": "^4.0.0",
     "gulp-awspublish": "^3.4.0",
     "gulp-babel": "^6.1.2",
